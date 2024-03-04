@@ -12,7 +12,7 @@ public class Utils {
     throw new IllegalStateException("Utility class");
   }
 
-  public static String randomUUID() {
+  public static String generateUniqueId() {
     return String.valueOf(Snowflake.getInstance().nextId());
   }
 

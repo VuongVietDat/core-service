@@ -23,24 +23,24 @@ public class MessageData<T> {
   private List<T> contents;
 
   public MessageData(String subject, T content) {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.subject = subject;
     this.contents = Collections.singletonList(content);
   }
 
   public MessageData(String subject, List<T> contents) {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.subject = subject;
     this.contents = contents;
   }
 
   public MessageData(T content) {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.contents = Collections.singletonList(content);
   }
 
   public MessageData(List<T> contents) {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.contents = contents;
   }
 

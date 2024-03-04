@@ -47,7 +47,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     try {
       var requestId = request.getHeader(RequestConstant.REQUEST_ID);
       ThreadContext.put(
-          RequestConstant.REQUEST_ID, requestId == null ? Utils.randomUUID() : requestId);
+          RequestConstant.REQUEST_ID, requestId == null ? Utils.generateUniqueId() : requestId);
       ThreadContext.put(RequestConstant.SERVICE_NAME, serviceName);
       ThreadContext.put(RequestConstant.CLIENT_IP, RequestUtils.extractClientIpAddress(request));
       ThreadContext.put(RequestConstant.LOCAL_IP, request.getLocalAddr());

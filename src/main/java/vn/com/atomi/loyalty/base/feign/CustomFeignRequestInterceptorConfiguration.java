@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.constant.RequestConstant;
-import vn.com.atomi.loyalty.common.utils.Utils;
+import vn.com.atomi.loyalty.core.utils.Utils;
 
 /**
  * @author haidv

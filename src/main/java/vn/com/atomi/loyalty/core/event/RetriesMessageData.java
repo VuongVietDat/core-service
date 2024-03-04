@@ -36,7 +36,7 @@ public class RetriesMessageData {
   private RetriesMessageDataStatus status;
 
   public RetriesMessageData() {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.retriesNo = 1;
     this.status = RetriesMessageDataStatus.INSERT;
   }
@@ -53,7 +53,7 @@ public class RetriesMessageData {
   }
 
   public RetriesMessageData incrementRetriesNo() {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.retriesNo = this.retriesNo + 1;
     this.data = null;
     this.source = null;
@@ -66,7 +66,7 @@ public class RetriesMessageData {
   }
 
   public RetriesMessageData deleteRetries() {
-    this.messageId = Utils.randomUUID();
+    this.messageId = Utils.generateUniqueId();
     this.retriesNo = null;
     this.data = null;
     this.source = null;

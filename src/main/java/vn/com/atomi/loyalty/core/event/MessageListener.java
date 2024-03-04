@@ -121,7 +121,7 @@ public abstract class MessageListener<T> {
       String topic, String partition, String offset, MessageData<T> input, String messageId);
 
   private void initListener(String topic, String partition, String offset, String data) {
-    ThreadContext.put(RequestConstant.REQUEST_ID, Utils.randomUUID());
+    ThreadContext.put(RequestConstant.REQUEST_ID, Utils.generateUniqueId());
     ThreadContext.put(RequestConstant.KAFKA_EVENT, topic);
     LOGGER.info("[KafkaConsumer][{}][{}][{}] Incoming: {}", topic, partition, offset, data);
   }
