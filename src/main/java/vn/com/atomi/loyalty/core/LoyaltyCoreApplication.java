@@ -14,7 +14,7 @@ import vn.com.atomi.loyalty.base.config.PersistenceConfig;
 
 @ComponentScan(basePackages = "vn.com.atomi.loyalty")
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients(basePackages = "vn.com.atomi.loyalty")
 @ConfigurationPropertiesScan
 @EnableJpaRepositories(basePackages = "vn.com.atomi.loyalty.core.repository")
 @EnableSpringDataWebSupport
