@@ -6,7 +6,7 @@ package vn.com.atomi.loyalty.core.utils;
  */
 public class Constants {
 
-  public static final String PLUS_LOYALTY_TYPE_NOTIFICATION = "PLUS_LOYALTY";
+  public static final String NOTE_CUSTOMER_NOT_FOUND = "Customer not found in loyalty system";
 
   private Constants() {
     throw new IllegalStateException("Utility class");
