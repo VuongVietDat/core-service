@@ -15,13 +15,13 @@ public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance
 
   @Query(
       value =
-          "select cb.customerId           as customerId, "
-              + "       c.customerName         as customerName, "
-              + "       c.cifBank         as cifBank, "
-              + "       c.cifWallet         as cifWallet, "
-              + "       cb.totalAmount       as totalAmount, "
-              + "       cb.lockAmount       as lockAmount, "
-              + "       cb.availableAmount    as availableAmount "
+          "select cb.customerId            as customerId, "
+              + "       c.customerName     as customerName, "
+              + "       c.cifBank          as cifBank, "
+              + "       c.cifWallet        as cifWallet, "
+              + "       cb.totalAmount     as totalAmount, "
+              + "       cb.lockAmount      as lockAmount, "
+              + "       cb.availableAmount as availableAmount "
               + "from CustomerBalance cb "
               + "         join Customer c on cb.customerId = cb.id "
               + "where cb.deleted = false "

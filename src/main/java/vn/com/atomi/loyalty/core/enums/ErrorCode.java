@@ -9,13 +9,13 @@ import vn.com.atomi.loyalty.base.exception.AbstractError;
  */
 public enum ErrorCode implements AbstractError {
   INPUT_INVALID(
-      1000, "Bắt buộc truyền một trong 2 input (cifBank, cifWallet).", HttpStatus.BAD_REQUEST),
-  CUSTOMER_GROUP_NOT_EXISTED(1009, "Không tồn tại nhóm khách hàng.", HttpStatus.NOT_FOUND),
+      4000, "Bắt buộc truyền một trong 2 input (cifBank, cifWallet).", HttpStatus.BAD_REQUEST),
+  CUSTOMER_GROUP_NOT_EXISTED(4001, "Không tồn tại nhóm khách hàng.", HttpStatus.NOT_FOUND),
 
-  APPROVING_RECORD_NOT_EXISTED(1000, "Không tìm thấy bản ghi chờ duyệt.", HttpStatus.NOT_FOUND),
+  APPROVING_RECORD_NOT_EXISTED(4002, "Không tìm thấy bản ghi chờ duyệt.", HttpStatus.NOT_FOUND),
   EXISTED_CAMPAIGN_USE_CUSTOMER_GROUP(
-      1010, "Nhóm khách hàng này đang được sử dụng ở chiến dịch.", HttpStatus.BAD_REQUEST),
-  ;
+      4003, "Nhóm khách hàng này đang được sử dụng ở chiến dịch.", HttpStatus.BAD_REQUEST),
+  CUSTOMER_NOT_EXISTED(4004, "Khách hàng không tồn tại.", HttpStatus.BAD_REQUEST);
 
   private final int code;
 
