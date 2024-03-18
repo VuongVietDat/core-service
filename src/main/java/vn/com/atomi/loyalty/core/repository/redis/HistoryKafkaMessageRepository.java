@@ -30,6 +30,8 @@ public class HistoryKafkaMessageRepository {
   }
 
   private String composeHeader(String topic, String key) {
-    return String.format("HistoryKafkaMessage:%s:%s:%s", applicationName, topic, key);
+    return String.format(
+        "LOYALTY_HISTORYKAFKAMESSAGE:%s:%s:%s",
+        applicationName.toUpperCase(), topic.toUpperCase(), key);
   }
 }

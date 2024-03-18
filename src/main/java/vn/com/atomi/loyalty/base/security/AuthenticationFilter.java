@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.logging.log4j.ThreadContext;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -31,11 +32,14 @@ import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponseUtils;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
+import vn.com.atomi.loyalty.base.redis.CacheUserRepository;
 import vn.com.atomi.loyalty.base.redis.TokenBlackListRepository;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
 
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
+
+  private static final String INTERNAL_API_PREFIX = "/internal/**";
 
   private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -43,8 +47,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
   @Autowired private TokenBlackListRepository tokenBlackListRepository;
 
+  @Autowired private CacheUserRepository cacheUserRepository;
+
+  @Autowired private UserinfoClient userinfoClient;
+
   @Value("${spring.application.name}")
   private String serviceName;
+
+  @Value("${custom.properties.internal-api.credentials}")
+  private String internalCredentials;
 
   @Override
   protected void doFilterInternal(
@@ -76,16 +87,37 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         var claims =
             tokenProvider.getClaimsFromToken(jwt.substring(RequestConstant.BEARER_PREFIX.length()));
         ThreadContext.put(RequestConstant.SESSION_ID, claims.getSubject());
-        UserPrincipal userDetails;
         if (tokenBlackListRepository.find(claims.getSubject()).isPresent()) {
           throw new BaseException(CommonErrorCode.REFRESH_TOKEN_EXPIRED);
         }
-        userDetails = new UserPrincipal(claims.getSubject(), claims.getIssuer(), new ArrayList<>());
+        UserOutput userOutput =
+            cacheUserRepository
+                .get(claims.getIssuer())
+                .orElseGet(() -> userinfoClient.getUser(requestId, claims.getIssuer()).getData());
+        var userDetails = new UserPrincipal(claims.getSubject(), claims.getIssuer(), userOutput);
         var authentication =
             new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+      }
+      var secureKey = request.getHeader(RequestConstant.SECURE_API_KEY);
+      if (StringUtils.hasText(secureKey)
+          && RequestUtils.matches(request, Set.of(INTERNAL_API_PREFIX))) {
+        if (secureKey.equals(internalCredentials)) {
+          var userDetails =
+              new UserPrincipal(
+                  UUID.randomUUID().toString(),
+                  RequestConstant.SYSTEM,
+                  List.of(new SimpleGrantedAuthority(RequestConstant.ROLE_SYSTEM)));
+          var authentication =
+              new UsernamePasswordAuthenticationToken(
+                  userDetails, null, userDetails.getAuthorities());
+          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+          LOGGER.error("Internal secure-api-key not match");
+        }
       }
 
     } catch (BaseException ex) {

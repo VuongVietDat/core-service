@@ -23,9 +23,13 @@ public class CustomFeignRequestInterceptorConfiguration implements RequestInterc
   @Value("${spring.application.name}")
   private String serviceName;
 
+  @Value("${custom.properties.internal-api.credentials}")
+  private String internalCredentials;
+
   @Override
   public void apply(RequestTemplate template) {
     String requestID;
+    template.header(RequestConstant.SECURE_API_KEY, internalCredentials);
     if (template.headers().get(RequestConstant.REQUEST_ID).isEmpty()) {
       requestID = UUID.randomUUID().toString();
       template.header(RequestConstant.REQUEST_ID, requestID);
@@ -41,7 +45,8 @@ public class CustomFeignRequestInterceptorConfiguration implements RequestInterc
     template.header(
         RequestConstant.CLIENT_TIME,
         LocalDateTime.now()
-            .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_YYYY_MM_DD_HH_MM_SS_SSS)));
+            .format(
+                DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_YYYY_MM_DD_HH_MM_SS_SSS_STROKE)));
     template.header(RequestConstant.CLIENT_PLATFORM, serviceName);
   }
 }
