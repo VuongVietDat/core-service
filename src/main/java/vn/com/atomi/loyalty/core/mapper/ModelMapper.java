@@ -8,6 +8,7 @@ import org.mapstruct.MappingTarget;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
+import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.entity.CustomerGroup;
 import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
 import vn.com.atomi.loyalty.core.enums.ApprovalStatus;
@@ -73,4 +74,7 @@ public interface ModelMapper {
   @Mapping(target = "approvalStatus", source = "approvalStatus")
   CustomerGroupApproval convertToGroupApproval(
       CustomerGroup customerGroup, ApprovalStatus approvalStatus, ApprovalType approvalType);
+
+  List<ExternalCustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
+      List<CustomerBalanceHistory> customerBalanceHistories);
 }
