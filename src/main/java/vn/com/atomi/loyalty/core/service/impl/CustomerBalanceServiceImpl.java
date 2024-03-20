@@ -31,6 +31,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
 
   @Override
   public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
+    // bắt buộc truyền 1 trong 2 param
     if (StringUtils.isBlank(cifBank) && StringUtils.isBlank(cifBank)) {
       throw new BaseException(ErrorCode.INPUT_INVALID);
     }

@@ -1,6 +1,7 @@
 package vn.com.atomi.loyalty.core.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 import vn.com.atomi.loyalty.base.data.BaseEntity;
@@ -41,6 +42,9 @@ public class CustomerBalanceHistory extends BaseEntity {
   @Column(name = "amount")
   private Long amount;
 
+  @Column(name = "amount_used")
+  private Long amountUsed;
+
   @Column(name = "before_amount")
   private Long beforeAmount;
 
@@ -49,6 +53,9 @@ public class CustomerBalanceHistory extends BaseEntity {
 
   @Column(name = "ref_no")
   private String refNo;
+
+  @Column(name = "content")
+  private String content;
 
   @Column(name = "campaign_id")
   private Long campaignId;
@@ -66,7 +73,7 @@ public class CustomerBalanceHistory extends BaseEntity {
   private LocalDateTime transactionAt;
 
   @Column(name = "expire_at")
-  private LocalDateTime expireAt;
+  private LocalDate expireAt;
 
   @Column(name = "search_transaction_date")
   private String searchTransactionDate;
