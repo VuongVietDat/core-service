@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.*;
 import vn.com.atomi.loyalty.base.data.BaseEntity;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 /**
  * @author haidv
@@ -83,4 +84,7 @@ public class Customer extends BaseEntity {
 
   @Column(name = "issue_place")
   private String issuePlace;
+
+  @Column(name = "status")
+  private Status status;
 }
