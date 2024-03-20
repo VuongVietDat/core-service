@@ -119,5 +119,7 @@ public interface ModelMapper {
   List<CustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> content);
 
+  CustomerOutput convertToCustomerOutput(Customer customer);
+
   List<CustomerOutput> convertToCustomerOutputs(List<Customer> customers);
 }

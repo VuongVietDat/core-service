@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import vn.com.atomi.loyalty.base.data.BaseController;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
@@ -57,5 +54,13 @@ public class MemberController extends BaseController {
             rank,
             segment,
             super.pageable(pageNo, pageSize, sort)));
+  }
+
+  @Operation(summary = "Api lấy chi tiết thành viên theo id")
+  @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
+  @GetMapping("{id}")
+  public ResponseEntity<ResponseData<CustomerOutput>> getCustomerPointAccount(
+      @Parameter(description = "ID khách hàng bên loyalty") @PathVariable Long id) {
+    return ResponseUtils.success(memberService.get(id));
   }
 }

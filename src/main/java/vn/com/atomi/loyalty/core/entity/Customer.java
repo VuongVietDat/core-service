@@ -86,5 +86,6 @@ public class Customer extends BaseEntity {
   private String issuePlace;
 
   @Column(name = "status")
+  @Enumerated(EnumType.STRING)
   private Status status;
 }

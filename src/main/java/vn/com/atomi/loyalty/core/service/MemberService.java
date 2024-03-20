@@ -14,4 +14,6 @@ public interface MemberService {
       String rank,
       String segment,
       Pageable pageable);
+
+  CustomerOutput get(Long id);
 }
