@@ -24,6 +24,12 @@ public class CustomerPointAccountOutput {
   @Schema(description = "Số giấy tờ tùy thân")
   private String uniqueValue;
 
+  @Schema(description = "Loại giấy tờ tùy thân")
+  private String uniqueType;
+
+  @Schema(description = "Tên loại giấy tờ tùy thân")
+  private String uniqueTypeName;
+
   @Schema(description = "Mã định danh của khách hàng trên bank")
   private String cifBank;
 
@@ -38,9 +44,6 @@ public class CustomerPointAccountOutput {
 
   @Schema(description = "Điểm hiệu lực availableAmount = totalAmount - lockAmount")
   private Long availableAmount;
-
-  @Schema(description = "Hạng khách hàng")
-  private String rank;
 
   @Schema(description = "Tổng điểm xếp hạng")
   private Long rankPoint;

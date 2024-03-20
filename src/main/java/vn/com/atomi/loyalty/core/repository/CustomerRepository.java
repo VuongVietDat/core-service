@@ -23,7 +23,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "       c.cifBank          as cifBank, "
               + "       c.cifWallet        as cifWallet, "
               + "       c.uniqueValue      as uniqueValue, "
-              + "       cr.rank            as rank, "
+              + "       cr.totalPoint      as rankPoint, "
               + "       cb.availableAmount as availableAmount "
               + "from Customer c "
               + "         join CustomerBalance cb on cb.customerId = c.id "
@@ -37,7 +37,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "  and (:cifWallet is null or c.cifWallet = :cifWallet) "
               + "  and (:cifBank is null or c.cifBank = :cifBank) "
               + "  and (:uniqueValue is null or c.uniqueValue = :uniqueValue) "
-              + "  and (:rank is null or cr.rank = :rank) "
               + "  and (:pointFrom is null or cb.totalAmount >= :pointFrom) "
               + "  and (:pointTo is null or cb.totalAmount <= :pointTo) ")
   Page<CustomerPointAccountProjection> findByDeletedFalseAndPointAccount(
@@ -47,7 +46,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
       String cifBank,
       String cifWallet,
       String uniqueValue,
-      String rank,
       Long pointFrom,
       Long pointTo,
       Pageable pageable);
@@ -59,6 +57,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "       c.cifBank          as cifBank, "
               + "       c.cifWallet        as cifWallet, "
               + "       c.uniqueValue      as uniqueValue, "
+              + "       c.uniqueType       as uniqueType, "
               + "       cr.rank            as rank, "
               + "       cb.totalAmount     as totalAmount, "
               + "       cb.lockAmount      as lockAmount, "

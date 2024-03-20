@@ -101,25 +101,20 @@ public interface ModelMapper {
   CustomerGroupApproval convertToGroupApproval(
       CustomerGroup customerGroup, ApprovalStatus approvalStatus, ApprovalType approvalType);
 
-  List<ExternalCustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
+  List<ExternalCustomerBalanceHistoryOutput> convertToExternalCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> customerBalanceHistories);
 
-  @Mapping(
-      target = "rank",
-      source = "customerPointAccountProjection.rank",
-      qualifiedByName = "findRankName")
-  CustomerPointAccountPreviewOutput convertToCustomerPointAccountPreviewOutput(
-      CustomerPointAccountProjection customerPointAccountProjection,
-      @Context List<RankOutput> rankOutputs);
-
   List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutput(
-      List<CustomerPointAccountProjection> customerPointAccountProjections,
-      @Context List<RankOutput> rankOutputs);
+      List<CustomerPointAccountProjection> customerPointAccountProjections);
 
   @Mapping(
-      target = "rank",
-      source = "pointAccountProjection.rank",
-      qualifiedByName = "findRankName")
+      target = "uniqueTypeName",
+      source = "pointAccountProjection.uniqueType",
+      qualifiedByName = "findDictionaryName")
   CustomerPointAccountOutput convertToCustomerPointAccountOutput(
-      CustomerPointAccountProjection pointAccountProjection, @Context List<RankOutput> ranks);
+      CustomerPointAccountProjection pointAccountProjection,
+      @Context List<DictionaryOutput> dictionaryOutputs);
+
+  List<CustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
+      List<CustomerBalanceHistory> content);
 }

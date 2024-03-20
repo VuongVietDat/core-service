@@ -27,7 +27,7 @@ public class CustomerController extends BaseController {
   private final CustomerService customerService;
 
   @Operation(summary = "Api lấy chi tiết tài khoản điểm theo id khách hàng")
-  @PreAuthorize(Authority.CustomerAccount.READ_CUSTOMER_ACCOUNT)
+  @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
   @GetMapping("/customers/{id}/point-accounts")
   public ResponseEntity<ResponseData<CustomerPointAccountOutput>> getCustomerPointAccount(
       @Parameter(description = "ID khách hàng bên loyalty") @PathVariable Long id) {
@@ -35,7 +35,7 @@ public class CustomerController extends BaseController {
   }
 
   @Operation(summary = "Api lấy danh sách tài khoản điểm")
-  @PreAuthorize(Authority.CustomerAccount.READ_CUSTOMER_ACCOUNT)
+  @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
   @GetMapping("/customers/point-accounts")
   public ResponseEntity<ResponseData<ResponsePage<CustomerPointAccountPreviewOutput>>>
       getCustomerPointAccounts(
@@ -63,7 +63,6 @@ public class CustomerController extends BaseController {
               String cifWallet,
           @Parameter(description = "Số giấy tờ tùy thân") @RequestParam(required = false)
               String uniqueValue,
-          @Parameter(description = "Xếp hạng KH") @RequestParam(required = false) String rank,
           @Parameter(description = "Số điểm lớn hơn hoặc bằng") @RequestParam(required = false)
               Long pointFrom,
           @Parameter(description = "Số điểm nhỏ hơn hoặc bằng") @RequestParam(required = false)
@@ -78,7 +77,6 @@ public class CustomerController extends BaseController {
             uniqueValue,
             pointFrom,
             pointTo,
-            rank,
             super.pageable(pageNo, pageSize, sort)));
   }
 }

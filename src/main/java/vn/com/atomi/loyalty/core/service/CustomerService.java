@@ -23,6 +23,5 @@ public interface CustomerService {
       String uniqueValue,
       Long pointFrom,
       Long pointTo,
-      String rank,
       Pageable pageable);
 }
