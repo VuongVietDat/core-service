@@ -30,6 +30,6 @@ public class CustomerPointAccountPreviewOutput {
   @Schema(description = "Điểm hiệu lực availableAmount = totalAmount - lockAmount")
   private Long availableAmount;
 
-  @Schema(description = "Hạng khách hàng")
-  private String rank;
+  @Schema(description = "Tổng điểm xếp hạng")
+  private Long rankPoint;
 }

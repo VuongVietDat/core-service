@@ -6,7 +6,7 @@ package vn.com.atomi.loyalty.core.utils;
  */
 public class Constants {
 
-  public static final String NOTE_CUSTOMER_NOT_FOUND = "Customer not found in loyalty system";
+  public static final String DICTIONARY_UNIQUE_TYPE = "UNIQUE_TYPE";
 
   public static final String DEFAULT_DAY_START_TIME = "00:00:00";
 

@@ -62,6 +62,13 @@ public class Utils {
     return date == null ? null : LOCAL_DATE_FORMATTER.format(date);
   }
 
+  public static String reformatStringDate(String date, String fromFormat, String toFormat) {
+    return StringUtils.isEmpty(date)
+        ? null
+        : DateTimeFormatter.ofPattern(toFormat)
+            .format(LocalDate.parse(date, DateTimeFormatter.ofPattern(fromFormat)));
+  }
+
   public static String generateCode(Long sequence, String className) {
     var shortYear = String.valueOf(LocalDate.now().getYear()).substring(2);
     if (className.equals(CustomerGroupApproval.class.getSimpleName())) {

@@ -14,6 +14,8 @@ public interface CustomerPointAccountProjection {
 
   String getUniqueValue();
 
+  String getUniqueType();
+
   String getCifBank();
 
   String getCifWallet();

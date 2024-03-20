@@ -6,5 +6,6 @@ package vn.com.atomi.loyalty.core.enums;
  */
 public enum ChangeType {
   PLUS,
-  MINUS;
+  MINUS_CONSUMPTION,
+  MINUS_EXPIRED;
 }

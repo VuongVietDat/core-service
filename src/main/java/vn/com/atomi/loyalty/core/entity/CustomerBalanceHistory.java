@@ -34,9 +34,11 @@ public class CustomerBalanceHistory extends BaseEntity {
   private Long customerId;
 
   @Column(name = "change_type")
+  @Enumerated(EnumType.STRING)
   private ChangeType changeType;
 
   @Column(name = "point_type")
+  @Enumerated(EnumType.STRING)
   private PointType pointType;
 
   @Column(name = "amount")

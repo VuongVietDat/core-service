@@ -15,7 +15,8 @@ public class Authority {
     public static final String APPROVE_CUSTOMER_GROUP = "hasAuthority('APPROVE_CUSTOMER_GROUP')";
   }
 
-  public static class CustomerAccount {
+  public static class Customer {
     public static final String READ_CUSTOMER_ACCOUNT = "hasAuthority('READ_CUSTOMER_ACCOUNT')";
+    public static final String READ_BALANCE_HISTORY = "hasAuthority('READ_BALANCE_HISTORY')";
   }
 }

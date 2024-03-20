@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
+import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
  * @author haidv
@@ -23,15 +25,20 @@ public interface CustomerBalanceHistoryRepository
               + "from CustomerBalanceHistory cb "
               + "where cb.deleted = false "
               + "  and cb.customerId = :customerId "
-              + "  and cb.pointType = vn.com.atomi.loyalty.core.enums.PointType.CONSUMPTION_POINT "
               + "  and (:changeType is null or cb.changeType = :changeType) "
-              + "  and (:searchDate is null or (cb.searchTransactionDate >= :startDate and cb.searchTransactionDate <= :endDate)) ")
+              + "  and (:pointType is null or cb.pointType = :pointType) "
+              + "  and (:startTransactionDate is null or cb.searchTransactionDate >= :startTransactionDate) "
+              + "  and (:endTransactionDate is null or cb.searchTransactionDate <= :endTransactionDate) "
+              + "  and (:startExpiredDate is null or cb.expireAt >= :startExpiredDate) "
+              + "  and (:endExpiredDate is null or cb.expireAt <= :endExpiredDate) ")
   Page<CustomerBalanceHistory> findHistory(
       Long customerId,
       ChangeType changeType,
-      String searchDate,
-      String startDate,
-      String endDate,
+      PointType pointType,
+      String startTransactionDate,
+      String endTransactionDate,
+      LocalDate startExpiredDate,
+      LocalDate endExpiredDate,
       Pageable pageable);
 
   @Query(
