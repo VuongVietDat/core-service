@@ -3,6 +3,7 @@ package vn.com.atomi.loyalty.core.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import vn.com.atomi.loyalty.base.data.BaseEntity;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 /**
  * @author haidv
@@ -37,4 +38,17 @@ public class CustomerBalance extends BaseEntity {
 
   @Column(name = "available_amount")
   private Long availableAmount;
+
+  @Column(name = "total_points_used")
+  private Long totalPointsUsed;
+
+  @Column(name = "total_accumulated_points")
+  private Long totalAccumulatedPoints;
+
+  @Column(name = "total_points_expired")
+  private Long totalPointsExpired;
+
+  @Column(name = "status")
+  @Enumerated(EnumType.STRING)
+  private Status status;
 }

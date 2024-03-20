@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.repository;
 
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,4 +33,16 @@ public interface CustomerBalanceHistoryRepository
       String startDate,
       String endDate,
       Pageable pageable);
+
+  @Query(
+      value =
+          "select cb "
+              + "from CustomerBalanceHistory cb "
+              + "where cb.deleted = false "
+              + "  and cb.customerId = :customerId "
+              + "  and cb.amount < cb.amountUsed "
+              + "  and cb.expireAt is not null "
+              + "order by cb.updatedAt desc "
+              + "limit 1 ")
+  Optional<CustomerBalanceHistory> findPointAboutExpire(Long customerId);
 }

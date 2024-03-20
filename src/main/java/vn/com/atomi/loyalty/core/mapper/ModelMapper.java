@@ -2,12 +2,11 @@ package vn.com.atomi.loyalty.core.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
+import vn.com.atomi.loyalty.core.dto.projection.CustomerPointAccountProjection;
 import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.entity.CustomerGroup;
 import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
@@ -33,6 +32,33 @@ public interface ModelMapper {
             || ApprovalStatus.WAITING.equals(approvalStatus)
         ? null
         : updateAt;
+  }
+
+  @Named("findDictionaryName")
+  default String findDictionaryName(
+      String code, @Context List<DictionaryOutput> dictionaryOutputs) {
+    if (code == null || dictionaryOutputs == null) {
+      return null;
+    }
+    for (DictionaryOutput value : dictionaryOutputs) {
+      if (value != null && code.equals(value.getCode())) {
+        return value.getName();
+      }
+    }
+    return null;
+  }
+
+  @Named("findRankName")
+  default String findRankName(String code, @Context List<RankOutput> rankOutputs) {
+    if (code == null || rankOutputs == null) {
+      return null;
+    }
+    for (RankOutput value : rankOutputs) {
+      if (value != null && code.equals(value.getCode())) {
+        return value.getName();
+      }
+    }
+    return code;
   }
 
   CustomerBalanceOutput convertToCustomerBalanceOutput(
@@ -77,4 +103,23 @@ public interface ModelMapper {
 
   List<ExternalCustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> customerBalanceHistories);
+
+  @Mapping(
+      target = "rank",
+      source = "customerPointAccountProjection.rank",
+      qualifiedByName = "findRankName")
+  CustomerPointAccountPreviewOutput convertToCustomerPointAccountPreviewOutput(
+      CustomerPointAccountProjection customerPointAccountProjection,
+      @Context List<RankOutput> rankOutputs);
+
+  List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutput(
+      List<CustomerPointAccountProjection> customerPointAccountProjections,
+      @Context List<RankOutput> rankOutputs);
+
+  @Mapping(
+      target = "rank",
+      source = "pointAccountProjection.rank",
+      qualifiedByName = "findRankName")
+  CustomerPointAccountOutput convertToCustomerPointAccountOutput(
+      CustomerPointAccountProjection pointAccountProjection, @Context List<RankOutput> ranks);
 }
