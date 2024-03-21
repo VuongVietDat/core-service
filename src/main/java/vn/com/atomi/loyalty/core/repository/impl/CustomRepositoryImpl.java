@@ -14,6 +14,7 @@ import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
+import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
 
@@ -29,6 +30,7 @@ public class CustomRepositoryImpl implements CustomRepository {
 
   private final EntityManager entityManager;
 
+  @Override
   public Long plusAmount(
       Long customerId,
       Long amount,
@@ -40,8 +42,7 @@ public class CustomRepositoryImpl implements CustomRepository {
       LocalDateTime transactionAt,
       String content,
       LocalDate expireAt,
-      PointType pointType,
-      ChangeType changeType) {
+      PointType pointType) {
     StoredProcedureQuery query =
         entityManager
             .createStoredProcedureQuery("P_PLUS_AMOUNT")
@@ -78,12 +79,59 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter("P_CONTENT", content)
             .setParameter("P_EXPIRE_AT", expireAt)
             .setParameter("P_POINT_TYPE", pointType.name())
-            .setParameter("P_CHANGE_TYPE", changeType.name());
+            .setParameter("P_CHANGE_TYPE", ChangeType.PLUS.name());
     query.execute();
     Long result = (Long) query.getOutputParameterValue("P_RESULT");
+    String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
+    LOGGER.info("CustomRepository.plusAmount execute result : {} {}", result, resultDesc);
     if (result != 0) {
-      LOGGER.error(
-          "CustomRepository.plusAmount error : {}", query.getOutputParameterValue("P_RESULT_DESC"));
+      throw new BaseException(CommonErrorCode.DATA_INTEGRITY_VIOLATION);
+    }
+    return (Long) query.getOutputParameterValue("P_TRANSACTION_ID");
+  }
+
+  public Long minusAmount(
+      Long customerId,
+      Long amount,
+      String refNo,
+      LocalDateTime transactionAt,
+      String content,
+      PointType pointType) {
+    StoredProcedureQuery query =
+        entityManager
+            .createStoredProcedureQuery("P_MINUS_AMOUNT")
+            .registerStoredProcedureParameter("P_CUSTOMER_ID", Long.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_AMOUNT", Long.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_REF_NO", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(
+                "P_TRANSACTION_AT", LocalDateTime.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(
+                "P_SEARCH_TRANSACTION_DATE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CONTENT", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_POINT_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CHANGE_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_TRANSACTION_ID", Long.class, ParameterMode.OUT)
+            .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
+            .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
+            .setParameter("P_CUSTOMER_ID", customerId)
+            .setParameter("P_AMOUNT", amount)
+            .setParameter("P_REF_NO", refNo)
+            .setParameter("P_TRANSACTION_AT", transactionAt)
+            .setParameter(
+                "P_SEARCH_TRANSACTION_DATE",
+                DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
+                    .format(transactionAt))
+            .setParameter("P_CONTENT", content)
+            .setParameter("P_POINT_TYPE", pointType.name())
+            .setParameter("P_CHANGE_TYPE", ChangeType.MINUS_CONSUMPTION.name());
+    query.execute();
+    Long result = (Long) query.getOutputParameterValue("P_RESULT");
+    String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
+    LOGGER.info("CustomRepository.plusAmount execute result : {} {}", result, resultDesc);
+    if (result == -1) {
+      throw new BaseException(ErrorCode.NOT_ENOUGH_BALANCE);
+    }
+    if (result != 0) {
       throw new BaseException(CommonErrorCode.DATA_INTEGRITY_VIOLATION);
     }
     return (Long) query.getOutputParameterValue("P_TRANSACTION_ID");

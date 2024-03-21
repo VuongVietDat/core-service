@@ -2,7 +2,6 @@ package vn.com.atomi.loyalty.core.repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import vn.com.atomi.loyalty.core.enums.ChangeType;
 import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
@@ -22,6 +21,13 @@ public interface CustomRepository {
       LocalDateTime transactionAt,
       String content,
       LocalDate expireAt,
-      PointType pointType,
-      ChangeType changeType);
+      PointType pointType);
+
+  Long minusAmount(
+      Long customerId,
+      Long amount,
+      String refNo,
+      LocalDateTime transactionAt,
+      String content,
+      PointType pointType);
 }
