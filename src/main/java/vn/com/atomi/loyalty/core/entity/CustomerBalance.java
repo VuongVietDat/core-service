@@ -27,6 +27,9 @@ public class CustomerBalance extends BaseEntity {
       allocationSize = 1)
   private Long id;
 
+  @Column(name = "code")
+  private String code;
+
   @Column(name = "customer_id")
   private Long customerId;
 

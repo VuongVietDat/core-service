@@ -1,6 +1,7 @@
 package vn.com.atomi.loyalty.core.dto.projection;
 
 import java.time.LocalDate;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 /**
  * @author haidv
@@ -35,4 +36,10 @@ public interface CustomerPointAccountProjection {
   Long getTotalPointsUsed();
 
   LocalDate getMostRecentExpirationDate();
+
+  String getCustomerBalanceCode();
+
+  String getCustomerRankCode();
+
+  Status getStatus();
 }

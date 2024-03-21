@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 /**
  * @author haidv
@@ -57,4 +58,16 @@ public class CustomerPointAccountOutput {
   @Schema(description = "Ngày hết hạn điểm gần nhất (dd/MM/yyyy)")
   @JsonFormat(pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   private LocalDate mostRecentExpirationDate;
+
+  @Schema(description = "TK Điểm đổi quà")
+  private String customerBalanceCode;
+
+  @Schema(description = "TK điểm xếp hạng")
+  private String customerRankCode;
+
+  @Schema(description = "Trạng thái thành viên")
+  private Status status;
+
+  @Schema(description = "Xếp hạng thành viên: Vàng, Bạc,...")
+  private String rank;
 }
