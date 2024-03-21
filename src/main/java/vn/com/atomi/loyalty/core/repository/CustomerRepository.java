@@ -58,6 +58,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "       c.cifWallet        as cifWallet, "
               + "       c.uniqueValue      as uniqueValue, "
               + "       c.uniqueType       as uniqueType, "
+              + "       c.status       as status, "
+              + "       cr.code            as customerRankCode, "
+              + "       cb.code     as customerBalanceCode, "
               + "       cr.rank            as rank, "
               + "       cb.totalAmount     as totalAmount, "
               + "       cb.lockAmount      as lockAmount, "
@@ -72,4 +75,24 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "  and cr.deleted = false "
               + "  and (:customerId is null or c.id = :customerId) ")
   CustomerPointAccountProjection findByDeletedFalseAndPointAccount(Long customerId);
+
+  @Query(
+      """
+              select c from Customer c
+              where c.deleted = false
+              and (:status is null or c.status = :status)
+              and (:customerId is null or c.id = :customerId)
+              and (:customerName is null or c.customerName = :customerName)
+              and (:cifBank is null or c.cifBank = :cifBank)
+              and (:rank is null or c.rank = :rank)
+              and (:segment is null or c.segment = :segment)
+                      """)
+  Page<Customer> findByCondition(
+      Status status,
+      Long customerId,
+      String customerName,
+      String cifBank,
+      String rank,
+      String segment,
+      Pageable pageable);
 }

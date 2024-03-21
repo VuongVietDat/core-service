@@ -7,6 +7,7 @@ import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerPointAccountProjection;
+import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.entity.CustomerGroup;
 import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
@@ -117,4 +118,8 @@ public interface ModelMapper {
 
   List<CustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> content);
+
+  CustomerOutput convertToCustomerOutput(Customer customer);
+
+  List<CustomerOutput> convertToCustomerOutputs(List<Customer> customers);
 }
