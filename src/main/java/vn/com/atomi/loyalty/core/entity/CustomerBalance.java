@@ -17,14 +17,12 @@ import vn.com.atomi.loyalty.core.enums.Status;
 @Entity
 @Table(name = "C_CUSTOMER_BALANCE")
 public class CustomerBalance extends BaseEntity {
+  public static final String GENERATOR = "c_customer_balance_id_seq";
 
   @Id
   @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "c_customer_balance_id_seq")
-  @SequenceGenerator(
-      name = "c_customer_balance_id_seq",
-      sequenceName = "c_customer_balance_id_seq",
-      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = GENERATOR)
+  @SequenceGenerator(name = GENERATOR, sequenceName = GENERATOR, allocationSize = 1)
   private Long id;
 
   @Column(name = "code")
