@@ -30,6 +30,9 @@ public class CustomerBalanceHistory extends BaseEntity {
       allocationSize = 1)
   private Long id;
 
+  @Column(name = "transaction_id")
+  private Long transactionId;
+
   @Column(name = "customer_id")
   private Long customerId;
 

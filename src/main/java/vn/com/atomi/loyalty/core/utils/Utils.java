@@ -28,7 +28,7 @@ public class Utils {
   }
 
   public static String makeLikeParameter(String param) {
-    return "%|" + param + "|%";
+    return "%" + param + "%";
   }
 
   public static LocalDateTime convertToLocalDateTime(String date) {
