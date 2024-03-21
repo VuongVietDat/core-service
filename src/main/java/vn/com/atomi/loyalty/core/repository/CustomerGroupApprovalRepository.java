@@ -20,9 +20,7 @@ import vn.com.atomi.loyalty.core.enums.Status;
 public interface CustomerGroupApprovalRepository
     extends JpaRepository<CustomerGroupApproval, Long> {
 
-  @Query(
-      value = "select {h-schema}cf_customer_group_arv_id_seq.nextval from DUAL",
-      nativeQuery = true)
+  @Query(value = "select cf_customer_group_arv_id_seq.nextval from DUAL", nativeQuery = true)
   Long getSequence();
 
   Optional<CustomerGroupApproval> findByDeletedFalseAndId(Long id);

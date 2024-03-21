@@ -16,6 +16,7 @@ import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
+import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceHistoryRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
 import vn.com.atomi.loyalty.core.service.CustomerBalanceService;
@@ -32,6 +33,8 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
   private final CustomerBalanceRepository customerBalanceRepository;
 
   private final CustomerBalanceHistoryRepository customerBalanceHistoryRepository;
+
+  private final CustomRepository customRepository;
 
   @Override
   public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
