@@ -136,4 +136,40 @@ public class CustomRepositoryImpl implements CustomRepository {
     }
     return (Long) query.getOutputParameterValue("P_TRANSACTION_ID");
   }
+
+  public void expiredAmount(
+      String refNo, LocalDate expiredAt, String content, PointType pointType) {
+    LocalDateTime transactionAt = LocalDateTime.now();
+    StoredProcedureQuery query =
+        entityManager
+            .createStoredProcedureQuery("P_EXPIRED_AMOUNT")
+            .registerStoredProcedureParameter("P_REF_NO", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(
+                "P_TRANSACTION_AT", LocalDateTime.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_EXPIRED_AT", LocalDate.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(
+                "P_SEARCH_TRANSACTION_DATE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CONTENT", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_POINT_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CHANGE_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
+            .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
+            .setParameter("P_REF_NO", refNo)
+            .setParameter("P_TRANSACTION_AT", transactionAt)
+            .setParameter("P_EXPIRED_AT", expiredAt)
+            .setParameter(
+                "P_SEARCH_TRANSACTION_DATE",
+                DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
+                    .format(transactionAt))
+            .setParameter("P_CONTENT", content)
+            .setParameter("P_POINT_TYPE", pointType.name())
+            .setParameter("P_CHANGE_TYPE", ChangeType.MINUS_CONSUMPTION.name());
+    query.execute();
+    Long result = (Long) query.getOutputParameterValue("P_RESULT");
+    String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
+    LOGGER.info("CustomRepository.expiredAmount execute result : {} {}", result, resultDesc);
+    if (result != 0) {
+      throw new BaseException(CommonErrorCode.DATA_INTEGRITY_VIOLATION);
+    }
+  }
 }

@@ -20,72 +20,72 @@ import vn.com.atomi.loyalty.core.enums.Status;
 public class Customer extends BaseEntity {
 
   @Id
-  @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "c_customer_id_seq")
+  @Column(name = "ID")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CUSTOMER_ID_SEQ")
   @SequenceGenerator(
-      name = "c_customer_id_seq",
-      sequenceName = "c_customer_id_seq",
+      name = "C_CUSTOMER_ID_SEQ",
+      sequenceName = "C_CUSTOMER_ID_SEQ",
       allocationSize = 1)
   private Long id;
 
-  @Column(name = "cif_bank")
+  @Column(name = "CIF_BANK")
   private String cifBank;
 
-  @Column(name = "cif_wallet")
+  @Column(name = "CIF_WALLET")
   private String cifWallet;
 
-  @Column(name = "current_address")
+  @Column(name = "CURRENT_ADDRESS")
   private String currentAddress;
 
-  @Column(name = "customer_name")
+  @Column(name = "CUSTOMER_NAME")
   private String customerName;
 
-  @Column(name = "customer_type")
+  @Column(name = "CUSTOMER_TYPE")
   private String customerType;
 
-  @Column(name = "gender")
+  @Column(name = "GENDER")
   private String gender;
 
-  @Column(name = "nationality")
+  @Column(name = "NATIONALITY")
   private String nationality;
 
-  @Column(name = "owner_branch")
+  @Column(name = "OWNER_BRANCH")
   private String ownerBranch;
 
-  @Column(name = "phone")
+  @Column(name = "PHONE")
   private String phone;
 
-  @Column(name = "rank")
+  @Column(name = "RANK")
   private String rank;
 
-  @Column(name = "register_branch")
+  @Column(name = "REGISTER_BRANCH")
   private String registerBranch;
 
-  @Column(name = "residential_address")
+  @Column(name = "RESIDENTIAL_ADDRESS")
   private String residentialAddress;
 
-  @Column(name = "rm_code")
+  @Column(name = "RM_CODE")
   private String rmCode;
 
-  @Column(name = "rm_name")
+  @Column(name = "RM_NAME")
   private String rmName;
 
-  @Column(name = "segment")
+  @Column(name = "SEGMENT")
   private String segment;
 
-  @Column(name = "unique_type")
+  @Column(name = "UNIQUE_TYPE")
   private String uniqueType;
 
-  @Column(name = "unique_value")
+  @Column(name = "UNIQUE_VALUE")
   private String uniqueValue;
 
-  @Column(name = "issue_date")
+  @Column(name = "ISSUE_DATE")
   private LocalDate issueDate;
 
-  @Column(name = "issue_place")
+  @Column(name = "ISSUE_PLACE")
   private String issuePlace;
 
-  @Column(name = "status")
+  @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)
   private Status status;
 }
