@@ -22,64 +22,64 @@ import vn.com.atomi.loyalty.core.enums.PointType;
 public class CustomerBalanceHistory extends BaseEntity {
 
   @Id
-  @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "c_balance_history_id_seq")
+  @Column(name = "ID")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_BALANCE_HISTORY_ID_SEQ")
   @SequenceGenerator(
-      name = "c_balance_history_id_seq",
-      sequenceName = "c_balance_history_id_seq",
+      name = "C_BALANCE_HISTORY_ID_SEQ",
+      sequenceName = "C_BALANCE_HISTORY_ID_SEQ",
       allocationSize = 1)
   private Long id;
 
-  @Column(name = "transaction_id")
+  @Column(name = "TRANSACTION_ID")
   private Long transactionId;
 
-  @Column(name = "customer_id")
+  @Column(name = "CUSTOMER_ID")
   private Long customerId;
 
-  @Column(name = "change_type")
+  @Column(name = "CHANGE_TYPE")
   @Enumerated(EnumType.STRING)
   private ChangeType changeType;
 
-  @Column(name = "point_type")
+  @Column(name = "POINT_TYPE")
   @Enumerated(EnumType.STRING)
   private PointType pointType;
 
-  @Column(name = "amount")
+  @Column(name = "AMOUNT")
   private Long amount;
 
-  @Column(name = "amount_used")
+  @Column(name = "AMOUNT_USED")
   private Long amountUsed;
 
-  @Column(name = "before_amount")
+  @Column(name = "BEFORE_AMOUNT")
   private Long beforeAmount;
 
-  @Column(name = "after_amount")
+  @Column(name = "AFTER_AMOUNT")
   private Long afterAmount;
 
-  @Column(name = "ref_no")
+  @Column(name = "REF_NO")
   private String refNo;
 
-  @Column(name = "content")
+  @Column(name = "CONTENT")
   private String content;
 
-  @Column(name = "campaign_id")
+  @Column(name = "CAMPAIGN_ID")
   private Long campaignId;
 
-  @Column(name = "campaign_code")
+  @Column(name = "CAMPAIGN_CODE")
   private String campaignCode;
 
-  @Column(name = "rule_id")
+  @Column(name = "RULE_ID")
   private Long ruleId;
 
-  @Column(name = "rule_code")
+  @Column(name = "RULE_CODE")
   private String ruleCode;
 
-  @Column(name = "transaction_at")
+  @Column(name = "TRANSACTION_AT")
   private LocalDateTime transactionAt;
 
-  @Column(name = "expire_at")
+  @Column(name = "EXPIRE_AT")
   private LocalDate expireAt;
 
-  @Column(name = "search_transaction_date")
+  @Column(name = "SEARCH_TRANSACTION_DATE")
   private String searchTransactionDate;
 }

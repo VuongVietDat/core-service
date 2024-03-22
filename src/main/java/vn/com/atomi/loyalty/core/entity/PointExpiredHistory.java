@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
+import vn.com.atomi.loyalty.base.data.BaseEntity;
 
 @Builder
 @Setter
@@ -12,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "C_POINT_EXPIRED_HISTORY")
-public class PointExpiredHistory {
+public class PointExpiredHistory extends BaseEntity {
 
   @Id
   @Column(name = "ID")
