@@ -24,6 +24,9 @@ public class PointExpiredHistory extends BaseEntity {
       allocationSize = 1)
   private long id;
 
+  @Column(name = "START_AT")
+  private LocalDateTime startAt;
+
   @Column(name = "END_AT")
   private LocalDateTime endAt;
 
@@ -32,9 +35,6 @@ public class PointExpiredHistory extends BaseEntity {
 
   @Column(name = "REF_NO")
   private String refNo;
-
-  @Column(name = "START_AT")
-  private LocalDateTime startAt;
 
   @Column(name = "TOTAL_POINT_EXPIRED")
   private Long totalPointExpired;
