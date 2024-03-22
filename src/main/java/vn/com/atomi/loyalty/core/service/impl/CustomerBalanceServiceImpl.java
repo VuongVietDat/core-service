@@ -109,4 +109,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
 
   @Override
   public void executeTransactionMinus(TransactionInput transactionInput) {}
+
+  @Override
+  public void executePointExpiration() {}
 }
