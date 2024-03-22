@@ -5,6 +5,9 @@ import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.enums.Status;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+
 public interface MemberService {
   ResponsePage<CustomerOutput> gets(
       Status status,
@@ -16,4 +19,6 @@ public interface MemberService {
       Pageable pageable);
 
   CustomerOutput get(Long id);
+
+  void creates(List<LinkedHashMap> input);
 }
