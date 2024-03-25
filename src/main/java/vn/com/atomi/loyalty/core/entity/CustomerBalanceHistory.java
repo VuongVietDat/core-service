@@ -87,5 +87,5 @@ public class CustomerBalanceHistory extends BaseEntity {
   private String searchTransactionDate;
 
   @Column(name = "TRANSACTION_USED")
-  private Long transactionUsed;
+  private String transactionUsed;
 }
