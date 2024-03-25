@@ -1,13 +1,15 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
@@ -25,12 +27,6 @@ import vn.com.atomi.loyalty.core.repository.CustomerRankRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerRepository;
 import vn.com.atomi.loyalty.core.service.MemberService;
 import vn.com.atomi.loyalty.core.utils.Utils;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -68,53 +64,53 @@ public class MemberServiceImpl extends BaseService implements MemberService {
 
   @Transactional
   @Override
-  public void creates(List<LinkedHashMap> input) {
+  public void creates(String requestId, List<LinkedHashMap> input) {
     var currentDate = LocalDate.now();
-    var rankCode = getFirstRank();
-
-    // lay cac next ID
-    var customerSequence = customerRepository.getSequence();
-    var customerBalanceSequence = customerBalanceRepository.getSequence();
-    var customerRankSequence = customerRankRepository.getSequence();
+    var rankCode = getFirstRank(requestId);
 
     // init data
     var listCustomer = new ArrayList<Customer>();
     var listCustomerBalances = new ArrayList<CustomerBalance>();
     var listCustomerRanks = new ArrayList<CustomerRank>();
-    var n = input.size();
-    for (int i = 0; i < n; i++) {
-      var cusId = customerSequence + i;
 
-      var cus = mapper.convertValue(input.get(i), Customer.class);
-      cus.setId(cusId);
-      listCustomer.add(cus);
+    input.forEach(
+        map -> {
+          // lay cac next ID
+          var cusId = customerRepository.getSequence();
+          var cusBalanceId = customerBalanceRepository.getSequence();
+          var cusRankId = customerRankRepository.getSequence();
 
-      listCustomerBalances.add(
-          CustomerBalance.builder()
-              .customerId(cusId)
-              .code(
-                  Utils.generateCode(
-                      customerBalanceSequence + i, CustomerBalance.class.getSimpleName()))
-              .totalAmount(0L)
-              .lockAmount(0L)
-              .availableAmount(0L)
-              .totalPointsUsed(0L)
-              .totalAccumulatedPoints(0L)
-              .totalPointsExpired(0L)
-              .status(Status.ACTIVE)
-              .build());
+          var cus = mapper.convertValue(map, Customer.class);
+          cus.setId(cusId);
+          listCustomer.add(cus);
 
-      listCustomerRanks.add(
-          CustomerRank.builder()
-              .customerId(cusId)
-              .code(
-                  Utils.generateCode(customerRankSequence + i, CustomerRank.class.getSimpleName()))
-              .rank(rankCode)
-              .applyDate(currentDate)
-              .totalPoint(0L)
-              .status(Status.ACTIVE)
-              .build());
-    }
+          var cbCode = Utils.generateCode(cusBalanceId, CustomerBalance.class.getSimpleName());
+          listCustomerBalances.add(
+              CustomerBalance.builder()
+                  .id(cusBalanceId)
+                  .customerId(cusId)
+                  .code(cbCode)
+                  .totalAmount(0L)
+                  .lockAmount(0L)
+                  .availableAmount(0L)
+                  .totalPointsUsed(0L)
+                  .totalAccumulatedPoints(0L)
+                  .totalPointsExpired(0L)
+                  .status(Status.ACTIVE)
+                  .build());
+
+          var crCode = Utils.generateCode(cusRankId, CustomerRank.class.getSimpleName());
+          listCustomerRanks.add(
+              CustomerRank.builder()
+                  .id(cusRankId)
+                  .customerId(cusId)
+                  .code(crCode)
+                  .rank(rankCode)
+                  .applyDate(currentDate)
+                  .totalPoint(0L)
+                  .status(Status.ACTIVE)
+                  .build());
+        });
 
     // saves
     customerRepository.saveAll(listCustomer);
@@ -122,9 +118,7 @@ public class MemberServiceImpl extends BaseService implements MemberService {
     customerRankRepository.saveAll(listCustomerRanks);
   }
 
-  private String getFirstRank() {
-    var sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    var requestId = sra.getRequest().getHeader(RequestConstant.REQUEST_ID);
+  private String getFirstRank(String requestId) {
     var res = configClient.getAllRanks(requestId);
     if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
     var ranks = res.getData();

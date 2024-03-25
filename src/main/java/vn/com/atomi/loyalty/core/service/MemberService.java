@@ -20,5 +20,5 @@ public interface MemberService {
 
   CustomerOutput get(Long id);
 
-  void creates(List<LinkedHashMap> input);
+  void creates(String messageId, List<LinkedHashMap> input);
 }

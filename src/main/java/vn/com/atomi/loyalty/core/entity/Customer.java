@@ -22,8 +22,6 @@ public class Customer extends BaseEntity {
 
   @Id
   @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = GENERATOR)
-  @SequenceGenerator(name = GENERATOR, sequenceName = GENERATOR, allocationSize = 1)
   private Long id;
 
   @Column(name = "cif_bank")

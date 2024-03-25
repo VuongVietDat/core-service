@@ -50,6 +50,6 @@ public class CustomerCreateEventListener extends MessageListener<LinkedHashMap> 
       String offset,
       MessageData<LinkedHashMap> input,
       String messageId) {
-    memberService.creates(input.getContents());
+    memberService.creates(messageId, input.getContents());
   }
 }
