@@ -12,6 +12,8 @@ import vn.com.atomi.loyalty.core.entity.CustomerBalance;
  */
 @Repository
 public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance, Long> {
+  @Query(value = "select c_customer_balance_id_seq.nextval from DUAL", nativeQuery = true)
+  Long getSequence();
 
   @Query(
       value =
