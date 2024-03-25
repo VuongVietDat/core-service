@@ -35,4 +35,6 @@ public interface CustomerBalanceService {
       Pageable pageable);
 
   void executeTransactionMinus(TransactionInput transactionInput);
+
+  void executePointExpiration();
 }

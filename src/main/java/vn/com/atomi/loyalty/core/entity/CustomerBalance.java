@@ -18,34 +18,34 @@ import vn.com.atomi.loyalty.core.enums.Status;
 @Table(name = "C_CUSTOMER_BALANCE")
 public class CustomerBalance extends BaseEntity {
   @Id
-  @Column(name = "id")
+  @Column(name = "ID")
   private Long id;
 
-  @Column(name = "code")
+  @Column(name = "CODE")
   private String code;
 
-  @Column(name = "customer_id")
+  @Column(name = "CUSTOMER_ID")
   private Long customerId;
 
-  @Column(name = "total_amount")
+  @Column(name = "TOTAL_AMOUNT")
   private Long totalAmount;
 
-  @Column(name = "lock_amount")
+  @Column(name = "LOCK_AMOUNT")
   private Long lockAmount;
 
-  @Column(name = "available_amount")
+  @Column(name = "AVAILABLE_AMOUNT")
   private Long availableAmount;
 
-  @Column(name = "total_points_used")
+  @Column(name = "TOTAL_POINTS_USED")
   private Long totalPointsUsed;
 
-  @Column(name = "total_accumulated_points")
+  @Column(name = "TOTAL_ACCUMULATED_POINTS")
   private Long totalAccumulatedPoints;
 
-  @Column(name = "total_points_expired")
+  @Column(name = "TOTAL_POINTS_EXPIRED")
   private Long totalPointsExpired;
 
-  @Column(name = "status")
+  @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)
   private Status status;
 }

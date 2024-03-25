@@ -30,4 +30,6 @@ public interface CustomRepository {
       LocalDateTime transactionAt,
       String content,
       PointType pointType);
+
+  void expiredAmount(String refNo, LocalDate expiredAt, String content, PointType pointType);
 }
