@@ -6,7 +6,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
+import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
+import vn.com.atomi.loyalty.core.entity.CustomerRank;
 
 /**
  * @author haidv
@@ -73,6 +75,10 @@ public class Utils {
     var shortYear = String.valueOf(LocalDate.now().getYear()).substring(2);
     if (className.equals(CustomerGroupApproval.class.getSimpleName())) {
       return "CG" + shortYear + StringUtils.leftPad(sequence.toString(), 6, "0");
+    } else if (className.equals(CustomerBalance.class.getSimpleName())) {
+      return "CB" + shortYear + StringUtils.leftPad(sequence.toString(), 6, "0");
+    } else if (className.equals(CustomerRank.class.getSimpleName())) {
+      return "CR" + shortYear + StringUtils.leftPad(sequence.toString(), 6, "0");
     }
     return null;
   }
