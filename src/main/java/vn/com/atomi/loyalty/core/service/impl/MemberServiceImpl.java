@@ -123,7 +123,7 @@ public class MemberServiceImpl extends BaseService implements MemberService {
     if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
     var ranks = res.getData();
     return ranks.stream()
-        .min(Comparator.comparing(RankOutput::getId))
+        .min(Comparator.comparing(RankOutput::getOrder))
         .orElseThrow(() -> new BaseException(CommonErrorCode.ENTITY_NOT_FOUND))
         .getCode();
   }
