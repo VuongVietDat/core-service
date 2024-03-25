@@ -50,6 +50,9 @@ public class CustomerBalanceHistory extends BaseEntity {
   @Column(name = "AMOUNT_USED")
   private Long amountUsed;
 
+  @Column(name = "AMOUNT_EXPIRED")
+  private Long amountExpired;
+
   @Column(name = "BEFORE_AMOUNT")
   private Long beforeAmount;
 
@@ -82,4 +85,7 @@ public class CustomerBalanceHistory extends BaseEntity {
 
   @Column(name = "SEARCH_TRANSACTION_DATE")
   private String searchTransactionDate;
+
+  @Column(name = "TRANSACTION_USED")
+  private Long transactionUsed;
 }
