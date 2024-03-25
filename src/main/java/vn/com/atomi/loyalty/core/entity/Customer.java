@@ -34,11 +34,14 @@ public class Customer extends BaseEntity {
   @Column(name = "CIF_WALLET")
   private String cifWallet;
 
-  @Column(name = "CURRENT_ADDRESS")
-  private String currentAddress;
-
   @Column(name = "CUSTOMER_NAME")
   private String customerName;
+
+  @Column(name = "DOB")
+  private String dob;
+
+  @Column(name = "CURRENT_ADDRESS")
+  private String currentAddress;
 
   @Column(name = "CUSTOMER_TYPE")
   private String customerType;
