@@ -17,8 +17,6 @@ import vn.com.atomi.loyalty.core.enums.Status;
 @Entity
 @Table(name = "C_CUSTOMER_BALANCE")
 public class CustomerBalance extends BaseEntity {
-  public static final String GENERATOR = "c_customer_balance_id_seq";
-
   @Id
   @Column(name = "id")
   private Long id;

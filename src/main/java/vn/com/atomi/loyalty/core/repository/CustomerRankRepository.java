@@ -7,6 +7,6 @@ import vn.com.atomi.loyalty.core.entity.CustomerRank;
 
 @Repository
 public interface CustomerRankRepository extends JpaRepository<CustomerRank, Long> {
-  @Query(value = "select " + CustomerRank.GENERATOR + ".nextval from DUAL", nativeQuery = true)
+  @Query(value = "select c_customer_rank_id_seq.nextval from DUAL", nativeQuery = true)
   Long getSequence();
 }

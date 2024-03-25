@@ -15,7 +15,7 @@ import vn.com.atomi.loyalty.core.enums.Status;
  */
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-  @Query(value = "select " + Customer.GENERATOR + ".nextval from DUAL", nativeQuery = true)
+  @Query(value = "select c_customer_id_seq.nextval from DUAL", nativeQuery = true)
   Long getSequence();
 
   @Query(

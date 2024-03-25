@@ -18,8 +18,6 @@ import vn.com.atomi.loyalty.core.enums.Status;
 @Entity
 @Table(name = "C_CUSTOMER_RANK")
 public class CustomerRank extends BaseEntity {
-  public static final String GENERATOR = "c_customer_rank_id_seq";
-
   @Id
   @Column(name = "id")
   private Long id;
