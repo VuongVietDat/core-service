@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,7 @@ import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
-import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
-import vn.com.atomi.loyalty.core.repository.CustomerRankRepository;
+import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerRepository;
 import vn.com.atomi.loyalty.core.service.MemberService;
 import vn.com.atomi.loyalty.core.utils.Utils;
@@ -32,9 +32,8 @@ import vn.com.atomi.loyalty.core.utils.Utils;
 @RequiredArgsConstructor
 public class MemberServiceImpl extends BaseService implements MemberService {
   private final LoyaltyConfigClient configClient;
+  private final CustomRepository customRepository;
   private final CustomerRepository customerRepository;
-  private final CustomerBalanceRepository customerBalanceRepository;
-  private final CustomerRankRepository customerRankRepository;
   private final ObjectMapper mapper;
 
   @Override
@@ -65,57 +64,49 @@ public class MemberServiceImpl extends BaseService implements MemberService {
   @Transactional
   @Override
   public void creates(String requestId, List<LinkedHashMap> input) {
-    var currentDate = LocalDate.now();
     var rankCode = getFirstRank(requestId);
+    var currentDate = LocalDate.now();
 
     // init data
-    var listCustomer = new ArrayList<Customer>();
-    var listCustomerBalances = new ArrayList<CustomerBalance>();
-    var listCustomerRanks = new ArrayList<CustomerRank>();
+    var list = new ArrayList<Triple<Customer, CustomerBalance, CustomerRank>>();
 
-    input.forEach(
-        map -> {
-          // lay cac next ID
-          var cusId = customerRepository.getSequence();
-          var cusBalanceId = customerBalanceRepository.getSequence();
-          var cusRankId = customerRankRepository.getSequence();
+    var sequence = customerRepository.getSequence();
+    var n = input.size();
 
-          var cus = mapper.convertValue(map, Customer.class);
-          cus.setId(cusId);
-          listCustomer.add(cus);
+    for (int i = 0; i < n; i++) {
+      var map = input.get(i);
+      var cus = mapper.convertValue(map, Customer.class);
 
-          var cbCode = Utils.generateCode(cusBalanceId, CustomerBalance.class.getSimpleName());
-          listCustomerBalances.add(
-              CustomerBalance.builder()
-                  .id(cusBalanceId)
-                  .customerId(cusId)
-                  .code(cbCode)
-                  .totalAmount(0L)
-                  .lockAmount(0L)
-                  .availableAmount(0L)
-                  .totalPointsUsed(0L)
-                  .totalAccumulatedPoints(0L)
-                  .totalPointsExpired(0L)
-                  .status(Status.ACTIVE)
-                  .build());
+      var cusId = sequence + i + 1;
 
-          var crCode = Utils.generateCode(cusRankId, CustomerRank.class.getSimpleName());
-          listCustomerRanks.add(
-              CustomerRank.builder()
-                  .id(cusRankId)
-                  .customerId(cusId)
-                  .code(crCode)
-                  .rank(rankCode)
-                  .applyDate(currentDate)
-                  .totalPoint(0L)
-                  .status(Status.ACTIVE)
-                  .build());
-        });
+      var cb =
+          CustomerBalance.builder()
+              .customerId(cusId)
+              .code(Utils.generateCode(cusId, CustomerBalance.class.getSimpleName()))
+              .totalAmount(0L)
+              .lockAmount(0L)
+              .availableAmount(0L)
+              .totalPointsUsed(0L)
+              .totalAccumulatedPoints(0L)
+              .totalPointsExpired(0L)
+              .status(Status.ACTIVE)
+              .build();
+
+      var cr =
+          CustomerRank.builder()
+              .customerId(cusId)
+              .code(Utils.generateCode(cusId, CustomerRank.class.getSimpleName()))
+              .rank(rankCode)
+              .applyDate(currentDate)
+              .totalPoint(0L)
+              .status(Status.ACTIVE)
+              .build();
+
+      list.add(Triple.of(cus, cb, cr));
+    }
 
     // saves
-    customerRepository.saveAll(listCustomer);
-    customerBalanceRepository.saveAll(listCustomerBalances);
-    customerRankRepository.saveAll(listCustomerRanks);
+    customRepository.saveAllCustomer(list);
   }
 
   private String getFirstRank(String requestId) {
@@ -123,7 +114,7 @@ public class MemberServiceImpl extends BaseService implements MemberService {
     if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
     var ranks = res.getData();
     return ranks.stream()
-        .min(Comparator.comparing(RankOutput::getOrder))
+        .min(Comparator.comparing(RankOutput::getOrderNo))
         .orElseThrow(() -> new BaseException(CommonErrorCode.ENTITY_NOT_FOUND))
         .getCode();
   }

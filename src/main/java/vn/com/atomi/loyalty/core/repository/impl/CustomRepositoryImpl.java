@@ -6,17 +6,25 @@ import jakarta.persistence.StoredProcedureQuery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
+import vn.com.atomi.loyalty.core.entity.Customer;
+import vn.com.atomi.loyalty.core.entity.CustomerBalance;
+import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
+import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
+import vn.com.atomi.loyalty.core.utils.Utils;
 
 /**
  * @author haidv
@@ -171,5 +179,106 @@ public class CustomRepositoryImpl implements CustomRepository {
     if (result != 0) {
       throw new BaseException(CommonErrorCode.DATA_INTEGRITY_VIOLATION);
     }
+  }
+
+  @Override
+  public void saveAllCustomer(List<Triple<Customer, CustomerBalance, CustomerRank>> infos) {
+    var currentTime = Utils.formatLocalDateToString(LocalDate.now());
+    var creator = "SYSTEM";
+
+    var values =
+        infos.stream()
+            .map(
+                info -> {
+                  var customer = info.getLeft();
+                  var cb = info.getMiddle();
+                  var cr = info.getRight();
+
+                  var intoCus =
+                      String.format(
+                          """
+                          INTO C_CUSTOMER (ID, CIF_BANK, CIF_WALLET, CUSTOMER_NAME, DOB, CURRENT_ADDRESS, CUSTOMER_TYPE,
+                          GENDER, NATIONALITY, OWNER_BRANCH, PHONE, RANK, REGISTER_BRANCH, RESIDENTIAL_ADDRESS, RM_CODE,
+                          RM_NAME, SEGMENT, UNIQUE_TYPE, UNIQUE_VALUE, ISSUE_DATE, ISSUE_PLACE, STATUS, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
+                          VALUES (GET_C_CUSTOMER_ID_SEQ(), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
+                          '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)
+                          """,
+                          customer.getCifBank(),
+                          customer.getCifWallet(),
+                          customer.getCustomerName(),
+                          customer.getDob(),
+                          customer.getCurrentAddress(),
+                          customer.getCustomerType(),
+                          customer.getGender(),
+                          customer.getNationality(),
+                          customer.getOwnerBranch(),
+                          customer.getPhone(),
+                          customer.getRank(),
+                          customer.getRegisterBranch(),
+                          customer.getResidentialAddress(),
+                          customer.getRmCode(),
+                          customer.getRmName(),
+                          customer.getSegment(),
+                          customer.getUniqueType(),
+                          customer.getUniqueValue(),
+                          Utils.formatLocalDateToString(customer.getIssueDate()),
+                          customer.getIssuePlace(),
+                          Status.ACTIVE.name(),
+                          currentTime,
+                          creator,
+                          currentTime,
+                          creator,
+                          0);
+
+                  var intoCusBal =
+                      String.format(
+                          """
+                          INTO C_CUSTOMER_BALANCE (ID, CODE, CUSTOMER_ID, TOTAL_AMOUNT, LOCK_AMOUNT, AVAILABLE_AMOUNT,
+                          TOTAL_POINTS_USED, TOTAL_ACCUMULATED_POINTS, TOTAL_POINTS_EXPIRED, STATUS, CREATED_AT,
+                          CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
+                          VALUES (GET_C_CUSTOMER_BALANCE_ID_SEQ(), '%s', %d, %d, %d, %d, %d, %d, %d, '%s', '%s', '%s', '%s', '%s', %d)
+                          """,
+                          cb.getCode(),
+                          cb.getCustomerId(),
+                          cb.getTotalAmount(),
+                          cb.getLockAmount(),
+                          cb.getAvailableAmount(),
+                          cb.getTotalPointsUsed(),
+                          cb.getTotalAccumulatedPoints(),
+                          cb.getTotalPointsExpired(),
+                          Status.ACTIVE.name(),
+                              currentTime,
+                              creator,
+                              currentTime,
+                              creator,
+                              0);
+
+                  var intoCusRank =
+                      String.format(
+                          """
+                          INTO C_CUSTOMER_RANK (ID, CODE, CUSTOMER_ID, RANK, APPLY_DATE, TOTAL_POINT, STATUS,
+                          CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
+                          VALUES (GET_C_CUSTOMER_RANK_ID_SEQ(), '%s', %d, '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', %d)
+                          """,
+                          cr.getCode(),
+                          cr.getCustomerId(),
+                          cr.getRank(),
+                          Utils.formatLocalDateToString(cr.getApplyDate()),
+                          cr.getTotalPoint(),
+                          Status.ACTIVE.name(),
+                              currentTime,
+                              creator,
+                              currentTime,
+                              creator,
+                              0);
+
+                  return intoCus + '\n' + intoCusBal + '\n' + intoCusRank;
+                })
+            .collect(Collectors.joining("\n"))
+            .replace("'null'", "null");
+
+    entityManager
+        .createNativeQuery("INSERT ALL\n" + values + "\nSELECT * FROM DUAL")
+        .executeUpdate();
   }
 }
