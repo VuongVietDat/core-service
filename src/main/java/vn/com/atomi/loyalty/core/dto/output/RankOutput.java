@@ -19,4 +19,6 @@ public class RankOutput {
   private String name;
 
   private Status status;
+
+  private Integer order;
 }

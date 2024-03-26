@@ -20,30 +20,25 @@ import vn.com.atomi.loyalty.core.enums.Status;
 public class CustomerRank extends BaseEntity {
 
   @Id
-  @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "c_customer_rank_id_seq")
-  @SequenceGenerator(
-      name = "c_customer_rank_id_seq",
-      sequenceName = "c_customer_rank_id_seq",
-      allocationSize = 1)
+  @Column(name = "ID")
   private Long id;
 
-  @Column(name = "code")
+  @Column(name = "CODE")
   private String code;
 
-  @Column(name = "customer_id")
+  @Column(name = "CUSTOMER_ID")
   private Long customerId;
 
-  @Column(name = "rank")
+  @Column(name = "RANK")
   private String rank;
 
-  @Column(name = "apply_date")
+  @Column(name = "APPLY_DATE")
   private LocalDate applyDate;
 
-  @Column(name = "total_point")
+  @Column(name = "TOTAL_POINT")
   private Long totalPoint;
 
-  @Column(name = "status")
+  @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)
   private Status status;
 }

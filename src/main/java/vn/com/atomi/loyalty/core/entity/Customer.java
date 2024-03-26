@@ -18,14 +18,8 @@ import vn.com.atomi.loyalty.core.enums.Status;
 @Entity
 @Table(name = "C_CUSTOMER")
 public class Customer extends BaseEntity {
-
   @Id
   @Column(name = "ID")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CUSTOMER_ID_SEQ")
-  @SequenceGenerator(
-      name = "C_CUSTOMER_ID_SEQ",
-      sequenceName = "C_CUSTOMER_ID_SEQ",
-      allocationSize = 1)
   private Long id;
 
   @Column(name = "CIF_BANK")
@@ -34,11 +28,14 @@ public class Customer extends BaseEntity {
   @Column(name = "CIF_WALLET")
   private String cifWallet;
 
-  @Column(name = "CURRENT_ADDRESS")
-  private String currentAddress;
-
   @Column(name = "CUSTOMER_NAME")
   private String customerName;
+
+  @Column(name = "DOB")
+  private String dob;
+
+  @Column(name = "CURRENT_ADDRESS")
+  private String currentAddress;
 
   @Column(name = "CUSTOMER_TYPE")
   private String customerType;
