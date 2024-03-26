@@ -27,6 +27,6 @@ public class LoyaltyCoreApplication {
 
   @PostConstruct
   public void init() {
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC+7"));
+    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
   }
 }
