@@ -20,5 +20,5 @@ public class RankOutput {
 
   private Status status;
 
-  private Integer order;
+  private Integer orderNo;
 }
