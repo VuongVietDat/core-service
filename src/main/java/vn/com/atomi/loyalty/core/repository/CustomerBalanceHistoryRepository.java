@@ -1,6 +1,7 @@
 package vn.com.atomi.loyalty.core.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,4 +53,29 @@ public interface CustomerBalanceHistoryRepository
               + "order by cb.updatedAt desc "
               + "limit 1 ")
   Optional<CustomerBalanceHistory> findPointAboutExpire(Long customerId);
+
+  @Query(
+      "select sum(h.amount) "
+          + "from CustomerBalanceHistory h "
+          + "where h.deleted = false "
+          + "  and h.customerId = :customerId "
+          + "  and h.ruleId = :ruleId "
+          + "  and h.pointType = :pointType ")
+  long sumByCustomerIdAndRuleId(Long customerId, Long ruleId, PointType pointType);
+
+  @Query(
+      "select count(h.id) "
+          + "from CustomerBalanceHistory h "
+          + "where h.deleted = false "
+          + "  and h.customerId = :customerId "
+          + "  and h.transactionAt >= :startAt "
+          + "  and h.transactionAt <= :endAt "
+          + "  and h.ruleId = :ruleId "
+          + "  and h.pointType = :pointType ")
+  long countByCustomerIdAndRuleId(
+      Long customerId,
+      Long ruleId,
+      PointType pointType,
+      LocalDateTime startAt,
+      LocalDateTime endAt);
 }

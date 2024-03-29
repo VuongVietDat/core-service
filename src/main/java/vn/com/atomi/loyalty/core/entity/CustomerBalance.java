@@ -28,22 +28,28 @@ public class CustomerBalance extends BaseEntity {
   private Long customerId;
 
   @Column(name = "TOTAL_AMOUNT")
-  private Long totalAmount;
+  private long totalAmount;
 
   @Column(name = "LOCK_AMOUNT")
-  private Long lockAmount;
+  private long lockAmount;
 
   @Column(name = "AVAILABLE_AMOUNT")
-  private Long availableAmount;
+  private long availableAmount;
 
   @Column(name = "TOTAL_POINTS_USED")
-  private Long totalPointsUsed;
+  private long totalPointsUsed;
 
   @Column(name = "TOTAL_ACCUMULATED_POINTS")
-  private Long totalAccumulatedPoints;
+  private long totalAccumulatedPoints;
 
   @Column(name = "TOTAL_POINTS_EXPIRED")
-  private Long totalPointsExpired;
+  private long totalPointsExpired;
+
+  @Column(name = "LST_YEAR_ACCUMULATED")
+  private int lstYearAccumulated;
+
+  @Column(name = "YEAR_ACCUMULATED")
+  private long yearAccumulated;
 
   @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)

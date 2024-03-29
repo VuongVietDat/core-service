@@ -7,11 +7,15 @@ import vn.com.atomi.loyalty.core.enums.Status;
 
 @Data
 public class CustomerOutput {
+
   @Schema(description = "Mã khách hàng")
   private Long id;
 
   @Schema(description = "Tên khách hàng")
   private String customerName;
+
+  @Schema(description = "Ngày sinh")
+  private LocalDate dob;
 
   @Schema(description = "CIF ngân hàng")
   private String cifBank;

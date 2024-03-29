@@ -10,6 +10,10 @@ public class Constants {
 
   public static final String DICTIONARY_UNIQUE_TYPE = "UNIQUE_TYPE";
 
+  public static final String DICTIONARY_LIMIT_POINT_PER_USER = "LIMIT_POINT_PER_USER";
+
+  public static final String DICTIONARY_RULE_TYPE_TRANSACTION = "TRANSACTION";
+
   public static final String DEFAULT_DAY_START_TIME = "00:00:00";
 
   public static final String DEFAULT_DAY_END_TIME = "23:59:59";

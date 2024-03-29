@@ -10,7 +10,7 @@ import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
-import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
+import vn.com.atomi.loyalty.core.dto.input.UsePointInput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceHistoryOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
 import vn.com.atomi.loyalty.core.dto.output.ExternalCustomerBalanceHistoryOutput;
@@ -114,7 +114,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
   }
 
   @Override
-  public void executeTransactionMinus(TransactionInput transactionInput) {}
+  public void executeTransactionMinus(UsePointInput usePointInput) {}
 
   @Override
   public void executePointExpiration() {
