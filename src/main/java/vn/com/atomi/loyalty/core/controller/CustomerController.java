@@ -11,6 +11,7 @@ import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.data.ResponseUtils;
 import vn.com.atomi.loyalty.base.security.Authority;
+import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.enums.Status;
@@ -78,5 +79,50 @@ public class CustomerController extends BaseController {
             pointFrom,
             pointTo,
             super.pageable(pageNo, pageSize, sort)));
+  }
+
+  @GetMapping("/customers")
+  @Operation(summary = "Api lấy danh sách thành viên")
+  @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
+  public ResponseEntity<ResponseData<ResponsePage<CustomerOutput>>> gets(
+      @Parameter(description = "Số trang, bắt đầu từ 1", example = "1") @RequestParam
+          Integer pageNo,
+      @Parameter(description = "Số lượng bản ghi 1 trang, tối đa 200", example = "10") @RequestParam
+          Integer pageSize,
+      @Parameter(description = "Sắp xếp, Pattern: ^[a-z0-9]+:(asc|desc)")
+          @RequestParam(required = false)
+          String sort,
+      @Parameter(description = "ID khách hàng bên loyalty") @RequestParam(required = false)
+          Long customerId,
+      @Parameter(description = "Tên khách hàng bên loyalty") @RequestParam(required = false)
+          String customerName,
+      @Parameter(description = "Mã định danh của khách hàng trên bank")
+          @RequestParam(required = false)
+          String cifBank,
+      @Parameter(description = "Xếp hạng KH") @RequestParam(required = false) String rank,
+      @Parameter(description = "Trạng thái:</br> ACTIVE: Hiệu lực</br> INACTIVE: Không hiệu lực")
+          @RequestParam(required = false)
+          Status status,
+      @Parameter(description = "Phân khúc KH: LUXURY, ENTRY", example = "ENTRY")
+          @RequestParam(required = false)
+          String segment) {
+
+    return ResponseUtils.success(
+        customerService.gets(
+            status,
+            customerId,
+            customerName,
+            cifBank,
+            rank,
+            segment,
+            super.pageable(pageNo, pageSize, sort)));
+  }
+
+  @Operation(summary = "Api lấy chi tiết thành viên theo id")
+  @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
+  @GetMapping("/customers/{id}")
+  public ResponseEntity<ResponseData<CustomerOutput>> getDetail(
+      @Parameter(description = "ID khách hàng bên loyalty") @PathVariable Long id) {
+    return ResponseUtils.success(customerService.get(id));
   }
 }
