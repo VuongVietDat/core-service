@@ -3,6 +3,7 @@ package vn.com.atomi.loyalty.core.dto.output;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import lombok.Data;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 @Data
 public class CustomerOutput {
@@ -65,4 +66,7 @@ public class CustomerOutput {
 
   @Schema(description = "Nơi phát hành")
   private String issuePlace;
+
+  @Schema(description = "Trạng thái")
+  private Status status;
 }
