@@ -7,5 +7,6 @@ package vn.com.atomi.loyalty.core.enums;
 public enum ExpirePolicyType {
   AFTER_DAY,
   AFTER_DATE,
-  FIRST_DATE_OF_MONTH;
+  FIRST_DATE_OF_MONTH,
+  NEVER
 }

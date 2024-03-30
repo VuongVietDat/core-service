@@ -6,6 +6,7 @@ import jakarta.persistence.StoredProcedureQuery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,13 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
+import vn.com.atomi.loyalty.base.utils.JsonUtils;
+import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
@@ -38,19 +43,11 @@ public class CustomRepositoryImpl implements CustomRepository {
 
   private final EntityManager entityManager;
 
+  @Transactional
   @Override
-  public Long plusAmount(
-      Long customerId,
-      Long amount,
-      String refNo,
-      String campaignCode,
-      Long campaignId,
-      String ruleCode,
-      Long ruleId,
-      LocalDateTime transactionAt,
-      String content,
-      LocalDate expireAt,
-      PointType pointType) {
+  public Long plusAmount(TransactionInput transactionInput) {
+    LOGGER.info(
+        "Start CustomRepository.plusAmount execute input: {}", JsonUtils.toJson(transactionInput));
     StoredProcedureQuery query =
         entityManager
             .createStoredProcedureQuery("P_PLUS_AMOUNT")
@@ -72,30 +69,49 @@ public class CustomRepositoryImpl implements CustomRepository {
             .registerStoredProcedureParameter("P_TRANSACTION_ID", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
-            .setParameter("P_CUSTOMER_ID", customerId)
-            .setParameter("P_AMOUNT", amount)
-            .setParameter("P_REF_NO", refNo)
-            .setParameter("P_CAMPAIGN_CODE", campaignCode)
-            .setParameter("P_CAMPAIGN_ID", campaignId)
-            .setParameter("P_RULE_CODE", ruleCode)
-            .setParameter("P_RULE_ID", ruleId)
-            .setParameter("P_TRANSACTION_AT", transactionAt)
+            .setParameter("P_CUSTOMER_ID", transactionInput.getCustomerId())
+            .setParameter("P_AMOUNT", transactionInput.getAmount())
+            .setParameter("P_REF_NO", transactionInput.getRefNo())
+            .setParameter("P_CAMPAIGN_CODE", transactionInput.getCampaignCode())
+            .setParameter("P_CAMPAIGN_ID", transactionInput.getCampaignId())
+            .setParameter("P_RULE_CODE", transactionInput.getRuleCode())
+            .setParameter("P_RULE_ID", transactionInput.getRuleId())
+            .setParameter("P_TRANSACTION_AT", transactionInput.getTransactionAt())
             .setParameter(
                 "P_SEARCH_TRANSACTION_DATE",
                 DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
-                    .format(transactionAt))
-            .setParameter("P_CONTENT", content)
-            .setParameter("P_EXPIRE_AT", expireAt)
-            .setParameter("P_POINT_TYPE", pointType.name())
+                    .format(transactionInput.getTransactionAt()))
+            .setParameter("P_CONTENT", transactionInput.getContent())
+            .setParameter("P_EXPIRE_AT", transactionInput.getExpireAt())
+            .setParameter("P_POINT_TYPE", transactionInput.getPointType().name())
             .setParameter("P_CHANGE_TYPE", ChangeType.PLUS.name());
     query.execute();
     Long result = (Long) query.getOutputParameterValue("P_RESULT");
     String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
-    LOGGER.info("CustomRepository.plusAmount execute result : {} {}", result, resultDesc);
+    Long transactionId = (Long) query.getOutputParameterValue("P_TRANSACTION_ID");
+    LOGGER.info(
+        "End CustomRepository.plusAmount execute result : [{}][{}][{}]",
+        result,
+        transactionId,
+        resultDesc);
     if (result != 0) {
       throw new BaseException(CommonErrorCode.DATA_INTEGRITY_VIOLATION);
     }
-    return (Long) query.getOutputParameterValue("P_TRANSACTION_ID");
+    return transactionId;
+  }
+
+  @Transactional
+  @Override
+  public List<Long> plusAmounts(List<TransactionInput> transactionInputs) {
+    List<Long> map = new ArrayList<>();
+    if (CollectionUtils.isEmpty(transactionInputs)) {
+      LOGGER.info("CustomRepository.plusAmounts input is empty");
+      return map;
+    }
+    for (TransactionInput transactionInput : transactionInputs) {
+      map.add(this.plusAmount(transactionInput));
+    }
+    return map;
   }
 
   public Long minusAmount(
@@ -247,11 +263,11 @@ public class CustomRepositoryImpl implements CustomRepository {
                           cb.getTotalAccumulatedPoints(),
                           cb.getTotalPointsExpired(),
                           Status.ACTIVE.name(),
-                              currentTime,
-                              creator,
-                              currentTime,
-                              creator,
-                              0);
+                          currentTime,
+                          creator,
+                          currentTime,
+                          creator,
+                          0);
 
                   var intoCusRank =
                       String.format(
@@ -266,11 +282,11 @@ public class CustomRepositoryImpl implements CustomRepository {
                           Utils.formatLocalDateToString(cr.getApplyDate()),
                           cr.getTotalPoint(),
                           Status.ACTIVE.name(),
-                              currentTime,
-                              creator,
-                              currentTime,
-                              creator,
-                              0);
+                          currentTime,
+                          creator,
+                          currentTime,
+                          creator,
+                          0);
 
                   return intoCus + '\n' + intoCusBal + '\n' + intoCusRank;
                 })

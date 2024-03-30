@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +17,12 @@ import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.utils.JsonUtils;
 import vn.com.atomi.loyalty.core.dto.input.AllocationPointTransactionInput;
+import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointMessage;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.enums.*;
+import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceHistoryRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
 import vn.com.atomi.loyalty.core.service.AllocationPointService;
@@ -44,11 +47,13 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
 
   private final CustomerBalanceHistoryRepository customerBalanceHistoryRepository;
 
+  private final CustomRepository customRepository;
+
   @Override
   public void handlerAllocationPointEvent(AllocationPointMessage allocationPointMessage) {
-    var transactionInput = allocationPointMessage.getTransaction();
+    var allocationTransaction = allocationPointMessage.getTransaction();
     var customerInput = allocationPointMessage.getCustomer();
-    var transactionDate = transactionInput.getTransactionAt().toLocalDate();
+    var transactionDate = allocationTransaction.getTransactionAt().toLocalDate();
     // lấy tất cả danh sách quy tắc hiệu lực
     var rules =
         ruleService.getAllActiveRule(
@@ -73,20 +78,20 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
     var dictionaries =
         masterDataService.getDictionary(
             Constants.DICTIONARY_LIMIT_POINT_PER_USER, Status.ACTIVE, false);
-    if (transactionInput.getAmount() == null) {
+    if (allocationTransaction.getAmount() == null) {
       LOGGER.warn("Transaction amount must not be null");
       return;
     }
-    var amount = BigInteger.valueOf(transactionInput.getAmount());
+    var amount = BigInteger.valueOf(allocationTransaction.getAmount());
     long limitPoint = -1;
     if (!dictionaries.isEmpty()) {
       limitPoint = Long.parseLong(dictionaries.get(0).getValue());
     }
-    List<AllocationPointTransactionInput> allocationPointTransactionInputs = new ArrayList<>();
+    List<TransactionInput> results = new ArrayList<>();
     for (RuleOutput rule : rules) {
       // kiểm tra điều kiện của quy tắc
       if (!CollectionUtils.isEmpty(rule.getRuleConditionOutputs())
-          && !this.checkCondition(transactionInput, customerInput, rule)) {
+          && !this.checkCondition(allocationTransaction, customerInput, rule)) {
         LOGGER.warn("The conditions for applying the rule are not met");
         return;
       }
@@ -98,7 +103,8 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       // với loại giao dịch thì chỉ có 1 loại phân bổ điểm
       RuleAllocationOutput ruleAllocationOutput = rule.getRuleAllocationOutputs().get(0);
       if (ruleAllocationOutput.getMinTransaction() != null
-          && ruleAllocationOutput.getMinTransaction().compareTo(transactionInput.getAmount()) > 0) {
+          && ruleAllocationOutput.getMinTransaction().compareTo(allocationTransaction.getAmount())
+              > 0) {
         LOGGER.info(
             "The minimum balance condition of the point allocation rule with action: {} is not met",
             ruleAllocationOutput.getAction());
@@ -117,7 +123,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                     rule.getRuleBonusOutputs(),
                     basePoint,
                     customerInput,
-                    transactionInput,
+                    allocationTransaction,
                     transactionDate));
       }
       rankPoint = totalPoint.longValue();
@@ -160,7 +166,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
             && ruleAllocationOutput.getFrequencyLimitEventPerUser() != null) {
           LocalDateTime startDate =
               this.getStartDateCountTransaction(
-                  transactionInput.getTransactionAt(),
+                  allocationTransaction.getTransactionAt(),
                   ruleAllocationOutput.getFrequencyLimitEventPerUser());
           var countResult =
               customerBalanceHistoryRepository.countByCustomerIdAndRuleId(
@@ -168,39 +174,42 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                   rule.getId(),
                   PointType.CONSUMPTION_POINT,
                   startDate,
-                  transactionInput.getTransactionAt());
+                  allocationTransaction.getTransactionAt());
           if (countResult >= ruleAllocationOutput.getLimitEventPerUser()) {
             consumptionPoint = 0;
           }
         }
       }
-      if (rule.getPointType().equals(PointType.RANK_POINT)) {
-        allocationPointTransactionInputs.add(
-            AllocationPointTransactionInput.builder()
-                .pointType(rule.getPointType())
-                .amount(rankPoint)
-                .build());
+      if (rule.getPointType().equals(PointType.ALL)
+          || rule.getPointType().equals(PointType.RANK_POINT)) {
+        results.add(
+            super.modelMapper.convertToTransactionInput(
+                allocationTransaction, PointType.RANK_POINT, rankPoint, rule, null));
       }
-      if (rule.getPointType().equals(PointType.CONSUMPTION_POINT)) {
-        allocationPointTransactionInputs.add(
-            AllocationPointTransactionInput.builder()
-                .pointType(rule.getPointType())
-                .amount(consumptionPoint)
-                .build());
-      }
-      if (rule.getPointType().equals(PointType.ALL)) {
-        allocationPointTransactionInputs.add(
-            AllocationPointTransactionInput.builder()
-                .pointType(rule.getPointType())
-                .amount(rankPoint)
-                .build());
-        allocationPointTransactionInputs.add(
-            AllocationPointTransactionInput.builder()
-                .pointType(rule.getPointType())
-                .amount(consumptionPoint)
-                .build());
+      if (rule.getPointType().equals(PointType.ALL)
+          || rule.getPointType().equals(PointType.CONSUMPTION_POINT)) {
+        results.add(
+            super.modelMapper.convertToTransactionInput(
+                allocationTransaction,
+                PointType.CONSUMPTION_POINT,
+                consumptionPoint,
+                rule,
+                this.getExpireDate(rule)));
       }
     }
+    customRepository.plusAmounts(results);
+  }
+
+  private LocalDate getExpireDate(RuleOutput ruleOutput) {
+    return switch (ruleOutput.getExpirePolicyType()) {
+      case AFTER_DATE -> Utils.convertToLocalDate(ruleOutput.getExpirePolicyValue());
+      case AFTER_DAY -> LocalDate.now().plusDays(Long.parseLong(ruleOutput.getExpirePolicyValue()));
+      case FIRST_DATE_OF_MONTH ->
+          LocalDate.now()
+              .plusMonths(Long.parseLong(ruleOutput.getExpirePolicyValue()))
+              .with(TemporalAdjusters.firstDayOfMonth());
+      case NEVER -> null;
+    };
   }
 
   private boolean checkCondition(
@@ -393,7 +402,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       List<RuleBonusOutput> ruleBonusOutputs,
       BigInteger basePoint,
       CustomerOutput customerInput,
-      AllocationPointTransactionInput transactionInput,
+      AllocationPointTransactionInput allocationTransaction,
       LocalDate transactionDate) {
     BigDecimal bonusPoint = BigDecimal.ZERO;
     for (RuleBonusOutput ruleBonusOutput : ruleBonusOutputs) {
@@ -443,9 +452,11 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       }
       // thưởng thêm theo dòng sản phẩm/dịch vụ
       if (BonusType.BONUS_PRODUCT.equals(ruleBonusOutput.getType())
-          && ruleBonusOutput.getCondition().equals(transactionInput.getProductType())
+          && ruleBonusOutput.getCondition().equals(allocationTransaction.getProductType())
           && (StringUtils.isBlank(ruleBonusOutput.getChildCondition())
-              || ruleBonusOutput.getChildCondition().equals(transactionInput.getProductLine()))) {
+              || ruleBonusOutput
+                  .getChildCondition()
+                  .equals(allocationTransaction.getProductLine()))) {
         if (PlusType.FIX.equals(ruleBonusOutput.getPlusType())) {
           bonusPoint = bonusPoint.add(value);
         }
@@ -456,7 +467,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       // thưởng thêm với chi tiêu vượt ngưỡng
       if (BonusType.BONUS_EXCEED_THRESHOLD.equals(ruleBonusOutput.getType())
           && StringUtils.isNotBlank(ruleBonusOutput.getCondition())
-          && Long.parseLong(ruleBonusOutput.getCondition()) > transactionInput.getAmount()) {
+          && Long.parseLong(ruleBonusOutput.getCondition()) > allocationTransaction.getAmount()) {
         if (PlusType.FIX.equals(ruleBonusOutput.getPlusType())) {
           bonusPoint = bonusPoint.add(value);
         }

@@ -43,6 +43,9 @@ public class RuleOutput {
   @Schema(description = "ID chiến dịch")
   private Long campaignId;
 
+  @Schema(description = "Mã chiến dịch")
+  private String campaignCode;
+
   @Schema(description = "Ngày bắt đầu hiệu lực (dd/MM/yyyy)", example = "01/01/2024")
   @JsonFormat(pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   private LocalDate startDate;

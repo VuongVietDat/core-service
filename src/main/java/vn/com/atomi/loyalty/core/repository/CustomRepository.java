@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Triple;
+import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
@@ -15,18 +16,9 @@ import vn.com.atomi.loyalty.core.enums.PointType;
  */
 public interface CustomRepository {
 
-  Long plusAmount(
-      Long customerId,
-      Long amount,
-      String refNo,
-      String campaignCode,
-      Long campaignId,
-      String ruleCode,
-      Long ruleId,
-      LocalDateTime transactionAt,
-      String content,
-      LocalDate expireAt,
-      PointType pointType);
+  Long plusAmount(TransactionInput transactionInput);
+
+  List<Long> plusAmounts(List<TransactionInput> transactionInputs);
 
   Long minusAmount(
       Long customerId,
