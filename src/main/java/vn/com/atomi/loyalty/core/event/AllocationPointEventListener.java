@@ -7,34 +7,41 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import vn.com.atomi.loyalty.core.service.CustomerService;
+import vn.com.atomi.loyalty.base.utils.JsonUtils;
+import vn.com.atomi.loyalty.core.dto.message.AllocationPointMessage;
+import vn.com.atomi.loyalty.core.service.AllocationPointService;
 
+/**
+ * @author haidv
+ * @version 1.0
+ */
 @SuppressWarnings({"rawtypes"})
 @RequiredArgsConstructor
 @Component
-public class CustomerCreateEventListener extends MessageListener<LinkedHashMap> {
-  private final CustomerService memberService;
+public class AllocationPointEventListener extends MessageListener<LinkedHashMap> {
+
+  private final AllocationPointService allocationPointService;
 
   @KafkaListener(
-      topics = "${custom.properties.kafka.topic.customer-create-event.name}",
+      topics = "${custom.properties.kafka.topic.allocation-point-event.name}",
       groupId = "${custom.properties.messaging.kafka.groupId}",
-      concurrency = "${custom.properties.kafka.topic.customer-create-event.concurrent.thread}",
+      concurrency = "${custom.properties.kafka.topic.allocation-point-event.concurrent.thread}",
       containerFactory = "kafkaListenerContainerFactory")
-  public void workflowEventListener(
+  public void allocationPointEventListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
       @Header(KafkaHeaders.OFFSET) String offset,
       Acknowledgment acknowledgment) {
-    super.messageListener(data, topic, partition, offset, acknowledgment, 300, 5);
+    super.messageListener(data, topic, partition, offset, acknowledgment, 300, 15);
   }
 
   @KafkaListener(
-      topics = "${custom.properties.kafka.topic.customer-create-event-retries.name}",
-      groupId = "${custom.properties.messaging.kafka.groupid}",
+      topics = "${custom.properties.kafka.topic.allocation-point-event-retries.name}",
+      groupId = "${custom.properties.messaging.kafka.groupId}",
       concurrency = "1",
       containerFactory = "kafkaListenerContainerFactory")
-  public void workflowEventRetriesListener(
+  public void allocationPointEventRetriesListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
@@ -50,6 +57,7 @@ public class CustomerCreateEventListener extends MessageListener<LinkedHashMap> 
       String offset,
       MessageData<LinkedHashMap> input,
       String messageId) {
-    memberService.creates(messageId, input.getContents());
+    allocationPointService.handlerAllocationPointEvent(
+        JsonUtils.fromJson(input.getContents().get(0), AllocationPointMessage.class));
   }
 }

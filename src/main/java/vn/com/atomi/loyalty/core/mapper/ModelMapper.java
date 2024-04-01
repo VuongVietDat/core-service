@@ -109,8 +109,17 @@ public interface ModelMapper {
   List<ExternalCustomerBalanceHistoryOutput> convertToExternalCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> customerBalanceHistories);
 
-  List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutput(
-      List<CustomerPointAccountProjection> customerPointAccountProjections);
+  @Mapping(
+      target = "uniqueTypeName",
+      source = "customerPointAccountProjections.uniqueType",
+      qualifiedByName = "findDictionaryName")
+  CustomerPointAccountPreviewOutput convertToCustomerPointAccountPreviewOutput(
+      CustomerPointAccountProjection customerPointAccountProjections,
+      @Context List<DictionaryOutput> dictionaryOutputs);
+
+  List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutputs(
+      List<CustomerPointAccountProjection> customerPointAccountProjections,
+      @Context List<DictionaryOutput> dictionaryOutputs);
 
   @Mapping(
       target = "uniqueTypeName",

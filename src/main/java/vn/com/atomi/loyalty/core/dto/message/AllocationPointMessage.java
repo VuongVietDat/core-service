@@ -1,14 +1,17 @@
 package vn.com.atomi.loyalty.core.dto.message;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import vn.com.atomi.loyalty.core.dto.input.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
+import vn.com.atomi.loyalty.core.enums.RuleType;
 
 /**
  * @author haidv
  * @version 1.0
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Setter
 @Getter
 public class AllocationPointMessage {
@@ -17,5 +20,5 @@ public class AllocationPointMessage {
 
   private AllocationPointTransactionInput transaction;
 
-  private String type;
+  private RuleType type;
 }
