@@ -18,6 +18,12 @@ public class CustomerPointAccountPreviewOutput {
   @Schema(description = "Tên khách hàng")
   private String customerName;
 
+  @Schema(description = "Loại giấy tờ tùy thân")
+  private String uniqueType;
+
+  @Schema(description = "Tên loại giấy tờ tùy thân")
+  private String uniqueTypeName;
+
   @Schema(description = "Số giấy tờ tùy thân")
   private String uniqueValue;
 

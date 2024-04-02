@@ -1,9 +1,12 @@
 package vn.com.atomi.loyalty.core.mapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.mapstruct.*;
+import vn.com.atomi.loyalty.core.dto.input.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
+import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerPointAccountProjection;
@@ -13,6 +16,7 @@ import vn.com.atomi.loyalty.core.entity.CustomerGroup;
 import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
 import vn.com.atomi.loyalty.core.enums.ApprovalStatus;
 import vn.com.atomi.loyalty.core.enums.ApprovalType;
+import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
  * @author haidv
@@ -105,8 +109,17 @@ public interface ModelMapper {
   List<ExternalCustomerBalanceHistoryOutput> convertToExternalCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> customerBalanceHistories);
 
-  List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutput(
-      List<CustomerPointAccountProjection> customerPointAccountProjections);
+  @Mapping(
+      target = "uniqueTypeName",
+      source = "customerPointAccountProjections.uniqueType",
+      qualifiedByName = "findDictionaryName")
+  CustomerPointAccountPreviewOutput convertToCustomerPointAccountPreviewOutput(
+      CustomerPointAccountProjection customerPointAccountProjections,
+      @Context List<DictionaryOutput> dictionaryOutputs);
+
+  List<CustomerPointAccountPreviewOutput> convertToCustomerPointAccountPreviewOutputs(
+      List<CustomerPointAccountProjection> customerPointAccountProjections,
+      @Context List<DictionaryOutput> dictionaryOutputs);
 
   @Mapping(
       target = "uniqueTypeName",
@@ -122,4 +135,17 @@ public interface ModelMapper {
   CustomerOutput convertToCustomerOutput(Customer customer);
 
   List<CustomerOutput> convertToCustomerOutputs(List<Customer> customers);
+
+  @Mapping(target = "expireAt", source = "expireAt")
+  @Mapping(target = "ruleId", source = "ruleOutput.id")
+  @Mapping(target = "ruleCode", source = "ruleOutput.code")
+  @Mapping(target = "pointType", source = "pointType")
+  @Mapping(target = "amount", source = "amount")
+  @Mapping(target = "transactionAmount", source = "allocationPointTransactionInput.amount")
+  TransactionInput convertToTransactionInput(
+      AllocationPointTransactionInput allocationPointTransactionInput,
+      PointType pointType,
+      Long amount,
+      RuleOutput ruleOutput,
+      LocalDate expireAt);
 }

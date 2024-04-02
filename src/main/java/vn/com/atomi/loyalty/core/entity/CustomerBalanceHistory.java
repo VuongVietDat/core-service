@@ -47,6 +47,9 @@ public class CustomerBalanceHistory extends BaseEntity {
   @Column(name = "AMOUNT")
   private Long amount;
 
+  @Column(name = "TRANSACTION_AMOUNT")
+  private Long transactionAmount;
+
   @Column(name = "AMOUNT_USED")
   private Long amountUsed;
 
@@ -88,4 +91,22 @@ public class CustomerBalanceHistory extends BaseEntity {
 
   @Column(name = "TRANSACTION_USED")
   private String transactionUsed;
+
+  @Column(name = "PRODUCT_TYPE")
+  private String productType;
+
+  @Column(name = "PRODUCT_LINE")
+  private String productLine;
+
+  @Column(name = "CURRENCY")
+  private String currency;
+
+  @Column(name = "CHANEL")
+  private String chanel;
+
+  @Column(name = "TRANSACTION_GROUP")
+  private String transactionGroup;
+
+  @Column(name = "TRANSACTION_TYPE")
+  private String transactionType;
 }

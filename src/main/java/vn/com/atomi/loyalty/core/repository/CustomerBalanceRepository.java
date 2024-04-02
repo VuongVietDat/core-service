@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.repository;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import vn.com.atomi.loyalty.core.entity.CustomerBalance;
  */
 @Repository
 public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance, Long> {
+
   @Query(
       value =
           "select cb.customerId            as customerId, "
@@ -28,4 +30,6 @@ public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance
               + "  and (:cifBank is null or c.cifBank = :cifBank) "
               + "  and (:cifWallet is null or c.cifWallet = :cifWallet)")
   CustomerBalanceProjection findCurrentBalance(String cifBank, String cifWallet);
+
+  Optional<CustomerBalance> findByDeletedFalseAndId(Long customerId);
 }

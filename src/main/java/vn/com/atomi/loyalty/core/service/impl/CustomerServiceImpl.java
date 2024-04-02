@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
@@ -95,10 +96,16 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
             pointFrom,
             pointTo,
             pageable);
-    return new ResponsePage<>(
-        pointAccountProjectionPage,
-        super.modelMapper.convertToCustomerPointAccountPreviewOutput(
-            pointAccountProjectionPage.getContent()));
+    if (!CollectionUtils.isEmpty(pointAccountProjectionPage.getContent())) {
+      // lấy master data để map tên loại giấy tờ tùy thân
+      var dictionaryOutputs =
+          masterDataService.getDictionary(Constants.DICTIONARY_UNIQUE_TYPE, false);
+      return new ResponsePage<>(
+          pointAccountProjectionPage,
+          super.modelMapper.convertToCustomerPointAccountPreviewOutputs(
+              pointAccountProjectionPage.getContent(), dictionaryOutputs));
+    }
+    return new ResponsePage<>(pointAccountProjectionPage, new ArrayList<>());
   }
 
   @Override
