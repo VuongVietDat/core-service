@@ -93,7 +93,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         UserOutput userOutput =
             cacheUserRepository
                 .get(claims.getIssuer())
-                .orElseGet(() -> userinfoClient.getUser(requestId, claims.getIssuer()).getData());
+                .orElseGet(
+                    () ->
+                        userinfoClient
+                            .getUser(
+                                requestId == null
+                                    ? ThreadContext.get(RequestConstant.REQUEST_ID)
+                                    : requestId,
+                                claims.getIssuer())
+                            .getData());
         var userDetails = new UserPrincipal(claims.getSubject(), claims.getIssuer(), userOutput);
         var authentication =
             new UsernamePasswordAuthenticationToken(
