@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
-import vn.com.atomi.loyalty.core.entity.Customer;
+import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
@@ -182,7 +182,8 @@ public class CustomRepositoryImpl implements CustomRepository {
   }
 
   @Override
-  public void saveAllCustomer(List<Triple<Customer, CustomerBalance, CustomerRank>> infos) {
+  public void saveAllCustomer(
+      List<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>> infos) {
     var currentTime = Utils.formatLocalDateToString(LocalDate.now());
     var creator = "SYSTEM";
 
@@ -221,7 +222,7 @@ public class CustomRepositoryImpl implements CustomRepository {
                           customer.getSegment(),
                           customer.getUniqueType(),
                           customer.getUniqueValue(),
-                          Utils.formatLocalDateToString(customer.getIssueDate()),
+                          customer.getIssueDate(),
                           customer.getIssuePlace(),
                           Status.ACTIVE.name(),
                           currentTime,
@@ -247,11 +248,11 @@ public class CustomRepositoryImpl implements CustomRepository {
                           cb.getTotalAccumulatedPoints(),
                           cb.getTotalPointsExpired(),
                           Status.ACTIVE.name(),
-                              currentTime,
-                              creator,
-                              currentTime,
-                              creator,
-                              0);
+                          currentTime,
+                          creator,
+                          currentTime,
+                          creator,
+                          0);
 
                   var intoCusRank =
                       String.format(
@@ -266,11 +267,11 @@ public class CustomRepositoryImpl implements CustomRepository {
                           Utils.formatLocalDateToString(cr.getApplyDate()),
                           cr.getTotalPoint(),
                           Status.ACTIVE.name(),
-                              currentTime,
-                              creator,
-                              currentTime,
-                              creator,
-                              0);
+                          currentTime,
+                          creator,
+                          currentTime,
+                          creator,
+                          0);
 
                   return intoCus + '\n' + intoCusBal + '\n' + intoCusRank;
                 })

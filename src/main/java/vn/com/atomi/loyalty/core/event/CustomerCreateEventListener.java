@@ -26,7 +26,7 @@ public class CustomerCreateEventListener extends MessageListener<LinkedHashMap> 
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
       @Header(KafkaHeaders.OFFSET) String offset,
       Acknowledgment acknowledgment) {
-    super.messageListener(data, topic, partition, offset, acknowledgment, 300, 10);
+    super.messageListener(data, topic, partition, offset, acknowledgment, 300, 5);
   }
 
   @KafkaListener(

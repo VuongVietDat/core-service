@@ -1,6 +1,11 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.data.domain.Pageable;
@@ -10,11 +15,11 @@ import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
+import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.dto.output.RankOutput;
-import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
@@ -27,12 +32,6 @@ import vn.com.atomi.loyalty.core.service.CustomerService;
 import vn.com.atomi.loyalty.core.service.MasterDataService;
 import vn.com.atomi.loyalty.core.utils.Constants;
 import vn.com.atomi.loyalty.core.utils.Utils;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * @author haidv
@@ -134,14 +133,14 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
         var currentDate = LocalDate.now();
 
         // init data
-        var list = new ArrayList<Triple<Customer, CustomerBalance, CustomerRank>>();
+        var list = new ArrayList<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>>();
 
         var sequence = customerRepository.getSequence();
         var n = input.size();
 
         for (int i = 0; i < n; i++) {
             var map = input.get(i);
-            var cus = mapper.convertValue(map, Customer.class);
+            var cus = mapper.convertValue(map, CustomerKafkaInput.class);
 
             var cusId = sequence + i + 1;
 
