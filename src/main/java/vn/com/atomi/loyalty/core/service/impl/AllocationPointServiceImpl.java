@@ -52,12 +52,16 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
   @Override
   public void handlerAllocationPointEvent(AllocationPointMessage allocationPointMessage) {
     var allocationTransaction = allocationPointMessage.getTransaction();
+    if (allocationPointMessage.getType() == null) {
+      LOGGER.warn("Type allocation null");
+      return;
+    }
     var customerInput = allocationPointMessage.getCustomer();
-    var transactionDate = allocationTransaction.getTransactionAt().toLocalDate();
     // lấy tất cả danh sách quy tắc hiệu lực
     var rules =
         ruleService.getAllActiveRule(
-            allocationPointMessage.getType(), Utils.formatLocalDateToString(transactionDate));
+            allocationPointMessage.getType().name(),
+            Utils.formatLocalDateToString(allocationTransaction.getTransactionAt().toLocalDate()));
     if (CollectionUtils.isEmpty(rules)) {
       LOGGER.warn(
           "Not found rule with type: {} currently active", allocationPointMessage.getType());
@@ -78,10 +82,37 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
     var dictionaries =
         masterDataService.getDictionary(
             Constants.DICTIONARY_LIMIT_POINT_PER_USER, Status.ACTIVE, false);
+    // phân bổ điểm
+    switch (allocationPointMessage.getType()) {
+      case TRANSACTION ->
+          allocationPointTransactionEvent(
+              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+      case HOLIDAY ->
+          allocationPointHolidayEvent(
+              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+      case USER_INTRODUCTION ->
+          allocationPointUserIntroductionEvent(
+              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+      case APPLICATION_ACTIVITY ->
+          allocationPointApplicationActivityEvent(
+              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+      case HAPPY_DOB ->
+          allocationPointHappyDOBEvent(
+              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+    }
+  }
+
+  private void allocationPointTransactionEvent(
+      AllocationPointTransactionInput allocationTransaction,
+      List<DictionaryOutput> dictionaries,
+      List<RuleOutput> rules,
+      CustomerOutput customerInput,
+      CustomerBalance customerBalance) {
     if (allocationTransaction.getAmount() == null) {
       LOGGER.warn("Transaction amount must not be null");
       return;
     }
+    var transactionDate = allocationTransaction.getTransactionAt().toLocalDate();
     var amount = BigInteger.valueOf(allocationTransaction.getAmount());
     long limitPoint = -1;
     if (!dictionaries.isEmpty()) {
@@ -200,6 +231,38 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
     customRepository.plusAmounts(results);
   }
 
+  @SuppressWarnings("unused")
+  private void allocationPointUserIntroductionEvent(
+      AllocationPointTransactionInput allocationTransaction,
+      List<DictionaryOutput> dictionaries,
+      List<RuleOutput> rules,
+      CustomerOutput customerInput,
+      CustomerBalance customerBalance) {}
+
+  @SuppressWarnings("unused")
+  private void allocationPointApplicationActivityEvent(
+      AllocationPointTransactionInput allocationTransaction,
+      List<DictionaryOutput> dictionaries,
+      List<RuleOutput> rules,
+      CustomerOutput customerInput,
+      CustomerBalance customerBalance) {}
+
+  @SuppressWarnings("unused")
+  private void allocationPointHappyDOBEvent(
+      AllocationPointTransactionInput allocationTransaction,
+      List<DictionaryOutput> dictionaries,
+      List<RuleOutput> rules,
+      CustomerOutput customerInput,
+      CustomerBalance customerBalance) {}
+
+  @SuppressWarnings("unused")
+  private void allocationPointHolidayEvent(
+      AllocationPointTransactionInput allocationTransaction,
+      List<DictionaryOutput> dictionaries,
+      List<RuleOutput> rules,
+      CustomerOutput customerInput,
+      CustomerBalance customerBalance) {}
+
   private LocalDate getExpireDate(RuleOutput ruleOutput) {
     return switch (ruleOutput.getExpirePolicyType()) {
       case AFTER_DATE -> Utils.convertToLocalDate(ruleOutput.getExpirePolicyValue());
@@ -218,138 +281,86 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       RuleOutput rule) {
     boolean result = true;
     for (RuleConditionOutput ruleConditionOutput : rule.getRuleConditionOutputs()) {
-      if (ConditionProperties.CHANEL.equals(ruleConditionOutput.getProperties())) {
-        if (!Objects.equals(transactionInput.getChanel(), ruleConditionOutput.getValue())) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getChanel());
-        }
-      } else if (ConditionProperties.GENDER.equals(ruleConditionOutput.getProperties())) {
-        if (!Objects.equals(customerInput.getGender(), ruleConditionOutput.getValue())) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              customerInput.getGender());
-        }
-      } else if (ConditionProperties.CURRENCY.equals(ruleConditionOutput.getProperties())) {
-        if (!Objects.equals(ruleConditionOutput.getValue(), transactionInput.getCurrency())) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getCurrency());
-        }
-      } else if (ConditionProperties.DOB.equals(ruleConditionOutput.getProperties())) {
-        if (customerInput.getDob() != null
-            && !customerInput.getDob().isEqual(transactionInput.getTransactionAt().toLocalDate())) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              customerInput.getDob());
-        }
-      } else if (ConditionProperties.CUSTOMER_TYPE.equals(ruleConditionOutput.getProperties())) {
-        if (!Objects.equals(ruleConditionOutput.getValue(), customerInput.getCustomerType())) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              customerInput.getCustomerType());
-        }
-      } else if (ConditionProperties.PRODUCT_TYPE.equals(ruleConditionOutput.getProperties())) {
+      if (compareCondition(ruleConditionOutput, transactionInput, customerInput, rule.getCode())) {
+        LOGGER.warn(
+            "Not match condition: {} operator: {} value: {}",
+            ruleConditionOutput.getProperties(),
+            ruleConditionOutput.getOperators(),
+            ruleConditionOutput.getValue());
+      }
+    }
+    return result;
+  }
+
+  private boolean compareCondition(
+      RuleConditionOutput ruleConditionOutput,
+      AllocationPointTransactionInput transactionInput,
+      CustomerOutput customerInput,
+      String ruleCode) {
+    return switch (ruleConditionOutput.getProperties()) {
+        // Kênh giao dịch
+      case CHANEL -> !Objects.equals(transactionInput.getChanel(), ruleConditionOutput.getValue());
+        // Giới tính KH
+      case GENDER -> !Objects.equals(customerInput.getGender(), ruleConditionOutput.getValue());
+        // Loại tiền
+      case CURRENCY ->
+          !Objects.equals(ruleConditionOutput.getValue(), transactionInput.getCurrency());
+        // Sinh nhật KH
+      case DOB ->
+          customerInput.getDob() != null
+              && !customerInput.getDob().isEqual(transactionInput.getTransactionAt().toLocalDate());
+        // Loại khách hàng
+      case CUSTOMER_TYPE ->
+          !Objects.equals(ruleConditionOutput.getValue(), customerInput.getCustomerType());
+        // Loại sản phẩm
+      case PRODUCT_TYPE -> {
         List<String> values =
             JsonUtils.fromJson(ruleConditionOutput.getValue(), List.class, String.class);
-        if (transactionInput.getProductType() == null
+        yield transactionInput.getProductType() == null
             || (Operators.IN.equals(ruleConditionOutput.getOperators())
                 && !values.contains(transactionInput.getProductType()))
             || (Operators.NOT_IN.equals(ruleConditionOutput.getOperators())
-                && values.contains(transactionInput.getProductType()))) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getProductType());
-        }
-      } else if (ConditionProperties.PRODUCT_LINE.equals(ruleConditionOutput.getProperties())) {
+                && values.contains(transactionInput.getProductType()));
+      }
+        // Dòng sản phẩm
+      case PRODUCT_LINE -> {
         List<String> values =
             JsonUtils.fromJson(ruleConditionOutput.getValue(), List.class, String.class);
-        if (transactionInput.getProductLine() == null
+        yield transactionInput.getProductLine() == null
             || (Operators.IN.equals(ruleConditionOutput.getOperators())
                 && !values.contains(transactionInput.getProductLine()))
             || (Operators.NOT_IN.equals(ruleConditionOutput.getOperators())
-                && values.contains(transactionInput.getProductLine()))) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getProductLine());
-        }
-      } else if (ConditionProperties.TRANSACTION_GROUP.equals(
-          ruleConditionOutput.getProperties())) {
+                && values.contains(transactionInput.getProductLine()));
+      }
+        // Nhóm giao dịch
+      case TRANSACTION_GROUP -> {
         List<String> values =
             JsonUtils.fromJson(ruleConditionOutput.getValue(), List.class, String.class);
-        if (transactionInput.getTransactionGroup() == null
+        yield transactionInput.getTransactionGroup() == null
             || (Operators.IN.equals(ruleConditionOutput.getOperators())
                 && !values.contains(transactionInput.getTransactionGroup()))
             || (Operators.NOT_IN.equals(ruleConditionOutput.getOperators())
-                && values.contains(transactionInput.getTransactionGroup()))) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getTransactionGroup());
-        }
-      } else if (ConditionProperties.TRANSACTION_TYPE.equals(ruleConditionOutput.getProperties())) {
+                && values.contains(transactionInput.getTransactionGroup()));
+      }
+        // Loại giao dịch
+      case TRANSACTION_TYPE -> {
         List<String> values =
             JsonUtils.fromJson(ruleConditionOutput.getValue(), List.class, String.class);
-        if (transactionInput.getTransactionType() == null
+        yield transactionInput.getTransactionType() == null
             || (Operators.IN.equals(ruleConditionOutput.getOperators())
                 && !values.contains(transactionInput.getTransactionType()))
             || (Operators.NOT_IN.equals(ruleConditionOutput.getOperators())
-                && values.contains(transactionInput.getTransactionType()))) {
-          result = false;
-          LOGGER.warn(
-              "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-              rule.getCode(),
-              ruleConditionOutput.getProperties(),
-              ruleConditionOutput.getOperators(),
-              ruleConditionOutput.getValue(),
-              transactionInput.getTransactionType());
-        }
-      } else if (ConditionProperties.CUSTOMER_AGE.equals(ruleConditionOutput.getProperties())) {
+                && values.contains(transactionInput.getTransactionType()));
+      }
+        // Tuổi của khách hàng
+      case CUSTOMER_AGE -> {
         List<Integer> values =
             JsonUtils.fromJson(ruleConditionOutput.getValue(), List.class, Integer.class);
+        var isMatch = true;
         if (values.size() != 2) {
           LOGGER.warn(
               "Rule: {} condition properties: {} operator: {} value: {} not enough",
-              rule.getCode(),
+              ruleCode,
               ruleConditionOutput.getProperties(),
               ruleConditionOutput.getOperators(),
               ruleConditionOutput.getValue());
@@ -357,31 +368,15 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
           if (customerInput.getDob() != null) {
             var age = Period.between(customerInput.getDob(), LocalDate.now()).getYears();
             if (age < values.get(0) || age > values.get(1)) {
-              result = false;
-              LOGGER.warn(
-                  "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-                  rule.getCode(),
-                  ruleConditionOutput.getProperties(),
-                  ruleConditionOutput.getOperators(),
-                  ruleConditionOutput.getValue(),
-                  customerInput.getDob());
+              isMatch = false;
             }
           } else {
-            result = false;
-            LOGGER.warn(
-                "Rule: {} condition properties: {} operator: {} value: {} not match input: {}",
-                rule.getCode(),
-                ruleConditionOutput.getProperties(),
-                ruleConditionOutput.getOperators(),
-                ruleConditionOutput.getValue(),
-                null);
+            isMatch = false;
           }
         }
-      } else {
-        LOGGER.warn("Rule condition: {} not support", ruleConditionOutput.getProperties());
+        yield isMatch;
       }
-    }
-    return result;
+    };
   }
 
   private LocalDateTime getStartDateCountTransaction(LocalDateTime startDate, Frequency frequency) {

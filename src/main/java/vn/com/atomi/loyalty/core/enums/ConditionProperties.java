@@ -9,7 +9,7 @@ public enum ConditionProperties {
   PRODUCT_TYPE, // Loại sản phẩm
   PRODUCT_LINE, // Dòng sản phẩm
   TRANSACTION_GROUP, // Nhóm giao dịch
-  TRANSACTION_TYPE, // Nhóm giao dịch
+  TRANSACTION_TYPE, // Loại giao dịch
   CUSTOMER_TYPE, // Loại khách hàng
   CUSTOMER_AGE, // Tuổi của khách hàng
   CURRENCY, // Loại tiền

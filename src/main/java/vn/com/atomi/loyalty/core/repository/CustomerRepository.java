@@ -25,6 +25,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "       c.cifBank          as cifBank, "
               + "       c.cifWallet        as cifWallet, "
               + "       c.uniqueValue      as uniqueValue, "
+              + "       c.uniqueType       as uniqueType, "
               + "       cr.totalPoint      as rankPoint, "
               + "       cb.availableAmount as availableAmount "
               + "from Customer c "

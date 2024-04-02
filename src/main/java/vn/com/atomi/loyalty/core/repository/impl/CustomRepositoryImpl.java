@@ -66,6 +66,14 @@ public class CustomRepositoryImpl implements CustomRepository {
             .registerStoredProcedureParameter("P_EXPIRE_AT", LocalDate.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_POINT_TYPE", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_CHANGE_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_YEAR", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_PRODUCT_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_PRODUCT_LINE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CURRENCY", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_CHANEL", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_TRANSACTION_GROUP", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_TRANSACTION_TYPE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_TRANSACTION_AMOUNT", Long.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_ID", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
@@ -84,7 +92,15 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter("P_CONTENT", transactionInput.getContent())
             .setParameter("P_EXPIRE_AT", transactionInput.getExpireAt())
             .setParameter("P_POINT_TYPE", transactionInput.getPointType().name())
-            .setParameter("P_CHANGE_TYPE", ChangeType.PLUS.name());
+            .setParameter("P_CHANGE_TYPE", ChangeType.PLUS.name())
+            .setParameter("P_YEAR", LocalDate.now().getYear())
+            .setParameter("P_PRODUCT_TYPE", transactionInput.getProductType())
+            .setParameter("P_PRODUCT_LINE", transactionInput.getProductLine())
+            .setParameter("P_CURRENCY", transactionInput.getCurrency())
+            .setParameter("P_CHANEL", transactionInput.getChanel())
+            .setParameter("P_TRANSACTION_GROUP", transactionInput.getTransactionGroup())
+            .setParameter("P_TRANSACTION_AMOUNT", transactionInput.getTransactionAmount())
+            .setParameter("P_TRANSACTION_TYPE", transactionInput.getTransactionType());
     query.execute();
     Long result = (Long) query.getOutputParameterValue("P_RESULT");
     String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
