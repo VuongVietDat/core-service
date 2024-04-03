@@ -41,5 +41,9 @@ public interface CustomerService {
 
   void creates(String messageId, List<LinkedHashMap> input);
 
+  void update(String messageId, LinkedHashMap input);
+
+  void delete(String messageId, LinkedHashMap input);
+
   CustomerOutput getCustomer(String cifBank, String cifWallet);
 }

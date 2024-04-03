@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
+import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.base.utils.JsonUtils;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.entity.Customer;
@@ -214,7 +215,8 @@ public class CustomRepositoryImpl implements CustomRepository {
   }
 
   @Override
-  public void saveAllCustomer(List<Triple<Customer, CustomerBalance, CustomerRank>> infos) {
+  public void saveAllCustomer(
+      List<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>> infos) {
     var currentTime = Utils.formatLocalDateToString(LocalDate.now());
     var creator = "SYSTEM";
 
@@ -253,7 +255,7 @@ public class CustomRepositoryImpl implements CustomRepository {
                           customer.getSegment(),
                           customer.getUniqueType(),
                           customer.getUniqueValue(),
-                          Utils.formatLocalDateToString(customer.getIssueDate()),
+                          customer.getIssueDate(),
                           customer.getIssuePlace(),
                           Status.ACTIVE.name(),
                           currentTime,

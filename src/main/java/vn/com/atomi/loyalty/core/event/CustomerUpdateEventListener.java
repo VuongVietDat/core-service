@@ -7,6 +7,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.event.BaseRetriesMessageListener;
 import vn.com.atomi.loyalty.base.event.MessageData;
 import vn.com.atomi.loyalty.core.service.CustomerService;
@@ -14,15 +15,15 @@ import vn.com.atomi.loyalty.core.service.CustomerService;
 @SuppressWarnings({"rawtypes"})
 @RequiredArgsConstructor
 @Component
-public class CustomerCreateEventListener extends BaseRetriesMessageListener<LinkedHashMap> {
+public class CustomerUpdateEventListener extends BaseRetriesMessageListener<LinkedHashMap> {
   private final CustomerService memberService;
 
   @KafkaListener(
-      topics = "${custom.properties.kafka.topic.customer-create-event.name}",
+      topics = "${custom.properties.kafka.topic.customer-update-event.name}",
       groupId = "${custom.properties.messaging.kafka.groupId}",
-      concurrency = "${custom.properties.kafka.topic.customer-create-event.concurrent.thread}",
+      concurrency = "${custom.properties.kafka.topic.customer-update-event.concurrent.thread}",
       containerFactory = "kafkaListenerContainerFactory")
-  public void createCustomerListener(
+  public void updateCustomerListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
@@ -32,11 +33,11 @@ public class CustomerCreateEventListener extends BaseRetriesMessageListener<Link
   }
 
   @KafkaListener(
-      topics = "${custom.properties.kafka.topic.customer-create-event-retries.name}",
+      topics = "${custom.properties.kafka.topic.customer-update-event-retries.name}",
       groupId = "${custom.properties.messaging.kafka.groupid}",
       concurrency = "1",
       containerFactory = "kafkaListenerContainerFactory")
-  public void createCustomerRetriesListener(
+  public void updateCustomerRetriesListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
@@ -52,6 +53,7 @@ public class CustomerCreateEventListener extends BaseRetriesMessageListener<Link
       String offset,
       MessageData<LinkedHashMap> input,
       String messageId) {
-    memberService.creates(messageId, input.getContents());
+    if (!CollectionUtils.isEmpty(input.getContents()))
+      memberService.update(messageId, input.getContents().get(0));
   }
 }

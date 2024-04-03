@@ -100,6 +100,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
       String segment,
       Pageable pageable);
 
+  Optional<Customer> findByCifBank(String cif);
+
   @Query(
       value =
           "select c "

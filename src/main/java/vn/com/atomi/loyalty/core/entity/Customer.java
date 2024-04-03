@@ -32,7 +32,7 @@ public class Customer extends BaseEntity {
   private String customerName;
 
   @Column(name = "DOB")
-  private String dob;
+  private LocalDate dob;
 
   @Column(name = "CURRENT_ADDRESS")
   private String currentAddress;
