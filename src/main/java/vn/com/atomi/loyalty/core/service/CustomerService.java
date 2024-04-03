@@ -41,4 +41,8 @@ public interface CustomerService {
   CustomerOutput get(Long id);
 
   void creates(String messageId, List<LinkedHashMap> input);
+
+  void update(String messageId, LinkedHashMap input);
+
+  void delete(String messageId, LinkedHashMap input);
 }

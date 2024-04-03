@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
@@ -21,6 +22,7 @@ import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.dto.output.RankOutput;
+import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
@@ -38,6 +40,7 @@ import vn.com.atomi.loyalty.core.utils.Utils;
  * @author haidv
  * @version 1.0
  */
+@SuppressWarnings({"rawtypes"})
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl extends BaseService implements CustomerService {
@@ -46,10 +49,9 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
 
   private final CustomerBalanceHistoryRepository customerBalanceHistoryRepository;
 
-
   private final MasterDataService masterDataService;
   private final LoyaltyConfigClient configClient;
-    private final CustomRepository customRepository;
+  private final CustomRepository customRepository;
   private final ObjectMapper mapper;
 
   @Override
@@ -133,61 +135,82 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
         .orElseThrow(() -> new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED));
   }
 
-    @Transactional
-    @Override
-    public void creates(String requestId, List<LinkedHashMap> input) {
-        var rankCode = getFirstRank(requestId);
-        var currentDate = LocalDate.now();
+  @Transactional
+  @Override
+  public void creates(String requestId, List<LinkedHashMap> input) {
+    var rankCode = getFirstRank(requestId);
+    var currentDate = LocalDate.now();
 
-        // init data
-        var list = new ArrayList<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>>();
+    // init data
+    var list = new ArrayList<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>>();
 
-        var sequence = customerRepository.getSequence();
-        var n = input.size();
+    var sequence = customerRepository.getSequence();
+    var n = input.size();
 
-        for (int i = 0; i < n; i++) {
-            var map = input.get(i);
-            var cus = mapper.convertValue(map, CustomerKafkaInput.class);
+    for (int i = 0; i < n; i++) {
+      var map = input.get(i);
+      var cus = mapper.convertValue(map, CustomerKafkaInput.class);
 
-            var cusId = sequence + i + 1;
+      var cusId = sequence + i + 1;
 
-            var cb =
-                    CustomerBalance.builder()
-                            .customerId(cusId)
-                            .code(Utils.generateCode(cusId, CustomerBalance.class.getSimpleName()))
-                            .totalAmount(0L)
-                            .lockAmount(0L)
-                            .availableAmount(0L)
-                            .totalPointsUsed(0L)
-                            .totalAccumulatedPoints(0L)
-                            .totalPointsExpired(0L)
-                            .status(Status.ACTIVE)
-                            .build();
+      var cb =
+          CustomerBalance.builder()
+              .customerId(cusId)
+              .code(Utils.generateCode(cusId, CustomerBalance.class.getSimpleName()))
+              .totalAmount(0L)
+              .lockAmount(0L)
+              .availableAmount(0L)
+              .totalPointsUsed(0L)
+              .totalAccumulatedPoints(0L)
+              .totalPointsExpired(0L)
+              .status(Status.ACTIVE)
+              .build();
 
-            var cr =
-                    CustomerRank.builder()
-                            .customerId(cusId)
-                            .code(Utils.generateCode(cusId, CustomerRank.class.getSimpleName()))
-                            .rank(rankCode)
-                            .applyDate(currentDate)
-                            .totalPoint(0L)
-                            .status(Status.ACTIVE)
-                            .build();
+      var cr =
+          CustomerRank.builder()
+              .customerId(cusId)
+              .code(Utils.generateCode(cusId, CustomerRank.class.getSimpleName()))
+              .rank(rankCode)
+              .applyDate(currentDate)
+              .totalPoint(0L)
+              .status(Status.ACTIVE)
+              .build();
 
-            list.add(Triple.of(cus, cb, cr));
-        }
-
-        // saves
-        customRepository.saveAllCustomer(list);
+      list.add(Triple.of(cus, cb, cr));
     }
 
-    private String getFirstRank(String requestId) {
-        var res = configClient.getAllRanks(requestId);
-        if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
-        var ranks = res.getData();
-        return ranks.stream()
-                .min(Comparator.comparing(RankOutput::getOrderNo))
-                .orElseThrow(() -> new BaseException(CommonErrorCode.ENTITY_NOT_FOUND))
-                .getCode();
-    }
+    // saves
+    customRepository.saveAllCustomer(list);
+  }
+
+  @Override
+  public void update(String messageId, LinkedHashMap input) {
+    var cus = mapper.convertValue(input, Customer.class);
+
+    customerRepository
+        .findByCifBank(cus.getCifBank())
+        .ifPresent(
+            customer -> {
+              cus.setId(customer.getId());
+              customerRepository.save(cus);
+            });
+  }
+
+  @Transactional
+  @Override
+  public void delete(String messageId, LinkedHashMap input) {
+    var cif = (String) input.get("cifBank");
+    if (StringUtils.hasText(cif))
+      customerRepository.findByCifBank(cif).ifPresent(customer -> customer.setDeleted(true));
+  }
+
+  private String getFirstRank(String requestId) {
+    var res = configClient.getAllRanks(requestId);
+    if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
+    var ranks = res.getData();
+    return ranks.stream()
+        .min(Comparator.comparing(RankOutput::getOrderNo))
+        .orElseThrow(() -> new BaseException(CommonErrorCode.ENTITY_NOT_FOUND))
+        .getCode();
+  }
 }

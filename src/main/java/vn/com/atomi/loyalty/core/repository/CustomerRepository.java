@@ -9,6 +9,8 @@ import vn.com.atomi.loyalty.core.dto.projection.CustomerPointAccountProjection;
 import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.enums.Status;
 
+import java.util.Optional;
+
 /**
  * @author haidv
  * @version 1.0
@@ -98,4 +100,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
       String rank,
       String segment,
       Pageable pageable);
+
+  Optional<Customer> findByCifBank(String cif);
 }
