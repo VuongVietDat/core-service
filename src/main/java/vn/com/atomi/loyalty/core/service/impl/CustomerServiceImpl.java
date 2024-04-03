@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -181,7 +182,19 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
         customRepository.saveAllCustomer(list);
     }
 
-    private String getFirstRank(String requestId) {
+  @Override
+  public CustomerOutput getCustomer(String cifBank, String cifWallet) {
+    // bắt buộc truyền 1 trong 2 param
+    if (StringUtils.isBlank(cifBank) && StringUtils.isBlank(cifBank)) {
+      throw new BaseException(ErrorCode.INPUT_INVALID);
+    }
+    return customerRepository
+        .findByDeletedFalseAndCifWallet(cifWallet, cifBank)
+        .map(modelMapper::convertToCustomerOutput)
+        .orElseThrow(() -> new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED));
+  }
+
+  private String getFirstRank(String requestId) {
         var res = configClient.getAllRanks(requestId);
         if (res.getCode() != 0) throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR);
         var ranks = res.getData();

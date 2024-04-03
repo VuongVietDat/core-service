@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.repository;
 
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -98,4 +99,13 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
       String rank,
       String segment,
       Pageable pageable);
+
+  @Query(
+      value =
+          "select c "
+              + "from Customer c "
+              + "where c.deleted = false "
+              + "  and (:cifBank is null or c.cifBank = :cifBank) "
+              + "  and (:cifWallet is null or c.cifWallet = :cifWallet)")
+  Optional<Customer> findByDeletedFalseAndCifWallet(String cifWallet, String cifBank);
 }

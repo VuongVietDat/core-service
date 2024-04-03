@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.BaseController;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
@@ -124,5 +125,24 @@ public class CustomerController extends BaseController {
   public ResponseEntity<ResponseData<CustomerOutput>> getDetail(
       @Parameter(description = "ID khách hàng bên loyalty") @PathVariable Long id) {
     return ResponseUtils.success(customerService.get(id));
+  }
+
+  @Operation(summary = "Api (nội bộ) lấy chi tiết thành viên theo mã ví")
+  @PreAuthorize(Authority.ROLE_SYSTEM)
+  @GetMapping("/internal/customers")
+  public ResponseEntity<ResponseData<CustomerOutput>> getCustomer(
+      @Parameter(
+              description = "Chuỗi xác thực khi gọi api nội bộ",
+              example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+          @RequestHeader(RequestConstant.SECURE_API_KEY)
+          @SuppressWarnings("unused")
+          String apiKey,
+      @Parameter(description = "Mã định danh của khách hàng trên bank")
+          @RequestParam(required = false)
+          String cifBank,
+      @Parameter(description = "Mã định danh của khách hàng trên ví")
+          @RequestParam(required = false)
+          String cifWallet) {
+    return ResponseUtils.success(customerService.getCustomer(cifBank, cifWallet));
   }
 }
