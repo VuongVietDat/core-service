@@ -143,8 +143,8 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       }
       basePoint =
           amount
-              .divide(BigInteger.valueOf(ruleAllocationOutput.getExchangePoint()))
-              .multiply(BigInteger.valueOf(ruleAllocationOutput.getExchangeValue()));
+              .divide(BigInteger.valueOf(ruleAllocationOutput.getExchangeValue()))
+              .multiply(BigInteger.valueOf(ruleAllocationOutput.getExchangePoint()));
       totalPoint = totalPoint.add(basePoint);
       // thưởng thêm
       if (!CollectionUtils.isEmpty(rule.getRuleBonusOutputs())) {
@@ -215,7 +215,12 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
           || rule.getPointType().equals(PointType.RANK_POINT)) {
         results.add(
             super.modelMapper.convertToTransactionInput(
-                allocationTransaction, PointType.RANK_POINT, rankPoint, rule, null));
+                allocationTransaction,
+                PointType.RANK_POINT,
+                rankPoint,
+                customerInput.getId(),
+                rule,
+                null));
       }
       if (rule.getPointType().equals(PointType.ALL)
           || rule.getPointType().equals(PointType.CONSUMPTION_POINT)) {
@@ -224,6 +229,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                 allocationTransaction,
                 PointType.CONSUMPTION_POINT,
                 consumptionPoint,
+                customerInput.getId(),
                 rule,
                 this.getExpireDate(rule)));
       }

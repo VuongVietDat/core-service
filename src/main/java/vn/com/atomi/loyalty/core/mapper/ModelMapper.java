@@ -106,6 +106,10 @@ public interface ModelMapper {
   CustomerGroupApproval convertToGroupApproval(
       CustomerGroup customerGroup, ApprovalStatus approvalStatus, ApprovalType approvalType);
 
+  @Mapping(target = "transactionAt", source = "createdAt")
+  ExternalCustomerBalanceHistoryOutput convertToExternalCustomerBalanceHistoryOutput(
+      CustomerBalanceHistory customerBalanceHistories);
+
   List<ExternalCustomerBalanceHistoryOutput> convertToExternalCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> customerBalanceHistories);
 
@@ -129,6 +133,10 @@ public interface ModelMapper {
       CustomerPointAccountProjection pointAccountProjection,
       @Context List<DictionaryOutput> dictionaryOutputs);
 
+  @Mapping(target = "transactionAt", source = "createdAt")
+  CustomerBalanceHistoryOutput convertToCustomerBalanceHistoryOutput(
+      CustomerBalanceHistory content);
+
   List<CustomerBalanceHistoryOutput> convertToCustomerBalanceHistoryOutputs(
       List<CustomerBalanceHistory> content);
 
@@ -137,6 +145,7 @@ public interface ModelMapper {
   List<CustomerOutput> convertToCustomerOutputs(List<Customer> customers);
 
   @Mapping(target = "expireAt", source = "expireAt")
+  @Mapping(target = "customerId", source = "customerId")
   @Mapping(target = "ruleId", source = "ruleOutput.id")
   @Mapping(target = "ruleCode", source = "ruleOutput.code")
   @Mapping(target = "pointType", source = "pointType")
@@ -146,6 +155,7 @@ public interface ModelMapper {
       AllocationPointTransactionInput allocationPointTransactionInput,
       PointType pointType,
       Long amount,
+      Long customerId,
       RuleOutput ruleOutput,
       LocalDate expireAt);
 }

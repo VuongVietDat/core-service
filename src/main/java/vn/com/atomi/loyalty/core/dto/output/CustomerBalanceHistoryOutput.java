@@ -1,10 +1,9 @@
 package vn.com.atomi.loyalty.core.dto.output;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.*;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
@@ -48,6 +47,9 @@ public class CustomerBalanceHistoryOutput {
 
   @Schema(description = "Số tham chiếu")
   private String refNo;
+
+  @Schema(description = "Mã giao dịch")
+  private Long transactionId;
 
   @Schema(description = "Nội dung")
   private String content;

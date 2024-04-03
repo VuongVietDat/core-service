@@ -88,7 +88,7 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter(
                 "P_SEARCH_TRANSACTION_DATE",
                 DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
-                    .format(transactionInput.getTransactionAt()))
+                    .format(LocalDateTime.now()))
             .setParameter("P_CONTENT", transactionInput.getContent())
             .setParameter("P_EXPIRE_AT", transactionInput.getExpireAt())
             .setParameter("P_POINT_TYPE", transactionInput.getPointType().name())
@@ -160,7 +160,7 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter(
                 "P_SEARCH_TRANSACTION_DATE",
                 DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
-                    .format(transactionAt))
+                    .format(LocalDateTime.now()))
             .setParameter("P_CONTENT", content)
             .setParameter("P_POINT_TYPE", pointType.name())
             .setParameter("P_CHANGE_TYPE", ChangeType.MINUS_CONSUMPTION.name());
@@ -200,7 +200,7 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter(
                 "P_SEARCH_TRANSACTION_DATE",
                 DateTimeFormatter.ofPattern(DateConstant.ISO_8601_EXTENDED_DATE_FORMAT_STROKE)
-                    .format(transactionAt))
+                    .format(LocalDateTime.now()))
             .setParameter("P_CONTENT", content)
             .setParameter("P_POINT_TYPE", pointType.name())
             .setParameter("P_CHANGE_TYPE", ChangeType.MINUS_CONSUMPTION.name());

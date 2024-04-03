@@ -68,8 +68,8 @@ public interface CustomerBalanceHistoryRepository
           + "from CustomerBalanceHistory h "
           + "where h.deleted = false "
           + "  and h.customerId = :customerId "
-          + "  and h.transactionAt >= :startAt "
-          + "  and h.transactionAt <= :endAt "
+          + "  and h.originTransactionAt >= :startAt "
+          + "  and h.originTransactionAt <= :endAt "
           + "  and h.ruleId = :ruleId "
           + "  and h.pointType = :pointType ")
   long countByCustomerIdAndRuleId(

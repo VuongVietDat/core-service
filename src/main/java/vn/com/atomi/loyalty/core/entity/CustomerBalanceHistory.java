@@ -81,7 +81,7 @@ public class CustomerBalanceHistory extends BaseEntity {
   private String ruleCode;
 
   @Column(name = "TRANSACTION_AT")
-  private LocalDateTime transactionAt;
+  private LocalDateTime originTransactionAt;
 
   @Column(name = "EXPIRE_AT")
   private LocalDate expireAt;
