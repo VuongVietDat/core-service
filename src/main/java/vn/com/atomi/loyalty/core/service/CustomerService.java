@@ -1,14 +1,13 @@
 package vn.com.atomi.loyalty.core.service;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.enums.Status;
-
-import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * @author haidv
@@ -45,4 +44,6 @@ public interface CustomerService {
   void update(String messageId, LinkedHashMap input);
 
   void delete(String messageId, LinkedHashMap input);
+
+  CustomerOutput getCustomer(String cifBank, String cifWallet);
 }

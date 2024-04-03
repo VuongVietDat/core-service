@@ -1,8 +1,7 @@
-package vn.com.atomi.loyalty.core.dto.input;
+package vn.com.atomi.loyalty.core.dto.message;
 
 import java.time.LocalDateTime;
 import lombok.*;
-import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
  * @author haidv
@@ -14,8 +13,6 @@ import vn.com.atomi.loyalty.core.enums.PointType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AllocationPointTransactionInput {
-
-  private PointType pointType;
 
   private String refNo;
 

@@ -8,12 +8,14 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import vn.com.atomi.loyalty.base.event.BaseRetriesMessageListener;
+import vn.com.atomi.loyalty.base.event.MessageData;
 import vn.com.atomi.loyalty.core.service.CustomerService;
 
 @SuppressWarnings({"rawtypes"})
 @RequiredArgsConstructor
 @Component
-public class CustomerUpdateEventListener extends MessageListener<LinkedHashMap> {
+public class CustomerUpdateEventListener extends BaseRetriesMessageListener<LinkedHashMap> {
   private final CustomerService memberService;
 
   @KafkaListener(

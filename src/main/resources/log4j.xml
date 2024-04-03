@@ -14,7 +14,7 @@
       <Property name="bootstrap.servers">10.163.233.31:9092</Property>
     </Kafka>
     <Console follow="true" name="ConsoleAppender"
-      target="SYSTEM_OUT">
+             target="SYSTEM_OUT">
       <PatternLayout pattern="${LOG_PATTERN}"/>
     </Console>
     <!-- Rolling File Appender -->
@@ -34,8 +34,8 @@
   </Appenders>
   <Loggers>
     <AsyncLogger
-      additivity="false"
-      level="error" name="com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver">
+        additivity="false"
+        level="error" name="com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver">
       <AppenderRef ref="ConsoleAppender"/>
       <!--      <AppenderRef ref="FileAppender"/>-->
       <AppenderRef ref="KafkaAppender"/>
