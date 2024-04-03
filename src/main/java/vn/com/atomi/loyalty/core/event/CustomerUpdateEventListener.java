@@ -23,7 +23,7 @@ public class CustomerUpdateEventListener extends BaseRetriesMessageListener<Link
       groupId = "${custom.properties.messaging.kafka.groupId}",
       concurrency = "${custom.properties.kafka.topic.customer-update-event.concurrent.thread}",
       containerFactory = "kafkaListenerContainerFactory")
-  public void workflowEventListener(
+  public void updateCustomerListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
@@ -37,7 +37,7 @@ public class CustomerUpdateEventListener extends BaseRetriesMessageListener<Link
       groupId = "${custom.properties.messaging.kafka.groupid}",
       concurrency = "1",
       containerFactory = "kafkaListenerContainerFactory")
-  public void workflowEventRetriesListener(
+  public void updateCustomerRetriesListener(
       String data,
       @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
       @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
