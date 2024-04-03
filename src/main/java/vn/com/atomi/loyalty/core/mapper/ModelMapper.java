@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.mapstruct.*;
+import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.core.dto.input.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
+import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
@@ -148,4 +150,8 @@ public interface ModelMapper {
       Long amount,
       RuleOutput ruleOutput,
       LocalDate expireAt);
+
+  @Mapping(target = "dob", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  @Mapping(target = "issueDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  Customer fromCustomerKafkaInput(@MappingTarget Customer customer, CustomerKafkaInput input);
 }

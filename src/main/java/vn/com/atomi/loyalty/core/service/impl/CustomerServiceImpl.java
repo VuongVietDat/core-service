@@ -22,7 +22,6 @@ import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.dto.output.RankOutput;
-import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
@@ -185,21 +184,19 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
 
   @Override
   public void update(String messageId, LinkedHashMap input) {
-    var cus = mapper.convertValue(input, Customer.class);
+    var cus = mapper.convertValue(input, CustomerKafkaInput.class);
 
     customerRepository
         .findByCifBank(cus.getCifBank())
         .ifPresent(
-            customer -> {
-              cus.setId(customer.getId());
-              customerRepository.save(cus);
-            });
+            customer -> customerRepository.save(modelMapper.fromCustomerKafkaInput(customer, cus)));
   }
 
   @Transactional
   @Override
   public void delete(String messageId, LinkedHashMap input) {
-    var cif = (String) input.get("cifBank");
+    var cus = mapper.convertValue(input, CustomerKafkaInput.class);
+    var cif = cus.getCifBank();
     if (StringUtils.hasText(cif))
       customerRepository.findByCifBank(cif).ifPresent(customer -> customer.setDeleted(true));
   }
