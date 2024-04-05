@@ -73,4 +73,17 @@ public class CustomerOutput {
 
   @Schema(description = "Trạng thái")
   private Status status;
+
+  @Schema(description = "Tên giới tính")
+  private String genderName;
+
+  @Schema(description = "Tên loại giấy tờ tùy thân")
+  private String uniqueTypeName;
+
+  @Schema(description = "Tên loại khách hàng")
+  private String customerTypeName;
+
+  @Schema(description = "Tên quốc gia")
+  private String nationalityName;
+
 }

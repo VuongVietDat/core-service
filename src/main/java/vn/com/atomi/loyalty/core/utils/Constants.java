@@ -11,6 +11,9 @@ public class Constants {
   public static final String DICTIONARY_UNIQUE_TYPE = "UNIQUE_TYPE";
 
   public static final String DICTIONARY_LIMIT_POINT_PER_USER = "LIMIT_POINT_PER_USER";
+  public static final String DICTIONARY_GENDER = "GENDER";
+  public static final String DICTIONARY_CUSTOMER_TYPE = "CUSTOMER_TYPE";
+  public static final String DICTIONARY_NATIONALITY = "NATIONALITY";
 
   public static final String DICTIONARY_RULE_TYPE_TRANSACTION = "TRANSACTION";
 
