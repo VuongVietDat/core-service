@@ -85,5 +85,4 @@ public class CustomerOutput {
 
   @Schema(description = "Tên quốc gia")
   private String nationalityName;
-
 }
