@@ -54,4 +54,8 @@ public class TransactionInput {
   private LocalDate expireAt;
 
   private PointEventSource eventSource;
+
+  private Long budgetId;
+
+  private String budgetCode;
 }

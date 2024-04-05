@@ -75,6 +75,8 @@ public class CustomRepositoryImpl implements CustomRepository {
             .registerStoredProcedureParameter("P_TRANSACTION_TYPE", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_AMOUNT", Long.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_EVENT_SOURCE", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_BUDGET_ID", String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_BUDGET_CODE", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_ID", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
@@ -102,6 +104,8 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter("P_TRANSACTION_GROUP", transactionInput.getTransactionGroup())
             .setParameter("P_TRANSACTION_AMOUNT", transactionInput.getTransactionAmount())
             .setParameter("P_TRANSACTION_TYPE", transactionInput.getTransactionType())
+            .setParameter("P_BUDGET_ID", transactionInput.getBudgetId())
+            .setParameter("P_BUDGET_CODE", transactionInput.getBudgetCode())
             .setParameter("P_EVENT_SOURCE", transactionInput.getEventSource().name());
     query.execute();
     Long result = (Long) query.getOutputParameterValue("P_RESULT");

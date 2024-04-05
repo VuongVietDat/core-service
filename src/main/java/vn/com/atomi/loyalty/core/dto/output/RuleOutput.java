@@ -46,6 +46,12 @@ public class RuleOutput {
   @Schema(description = "Mã chiến dịch")
   private String campaignCode;
 
+  @Schema(description = "ID ngân sách")
+  private Long budgetId;
+
+  @Schema(description = "Mã ngân sách")
+  private String budgetCode;
+
   @Schema(description = "Ngày bắt đầu hiệu lực (dd/MM/yyyy)", example = "01/01/2024")
   @JsonFormat(pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   private LocalDate startDate;
