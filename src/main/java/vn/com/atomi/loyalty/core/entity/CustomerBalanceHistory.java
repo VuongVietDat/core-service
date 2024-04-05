@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import lombok.*;
 import vn.com.atomi.loyalty.base.data.BaseEntity;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
+import vn.com.atomi.loyalty.core.enums.PointEventSource;
 import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
@@ -109,4 +110,8 @@ public class CustomerBalanceHistory extends BaseEntity {
 
   @Column(name = "TRANSACTION_TYPE")
   private String transactionType;
+
+  @Column(name = "EVENT_SOURCE")
+  @Enumerated(EnumType.STRING)
+  private PointEventSource eventSource;
 }

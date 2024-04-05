@@ -3,6 +3,7 @@ package vn.com.atomi.loyalty.core.dto.input;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
+import vn.com.atomi.loyalty.core.enums.PointEventSource;
 import vn.com.atomi.loyalty.core.enums.PointType;
 
 /**
@@ -51,4 +52,6 @@ public class TransactionInput {
   private String content;
 
   private LocalDate expireAt;
+
+  private PointEventSource eventSource;
 }

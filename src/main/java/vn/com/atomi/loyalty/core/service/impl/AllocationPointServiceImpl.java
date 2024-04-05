@@ -86,7 +86,12 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
     switch (allocationPointMessage.getType()) {
       case TRANSACTION ->
           allocationPointTransactionEvent(
-              allocationTransaction, dictionaries, rules, customerInput, customerBalance);
+              allocationPointMessage.getPointEventSource(),
+              allocationTransaction,
+              dictionaries,
+              rules,
+              customerInput,
+              customerBalance);
       case HOLIDAY ->
           allocationPointHolidayEvent(
               allocationTransaction, dictionaries, rules, customerInput, customerBalance);
@@ -103,6 +108,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
   }
 
   private void allocationPointTransactionEvent(
+      PointEventSource pointEventSource,
       AllocationPointTransactionInput allocationTransaction,
       List<DictionaryOutput> dictionaries,
       List<RuleOutput> rules,
@@ -220,6 +226,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                 rankPoint,
                 customerInput.getId(),
                 rule,
+                pointEventSource,
                 null));
       }
       if (rule.getPointType().equals(PointType.ALL)
@@ -231,6 +238,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                 consumptionPoint,
                 customerInput.getId(),
                 rule,
+                pointEventSource,
                 this.getExpireDate(rule)));
       }
     }

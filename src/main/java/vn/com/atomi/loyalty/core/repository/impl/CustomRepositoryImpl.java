@@ -19,10 +19,9 @@ import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
-import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.base.utils.JsonUtils;
+import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
-import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
@@ -75,6 +74,7 @@ public class CustomRepositoryImpl implements CustomRepository {
             .registerStoredProcedureParameter("P_TRANSACTION_GROUP", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_TYPE", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_AMOUNT", Long.class, ParameterMode.IN)
+            .registerStoredProcedureParameter("P_EVENT_SOURCE", String.class, ParameterMode.IN)
             .registerStoredProcedureParameter("P_TRANSACTION_ID", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT", Long.class, ParameterMode.OUT)
             .registerStoredProcedureParameter("P_RESULT_DESC", String.class, ParameterMode.OUT)
@@ -101,7 +101,8 @@ public class CustomRepositoryImpl implements CustomRepository {
             .setParameter("P_CHANEL", transactionInput.getChanel())
             .setParameter("P_TRANSACTION_GROUP", transactionInput.getTransactionGroup())
             .setParameter("P_TRANSACTION_AMOUNT", transactionInput.getTransactionAmount())
-            .setParameter("P_TRANSACTION_TYPE", transactionInput.getTransactionType());
+            .setParameter("P_TRANSACTION_TYPE", transactionInput.getTransactionType())
+            .setParameter("P_EVENT_SOURCE", transactionInput.getEventSource().name());
     query.execute();
     Long result = (Long) query.getOutputParameterValue("P_RESULT");
     String resultDesc = (String) query.getOutputParameterValue("P_RESULT_DESC");
