@@ -222,7 +222,6 @@ public class CustomRepositoryImpl implements CustomRepository {
   @Override
   public void saveAllCustomer(
       List<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>> infos) {
-    var currentTime = Utils.formatLocalDateToString(LocalDate.now());
     var creator = "SYSTEM";
 
     var values =
@@ -238,9 +237,9 @@ public class CustomRepositoryImpl implements CustomRepository {
                           """
                           INTO C_CUSTOMER (ID, CIF_BANK, CIF_WALLET, CUSTOMER_NAME, DOB, CURRENT_ADDRESS, CUSTOMER_TYPE,
                           GENDER, NATIONALITY, OWNER_BRANCH, PHONE, RANK, REGISTER_BRANCH, RESIDENTIAL_ADDRESS, RM_CODE,
-                          RM_NAME, SEGMENT, UNIQUE_TYPE, UNIQUE_VALUE, ISSUE_DATE, ISSUE_PLACE, STATUS, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
+                          RM_NAME, SEGMENT, UNIQUE_TYPE, UNIQUE_VALUE, ISSUE_DATE, ISSUE_PLACE, STATUS, CREATED_BY, UPDATED_BY, IS_DELETED)
                           VALUES (GET_C_CUSTOMER_ID_SEQ(), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
-                          '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)
+                          '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)
                           """,
                           customer.getCifBank(),
                           customer.getCifWallet(),
@@ -263,9 +262,7 @@ public class CustomRepositoryImpl implements CustomRepository {
                           customer.getIssueDate(),
                           customer.getIssuePlace(),
                           Status.ACTIVE.name(),
-                          currentTime,
                           creator,
-                          currentTime,
                           creator,
                           0);
 
@@ -273,9 +270,9 @@ public class CustomRepositoryImpl implements CustomRepository {
                       String.format(
                           """
                           INTO C_CUSTOMER_BALANCE (ID, CODE, CUSTOMER_ID, TOTAL_AMOUNT, LOCK_AMOUNT, AVAILABLE_AMOUNT,
-                          TOTAL_POINTS_USED, TOTAL_ACCUMULATED_POINTS, TOTAL_POINTS_EXPIRED, STATUS, CREATED_AT,
-                          CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
-                          VALUES (GET_C_CUSTOMER_BALANCE_ID_SEQ(), '%s', %d, %d, %d, %d, %d, %d, %d, '%s', '%s', '%s', '%s', '%s', %d)
+                          TOTAL_POINTS_USED, TOTAL_ACCUMULATED_POINTS, TOTAL_POINTS_EXPIRED, STATUS,
+                          CREATED_BY, UPDATED_BY, IS_DELETED)
+                          VALUES (GET_C_CUSTOMER_BALANCE_ID_SEQ(), '%s', %d, %d, %d, %d, %d, %d, %d, '%s', '%s', '%s', %d)
                           """,
                           cb.getCode(),
                           cb.getCustomerId(),
@@ -286,9 +283,7 @@ public class CustomRepositoryImpl implements CustomRepository {
                           cb.getTotalAccumulatedPoints(),
                           cb.getTotalPointsExpired(),
                           Status.ACTIVE.name(),
-                          currentTime,
                           creator,
-                          currentTime,
                           creator,
                           0);
 
@@ -296,8 +291,8 @@ public class CustomRepositoryImpl implements CustomRepository {
                       String.format(
                           """
                           INTO C_CUSTOMER_RANK (ID, CODE, CUSTOMER_ID, RANK, APPLY_DATE, TOTAL_POINT, STATUS,
-                          CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY, IS_DELETED)
-                          VALUES (GET_C_CUSTOMER_RANK_ID_SEQ(), '%s', %d, '%s', '%s', %d, '%s', '%s', '%s', '%s', '%s', %d)
+                          CREATED_BY, UPDATED_BY, IS_DELETED)
+                          VALUES (GET_C_CUSTOMER_RANK_ID_SEQ(), '%s', %d, '%s', '%s', %d, '%s', '%s', '%s', %d)
                           """,
                           cr.getCode(),
                           cr.getCustomerId(),
@@ -305,9 +300,7 @@ public class CustomRepositoryImpl implements CustomRepository {
                           Utils.formatLocalDateToString(cr.getApplyDate()),
                           cr.getTotalPoint(),
                           Status.ACTIVE.name(),
-                          currentTime,
                           creator,
-                          currentTime,
                           creator,
                           0);
 
