@@ -230,15 +230,14 @@ public class CustomRepositoryImpl implements CustomRepository {
                   var customer = info.getLeft();
                   var cb = info.getMiddle();
                   var cr = info.getRight();
-
                   var intoCus =
                       String.format(
                           """
                           INTO C_CUSTOMER (ID, CIF_BANK, CIF_WALLET, CUSTOMER_NAME, DOB, CURRENT_ADDRESS, CUSTOMER_TYPE,
                           GENDER, NATIONALITY, OWNER_BRANCH, PHONE, RANK, REGISTER_BRANCH, RESIDENTIAL_ADDRESS, RM_CODE,
                           RM_NAME, SEGMENT, UNIQUE_TYPE, UNIQUE_VALUE, ISSUE_DATE, ISSUE_PLACE, STATUS, CREATED_BY, UPDATED_BY, IS_DELETED)
-                          VALUES (GET_C_CUSTOMER_ID_SEQ(), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s',
-                          '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)
+                          VALUES (GET_C_CUSTOMER_ID_SEQ(), '%s', '%s', '%s', TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS.FF6'), '%s', '%s', '%s', '%s', '%s', '%s',
+                          '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS.FF6'), '%s', '%s', '%s', '%s', %d)
                           """,
                           customer.getCifBank(),
                           customer.getCifWallet(),
