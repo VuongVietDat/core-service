@@ -29,7 +29,6 @@ import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
 import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
-import vn.com.atomi.loyalty.core.utils.Utils;
 
 /**
  * @author haidv
@@ -290,14 +289,13 @@ public class CustomRepositoryImpl implements CustomRepository {
                   var intoCusRank =
                       String.format(
                           """
-                          INTO C_CUSTOMER_RANK (ID, CODE, CUSTOMER_ID, RANK, APPLY_DATE, TOTAL_POINT, STATUS,
+                          INTO C_CUSTOMER_RANK (ID, CODE, CUSTOMER_ID, RANK, TOTAL_POINT, STATUS,
                           CREATED_BY, UPDATED_BY, IS_DELETED)
-                          VALUES (GET_C_CUSTOMER_RANK_ID_SEQ(), '%s', %d, '%s', '%s', %d, '%s', '%s', '%s', %d)
+                          VALUES (GET_C_CUSTOMER_RANK_ID_SEQ(), '%s', %d, '%s', %d, '%s', '%s', '%s', %d)
                           """,
                           cr.getCode(),
                           cr.getCustomerId(),
                           cr.getRank(),
-                          Utils.formatLocalDateToString(cr.getApplyDate()),
                           cr.getTotalPoint(),
                           Status.ACTIVE.name(),
                           creator,
