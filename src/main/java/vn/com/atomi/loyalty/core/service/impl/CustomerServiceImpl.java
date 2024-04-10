@@ -1,13 +1,10 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -21,7 +18,6 @@ import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
 import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
-import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.CustomerBalance;
 import vn.com.atomi.loyalty.core.entity.CustomerRank;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
@@ -145,7 +141,6 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
     @Override
     public void creates(String requestId, List<LinkedHashMap> input) {
         var rankCode = getFirstRank(requestId);
-        var currentDate = LocalDate.now();
 
         // init data
         var list = new ArrayList<Triple<CustomerKafkaInput, CustomerBalance, CustomerRank>>();
@@ -177,7 +172,6 @@ public class CustomerServiceImpl extends BaseService implements CustomerService 
                             .customerId(cusId)
                             .code(Utils.generateCode(cusId, CustomerRank.class.getSimpleName()))
                             .rank(rankCode)
-                            .applyDate(currentDate)
                             .totalPoint(0L)
                             .status(Status.ACTIVE)
                             .build();
