@@ -200,4 +200,10 @@ public class CustomerGroupServiceImpl extends BaseService implements CustomerGro
   public Boolean checkCustomerGroupExisted(Long id) {
     return customerGroupRepository.existsByIdAndDeletedFalse(id);
   }
+
+  @Override
+  public List<InternalCustomerGroupOutput> getInternalCustomerGroup(
+      Long customerId, String cifBank, String cifWallet) {
+    return null;
+  }
 }

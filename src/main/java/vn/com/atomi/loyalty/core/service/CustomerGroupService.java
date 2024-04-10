@@ -44,4 +44,7 @@ public interface CustomerGroupService {
   void approveCustomerGroup(ApprovalInput input);
 
   Boolean checkCustomerGroupExisted(Long id);
+
+  List<InternalCustomerGroupOutput> getInternalCustomerGroup(
+      Long customerId, String cifBank, String cifWallet);
 }

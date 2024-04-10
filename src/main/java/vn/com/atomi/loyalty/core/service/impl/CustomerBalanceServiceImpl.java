@@ -53,6 +53,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
     if (balanceProjection == null || balanceProjection.getCustomerId() == null) {
       throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
     }
+    // TODO
     return super.modelMapper.convertToCustomerBalanceOutput(balanceProjection);
   }
 

@@ -185,4 +185,26 @@ public class CustomerGroupController extends BaseController {
       @RequestParam Long id) {
     return ResponseUtils.success(customerGroupService.checkCustomerGroupExisted(id));
   }
+
+  @Operation(summary = "Api (nội bộ) lấy danh sách nhóm khách hàng mà khách hàng thuộc về")
+  @PreAuthorize(Authority.ROLE_SYSTEM)
+  @GetMapping("/internal/customer-groups")
+  public ResponseEntity<ResponseData<List<InternalCustomerGroupOutput>>> getInternalCustomerGroup(
+      @Parameter(
+              description = "Chuỗi xác thực khi gọi api nội bộ",
+              example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+          @RequestHeader(RequestConstant.SECURE_API_KEY)
+          @SuppressWarnings("unused")
+          String apiKey,
+      @Parameter(description = "Mã định danh của khách hàng trên bank")
+          @RequestParam(required = false)
+          String cifBank,
+      @Parameter(description = "Mã định danh của khách hàng trên ví")
+          @RequestParam(required = false)
+          String cifWallet,
+      @Parameter(description = "ID của khách hàng") @RequestParam(required = false)
+          Long customerId) {
+    return ResponseUtils.success(
+        customerGroupService.getInternalCustomerGroup(customerId, cifBank, cifWallet));
+  }
 }
