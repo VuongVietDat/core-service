@@ -24,7 +24,7 @@ public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance
               + "       cb.lockAmount      as lockAmount, "
               + "       cb.availableAmount as availableAmount "
               + "from CustomerBalance cb "
-              + "         join Customer c on cb.customerId = cb.id "
+              + "         join Customer c on cb.customerId = c.id "
               + "where cb.deleted = false "
               + "  and c.deleted = false "
               + "  and (:cifBank is null or c.cifBank = :cifBank) "
