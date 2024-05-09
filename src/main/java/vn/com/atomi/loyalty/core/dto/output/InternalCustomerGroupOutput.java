@@ -1,8 +1,7 @@
 package vn.com.atomi.loyalty.core.dto.output;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @author haidv
@@ -10,6 +9,9 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class InternalCustomerGroupOutput {
 
   @Schema(description = "ID bản ghi")

@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -204,6 +205,16 @@ public class CustomerGroupServiceImpl extends BaseService implements CustomerGro
   @Override
   public List<InternalCustomerGroupOutput> getInternalCustomerGroup(
       Long customerId, String cifBank, String cifWallet) {
-    return null;
+    return Arrays.asList(
+        InternalCustomerGroupOutput.builder()
+            .id(1L)
+            .code("CG01")
+            .name("Nhóm khách hàng 01")
+            .build(),
+        InternalCustomerGroupOutput.builder()
+            .id(1L)
+            .code("CG02")
+            .name("Nhóm khách hàng 02")
+            .build());
   }
 }
