@@ -70,7 +70,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
     // lấy thông tin tài khoản điểm của KH
     CustomerBalance customerBalance =
         customerBalanceRepository
-            .findByDeletedFalseAndId(allocationPointMessage.getCustomer().getId())
+            .findByDeletedFalseAndCustomerId(allocationPointMessage.getCustomer().getId())
             .orElse(null);
     if (customerBalance == null) {
       LOGGER.warn(
@@ -487,7 +487,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
       // thưởng thêm giao dịch đầu tiên
       if (BonusType.BONUS_FIRST_TRANSACTION.equals(ruleBonusOutput.getType())) {
         var customerBalance =
-            customerBalanceRepository.findByDeletedFalseAndId(customerInput.getId()).orElse(null);
+            customerBalanceRepository.findByDeletedFalseAndCustomerId(customerInput.getId()).orElse(null);
         if (customerBalance != null && customerBalance.getTotalAccumulatedPoints() == 0) {
           if (PlusType.FIX.equals(ruleBonusOutput.getPlusType())) {
             bonusPoint = bonusPoint.add(value);

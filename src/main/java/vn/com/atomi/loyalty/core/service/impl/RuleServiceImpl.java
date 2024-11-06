@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
 import vn.com.atomi.loyalty.core.dto.output.RuleOutput;
+import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
 import vn.com.atomi.loyalty.core.repository.redis.RuleRepository;
 import vn.com.atomi.loyalty.core.service.RuleService;
@@ -30,6 +31,7 @@ public class RuleServiceImpl extends BaseService implements RuleService {
     if (CollectionUtils.isEmpty(ruleOutputs)) {
       return renewCacheActiveRule(type, transactionAt);
     }
+    ruleOutputs.removeIf(ruleOutput -> ruleOutput.getStatus() == Status.INACTIVE);
     for (RuleOutput ruleOutput : ruleOutputs) {
       if (ruleOutput.getEndDate() != null && LocalDate.now().isAfter(ruleOutput.getEndDate())) {
         return renewCacheActiveRule(type, transactionAt);

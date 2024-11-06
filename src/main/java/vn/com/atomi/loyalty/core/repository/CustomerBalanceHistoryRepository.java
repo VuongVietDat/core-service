@@ -55,7 +55,7 @@ public interface CustomerBalanceHistoryRepository
   Optional<CustomerBalanceHistory> findPointAboutExpire(Long customerId);
 
   @Query(
-      "select sum(h.amount) "
+      "select NVL(sum(h.amount),0) "
           + "from CustomerBalanceHistory h "
           + "where h.deleted = false "
           + "  and h.customerId = :customerId "
