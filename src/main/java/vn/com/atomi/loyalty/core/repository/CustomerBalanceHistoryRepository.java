@@ -88,5 +88,5 @@ public interface CustomerBalanceHistoryRepository
                           + "  and cb.pointType = :pointType "
                           + "  and cb.expireAt is not null "
                           + "order by cb.createdAt")
-  Optional<CustomerBalanceHistory> findByDeletedFalseAndCustomerIdAndPointType(Long customerId, PointType pointType);
+  Optional<CustomerBalanceHistory> findTranByPointType(Long customerId, PointType pointType);
 }

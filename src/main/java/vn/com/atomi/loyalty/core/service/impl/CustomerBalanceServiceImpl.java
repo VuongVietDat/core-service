@@ -150,7 +150,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
   @Override
   public void executePointExpiration() {
     customerBalanceHistoryRepository
-            .findByDeletedFalseAndCustomerIdAndPointType(55L, PointType.CONSUMPTION_POINT)
+            .findTranByPointType(55L, PointType.CONSUMPTION_POINT)
             .ifPresentOrElse(
                     pointExpiredHistory -> {
                       if (pointExpiredHistory.getExpireAt() == null) {
