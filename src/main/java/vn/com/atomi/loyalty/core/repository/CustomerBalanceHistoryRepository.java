@@ -78,4 +78,15 @@ public interface CustomerBalanceHistoryRepository
       PointType pointType,
       LocalDateTime startAt,
       LocalDateTime endAt);
+
+  @Query(
+          value =
+                  "select cb "
+                          + "from CustomerBalanceHistory cb "
+                          + "where cb.deleted = false "
+                          + "  and cb.customerId = :customerId "
+                          + "  and cb.pointType = :pointType "
+                          + "  and cb.expireAt is not null "
+                          + "order by cb.createdAt")
+  Optional<CustomerBalanceHistory> findByDeletedFalseAndCustomerIdAndPointType(Long customerId, PointType pointType);
 }

@@ -117,33 +117,63 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
   @Override
   public void executeTransactionMinus(UsePointInput usePointInput) {}
 
+//  @Override
+//  public void executePointExpiration() {
+//    pointExpiredHistoryRepository
+//        .findTop1ByDeletedFalseOrderByExpiredAtDesc()
+//        .ifPresentOrElse(
+//            pointExpiredHistory -> {
+//              if (pointExpiredHistory.getEndAt() == null) {
+//                LOGGER.info("Another process is running");
+//              } else {
+//                if (pointExpiredHistory.getExpiredAt().isBefore(LocalDate.now())) {
+//                  LOGGER.info("Processed up to the latest date");
+//                } else {
+//                  customRepository.expiredAmount(
+//                      UUID.randomUUID().toString(),
+//                      pointExpiredHistory.getExpiredAt().plusDays(1),
+//                      Constants.EXPIRED_POINT_CONTENT,
+//                      PointType.CONSUMPTION_POINT);
+//                }
+//              }
+//            },
+//            () -> {
+//              LOGGER.info("Perform processing for the first time");
+//              customRepository.expiredAmount(
+//                  UUID.randomUUID().toString(),
+//                  LocalDate.now().minusDays(1),
+//                  Constants.EXPIRED_POINT_CONTENT,
+//                  PointType.CONSUMPTION_POINT);
+//            });
+//  }
+
   @Override
   public void executePointExpiration() {
-    pointExpiredHistoryRepository
-        .findTop1ByDeletedFalseOrderByExpiredAtDesc()
-        .ifPresentOrElse(
-            pointExpiredHistory -> {
-              if (pointExpiredHistory.getEndAt() == null) {
-                LOGGER.info("Another process is running");
-              } else {
-                if (pointExpiredHistory.getExpiredAt().isBefore(LocalDate.now())) {
-                  LOGGER.info("Processed up to the latest date");
-                } else {
-                  customRepository.expiredAmount(
-                      UUID.randomUUID().toString(),
-                      pointExpiredHistory.getExpiredAt().plusDays(1),
-                      Constants.EXPIRED_POINT_CONTENT,
-                      PointType.CONSUMPTION_POINT);
-                }
-              }
-            },
-            () -> {
-              LOGGER.info("Perform processing for the first time");
-              customRepository.expiredAmount(
-                  UUID.randomUUID().toString(),
-                  LocalDate.now().minusDays(1),
-                  Constants.EXPIRED_POINT_CONTENT,
-                  PointType.CONSUMPTION_POINT);
-            });
+    customerBalanceHistoryRepository
+            .findByDeletedFalseAndCustomerIdAndPointType(55L, PointType.CONSUMPTION_POINT)
+            .ifPresentOrElse(
+                    pointExpiredHistory -> {
+                      if (pointExpiredHistory.getExpireAt() == null) {
+                        LOGGER.info("Another process is running");
+                      } else {
+                        if (pointExpiredHistory.getExpireAt().isBefore(LocalDate.now())) {
+                          LOGGER.info("Processed up to the latest date");
+                        } else {
+                          customRepository.expiredAmount(
+                                  UUID.randomUUID().toString(),
+                                  pointExpiredHistory.getExpireAt().plusDays(1),
+                                  Constants.EXPIRED_POINT_CONTENT,
+                                  PointType.CONSUMPTION_POINT);
+                        }
+                      }
+                    },
+                    () -> {
+                      LOGGER.info("Perform processing for the first time");
+                      customRepository.expiredAmount(
+                              UUID.randomUUID().toString(),
+                              LocalDate.now().minusDays(1),
+                              Constants.EXPIRED_POINT_CONTENT,
+                              PointType.CONSUMPTION_POINT);
+                    });
   }
 }
