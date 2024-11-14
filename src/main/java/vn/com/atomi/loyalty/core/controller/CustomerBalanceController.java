@@ -201,4 +201,17 @@ public class CustomerBalanceController extends BaseController {
             endExpiredDate,
             super.pageable(pageNo, pageSize, sort)));
   }
+
+    @Operation(summary = "Api (public) lấy thông tin số dư điểm hiện tại ")
+//    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @GetMapping("/customers/balances")
+    public ResponseEntity<ResponseData<CustomerBalanceOutput>> getPublicCurrentBalance(
+            @Parameter(description = "Mã định danh của khách hàng trên bank")
+            @RequestParam(required = false)
+            String cifBank,
+            @Parameter(description = "Mã định danh của khách hàng trên ví")
+            @RequestParam(required = false)
+            String cifWallet) {
+        return ResponseUtils.success(customerBalanceService.getCurrentBalance(cifBank, cifWallet));
+    }
 }

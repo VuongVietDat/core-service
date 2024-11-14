@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +56,7 @@ public interface CustomerBalanceHistoryRepository
   Optional<CustomerBalanceHistory> findPointAboutExpire(Long customerId);
 
   @Query(
-      "select sum(h.amount) "
+      "select NVL(sum(h.amount),0) "
           + "from CustomerBalanceHistory h "
           + "where h.deleted = false "
           + "  and h.customerId = :customerId "
@@ -78,4 +79,10 @@ public interface CustomerBalanceHistoryRepository
       PointType pointType,
       LocalDateTime startAt,
       LocalDateTime endAt);
+
+  @Query("select h from CustomerBalanceHistory h where h.deleted = false and h.customerId = :customerId and h.pointType = :pointType and h.expireAt is not null order by h.createdAt")
+  List<CustomerBalanceHistory> findTranByPointType(Long customerId, PointType pointType);
+
+  @Query("select sum(h.amount) from CustomerBalanceHistory h where h.deleted = false and h.customerId = :customerId and h.pointType = :pointType and (h.expireAt is not null and h.expireAt < current_date ) order by h.createdAt")
+  long sumPointExpire(Long customerId, PointType pointType);
 }
