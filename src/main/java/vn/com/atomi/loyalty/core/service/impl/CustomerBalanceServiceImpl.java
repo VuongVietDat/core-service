@@ -1,6 +1,7 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceHistoryOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
 import vn.com.atomi.loyalty.core.dto.output.ExternalCustomerBalanceHistoryOutput;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
+import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
@@ -48,8 +50,24 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
     if (StringUtils.isBlank(cifBank) && StringUtils.isBlank(cifWallet)) {
       throw new BaseException(ErrorCode.INPUT_INVALID);
     }
+//    //Xử lý phục vụ demo
+//    CustomerBalanceProjection balanceProjection =
+//        customerBalanceRepository.findCurrentBalance(cifBank, cifWallet);
+//    long pointExpire = customerBalanceHistoryRepository.sumPointExpire(balanceProjection.getCustomerId(),PointType.CONSUMPTION_POINT);
+//    if (balanceProjection == null || balanceProjection.getCustomerId() == null) {
+//      throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+//    }
+//    // TODO
+//    CustomerBalanceOutput customerBalanceOutput = super.modelMapper.convertToCustomerBalanceOutput(balanceProjection);
+//    long totalAmount = customerBalanceOutput.getTotalAmount();
+//    customerBalanceOutput.setLockAmount(pointExpire);
+//    customerBalanceOutput.setAvailableAmount(totalAmount - pointExpire);
+//    return customerBalanceOutput;
+//    //
+
+    //Mở lại sau demo
     CustomerBalanceProjection balanceProjection =
-        customerBalanceRepository.findCurrentBalance(cifBank, cifWallet);
+            customerBalanceRepository.findCurrentBalance(cifBank, cifWallet);
     if (balanceProjection == null || balanceProjection.getCustomerId() == null) {
       throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
     }
@@ -149,31 +167,28 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
 
   @Override
   public void executePointExpiration() {
-    customerBalanceHistoryRepository
-            .findTranByPointType(55L, PointType.CONSUMPTION_POINT)
-            .ifPresentOrElse(
-                    pointExpiredHistory -> {
-                      if (pointExpiredHistory.getExpireAt() == null) {
-                        LOGGER.info("Another process is running");
-                      } else {
-                        if (pointExpiredHistory.getExpireAt().isBefore(LocalDate.now())) {
-                          LOGGER.info("Processed up to the latest date");
-                        } else {
-                          customRepository.expiredAmount(
-                                  UUID.randomUUID().toString(),
-                                  pointExpiredHistory.getExpireAt().plusDays(1),
-                                  Constants.EXPIRED_POINT_CONTENT,
-                                  PointType.CONSUMPTION_POINT);
-                        }
-                      }
-                    },
-                    () -> {
-                      LOGGER.info("Perform processing for the first time");
-                      customRepository.expiredAmount(
-                              UUID.randomUUID().toString(),
-                              LocalDate.now().minusDays(1),
-                              Constants.EXPIRED_POINT_CONTENT,
-                              PointType.CONSUMPTION_POINT);
-                    });
+    List<CustomerBalanceHistory> histories = customerBalanceHistoryRepository.findTranByPointType(55L, PointType.CONSUMPTION_POINT);
+    if (histories.isEmpty()) {
+      LOGGER.info("Perform processing for the first time");
+      customRepository.expiredAmount(
+              UUID.randomUUID().toString(),
+              LocalDate.now().minusDays(1),
+              Constants.EXPIRED_POINT_CONTENT,
+              PointType.CONSUMPTION_POINT);
+    } else {
+      for (CustomerBalanceHistory history : histories) {
+        if (history.getExpireAt() == null) {
+          LOGGER.info("Another process is running");
+        } else if (history.getExpireAt().isBefore(LocalDate.now())) {
+          customRepository.expiredAmount(
+                  UUID.randomUUID().toString(),
+                  history.getExpireAt().plusDays(1),
+                  Constants.EXPIRED_POINT_CONTENT,
+                  PointType.CONSUMPTION_POINT);
+        } else {
+          LOGGER.info("Processed up to the latest date");
+        }
+      }
+    }
   }
 }
