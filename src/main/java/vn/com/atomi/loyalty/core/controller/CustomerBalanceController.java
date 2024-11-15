@@ -214,4 +214,19 @@ public class CustomerBalanceController extends BaseController {
             String cifWallet) {
         return ResponseUtils.success(customerBalanceService.getCurrentBalance(cifBank, cifWallet));
     }
+
+
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-casa")
+    public ResponseEntity<ResponseData<Void>> executePointCasa(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey) {
+        customerBalanceService.executePointExpiration();
+        return ResponseUtils.success();
+    }
 }

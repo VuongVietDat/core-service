@@ -10,6 +10,7 @@ import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
 import vn.com.atomi.loyalty.core.dto.output.RankOutput;
 import vn.com.atomi.loyalty.core.dto.output.RuleOutput;
+import vn.com.atomi.loyalty.core.dto.output.RulePOC;
 import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
 
 /**
@@ -37,6 +38,11 @@ public class LoyaltyConfigClientFallbackFactory implements FallbackFactory<Loyal
       @Override
       public ResponseData<List<RuleOutput>> getAllActiveRule(
           String requestId, String type, String transactionAt) {
+        throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR, cause);
+      }
+
+      @Override
+      public ResponseData<RulePOC> getRulePoc(String requestId, String type) {
         throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR, cause);
       }
     };

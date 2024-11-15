@@ -8,6 +8,7 @@ import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.core.dto.output.RankOutput;
 import vn.com.atomi.loyalty.core.dto.output.RuleOutput;
+import vn.com.atomi.loyalty.core.dto.output.RulePOC;
 import vn.com.atomi.loyalty.core.feign.fallback.LoyaltyConfigClientFallbackFactory;
 
 /**
@@ -38,4 +39,11 @@ public interface LoyaltyConfigClient {
       @RequestHeader(RequestConstant.REQUEST_ID) String requestId,
       @RequestParam String type,
       @RequestParam(required = false) String transactionAt);
+
+  @Operation(summary = "Api (nội bộ) lấy tất cả quy tắc theo kịch bản phục vụ POC")
+  @GetMapping("/internal/rules/poc")
+  ResponseData<RulePOC> getRulePoc(
+          @RequestHeader(RequestConstant.REQUEST_ID) String requestId,
+          @RequestParam String type);
+
 }

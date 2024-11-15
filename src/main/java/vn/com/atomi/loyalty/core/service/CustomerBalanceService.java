@@ -37,4 +37,6 @@ public interface CustomerBalanceService {
   void executeTransactionMinus(UsePointInput usePointInput);
 
   void executePointExpiration();
+
+  void executePointCasa();
 }

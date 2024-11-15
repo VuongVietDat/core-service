@@ -1,8 +1,5 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
@@ -11,15 +8,16 @@ import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
+import vn.com.atomi.loyalty.base.utils.RequestUtils;
 import vn.com.atomi.loyalty.core.dto.input.UsePointInput;
-import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceHistoryOutput;
-import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
-import vn.com.atomi.loyalty.core.dto.output.ExternalCustomerBalanceHistoryOutput;
+import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.enums.ChangeType;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
+import vn.com.atomi.loyalty.core.feign.LoyaltyCollectDataClient;
+import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceHistoryRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
@@ -27,6 +25,11 @@ import vn.com.atomi.loyalty.core.repository.PointExpiredHistoryRepository;
 import vn.com.atomi.loyalty.core.service.CustomerBalanceService;
 import vn.com.atomi.loyalty.core.utils.Constants;
 import vn.com.atomi.loyalty.core.utils.Utils;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author haidv
@@ -43,6 +46,11 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
   private final CustomRepository customRepository;
 
   private final PointExpiredHistoryRepository pointExpiredHistoryRepository;
+
+  private final LoyaltyConfigClient loyaltyConfigClient;
+
+  private final LoyaltyCollectDataClient loyaltyCollectDataClient;
+
 
   @Override
   public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
@@ -167,6 +175,40 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
 
   @Override
   public void executePointExpiration() {
+    List<CustomerBalanceHistory> histories = customerBalanceHistoryRepository.findTranByPointType(55L, PointType.CONSUMPTION_POINT);
+    if (histories.isEmpty()) {
+      LOGGER.info("Perform processing for the first time");
+      customRepository.expiredAmount(
+              UUID.randomUUID().toString(),
+              LocalDate.now().minusDays(1),
+              Constants.EXPIRED_POINT_CONTENT,
+              PointType.CONSUMPTION_POINT);
+    } else {
+      for (CustomerBalanceHistory history : histories) {
+        if (history.getExpireAt() == null) {
+          LOGGER.info("Another process is running");
+        } else if (history.getExpireAt().isBefore(LocalDate.now())) {
+          customRepository.expiredAmount(
+                  UUID.randomUUID().toString(),
+                  history.getExpireAt().plusDays(1),
+                  Constants.EXPIRED_POINT_CONTENT,
+                  PointType.CONSUMPTION_POINT);
+        } else {
+          LOGGER.info("Processed up to the latest date");
+        }
+      }
+    }
+  }
+
+  @Override
+  public void executePointCasa() {
+    RulePOC rulePOC = loyaltyConfigClient.getRulePoc(RequestUtils.extractRequestId(), "CASA").getData();
+    List<CustomerCasa> customerCasas = loyaltyCollectDataClient.getLstCurrentCasa(RequestUtils.extractRequestId()).getData()
+            .stream()
+            .filter(customerCasa -> customerCasa.getCasaAmount() >= rulePOC.getMinTransaction())
+            .collect(Collectors.toList());
+
+
     List<CustomerBalanceHistory> histories = customerBalanceHistoryRepository.findTranByPointType(55L, PointType.CONSUMPTION_POINT);
     if (histories.isEmpty()) {
       LOGGER.info("Perform processing for the first time");
