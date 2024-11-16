@@ -27,7 +27,11 @@ public class RuleServiceImpl extends BaseService implements RuleService {
 
   @Override
   public List<RuleOutput> getAllActiveRule(String type, String transactionAt) {
-    var ruleOutputs = ruleRepository.getRuleCurrentActive(type);
+//    var ruleOutputs = ruleRepository.getRuleCurrentActive(type);
+    var ruleOutputs =
+            loyaltyConfigClient
+                    .getAllActiveRule(RequestUtils.extractRequestId(), type, transactionAt)
+                    .getData();
     if (CollectionUtils.isEmpty(ruleOutputs)) {
       return renewCacheActiveRule(type, transactionAt);
     }
