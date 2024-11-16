@@ -215,7 +215,7 @@ public class CustomerBalanceController extends BaseController {
         return ResponseUtils.success(customerBalanceService.getCurrentBalance(cifBank, cifWallet));
     }
 
-    @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân")
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân cua KH")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/points-casa")
     public ResponseEntity<ResponseData<Void>> calculatePointCasa(
@@ -230,7 +230,7 @@ public class CustomerBalanceController extends BaseController {
     }
 
 
-    @Operation(summary = "Api (nội bộ) thực hiện tính điểm cho giao dịch mua bán ngoại tệ tại quầy")
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm cho giao dịch mua bán ngoại tệ tại quầy cua KH")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/points-currencyTransaction")
     public ResponseEntity<ResponseData<Void>> calculatePointCurrencyTransaction(
