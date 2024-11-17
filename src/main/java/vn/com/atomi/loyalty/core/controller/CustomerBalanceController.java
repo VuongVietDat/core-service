@@ -260,5 +260,34 @@ public class CustomerBalanceController extends BaseController {
         customerBalanceService.calculatePointCurrencyTransaction(startDate, endDate);
         return ResponseUtils.success();
     }
+
+
+    @Operation(summary = "Api test ")
+//    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @GetMapping("/customers/tesst/balances")
+    public ResponseEntity<ResponseData<CustomerBalanceOutput>> getPtessrtalance(
+            @Parameter(description = "Mã định danh của khách hàng trên bank")
+            @RequestParam(required = false)
+            String cifBank,
+            @Parameter(description = "Mã định danh của khách hàng trên ví")
+            @RequestParam(required = false)
+            String cifWallet) {
+        return ResponseUtils.success(customerBalanceService.getCurrentBalance(cifBank, cifWallet));
+    }
+
+    @Operation(summary = "Api (nội bộ) thực hiện hết wqwqq hạn điểm")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-expiration-test")
+    public ResponseEntity<ResponseData<Void>> executePointExpirationTesst(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey) {
+        customerBalanceService.executePointExpiration();
+        return ResponseUtils.success();
+    }
+
 }
 
