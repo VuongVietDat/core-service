@@ -9,6 +9,7 @@ import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
+import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.input.UsePointInput;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
@@ -19,6 +20,7 @@ import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.enums.*;
 import vn.com.atomi.loyalty.core.feign.LoyaltyCollectDataClient;
 import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
+import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceHistoryRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
@@ -31,6 +33,7 @@ import vn.com.atomi.loyalty.core.utils.Utils;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +61,8 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
     private final PointExpiredHistoryRepository pointExpiredHistoryRepository;
 
     private final CustomerService customerService;
+
+    private final LoyaltyEventGetwayClient loyaltyEventGetwayClient;
 
     @Override
     public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
@@ -242,7 +247,12 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             rule,
                             PointEventSource.LV24H,
                             this.getExpireDate(rule)));
-            customRepository.plusAmounts(results);
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+            }
+
         }
     }
 
@@ -299,8 +309,27 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             rule,
                             PointEventSource.LV24H,
                             this.getExpireDate(rule)));
-            customRepository.plusAmounts(results);
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+            }
         }
+    }
+
+    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput)
+    {
+        NotificationInput notificationInput = new NotificationInput();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss.SSS");
+        String startTime = LocalDateTime.now().format(formatter);
+        notificationInput.setLanguage("VN");
+        notificationInput.setRequestId(RequestUtils.extractRequestId());
+        notificationInput.setClientTime(startTime);
+        notificationInput.setTransTime(startTime);
+        notificationInput.setTitle("Cộng điểm Loyalty");
+        notificationInput.setContent("Quý khách được cộng " + consumptionPoint + "điểm Loyalty");
+        notificationInput.setUserName(customerOutput.getPhone());
+        return notificationInput;
     }
 
     public static RuleOutput convertToRuleOutput(RulePOCOutput rulePOC) {
