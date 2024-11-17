@@ -218,7 +218,7 @@ public class CustomerBalanceController extends BaseController {
 
     @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân cua KH")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @PostMapping("/internal/points-casa")
+    @PostMapping("/internal/customers/points/casa")
     public ResponseEntity<ResponseData<Void>> calculatePointCasa(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
@@ -233,7 +233,7 @@ public class CustomerBalanceController extends BaseController {
 
     @Operation(summary = "Api (nội bộ) thực hiện tính điểm cho giao dịch mua bán ngoại tệ tại quầy cua KH")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @PostMapping("/internal/points-currencyTransaction")
+    @PostMapping("/internal/customers/points/currencyTransaction")
     public ResponseEntity<ResponseData<Void>> calculatePointCurrencyTransaction(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
