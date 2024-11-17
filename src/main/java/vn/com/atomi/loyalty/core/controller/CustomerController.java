@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vn.com.atomi.loyalty.base.annotations.DateTimeValidator;
+import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.BaseController;
 import vn.com.atomi.loyalty.base.data.ResponseData;
@@ -16,6 +18,7 @@ import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerPointAccountPreviewOutput;
 import vn.com.atomi.loyalty.core.enums.Status;
+import vn.com.atomi.loyalty.core.service.CustomerBalanceService;
 import vn.com.atomi.loyalty.core.service.CustomerService;
 
 /**
@@ -27,6 +30,8 @@ import vn.com.atomi.loyalty.core.service.CustomerService;
 public class CustomerController extends BaseController {
 
   private final CustomerService customerService;
+
+  private final CustomerBalanceService customerBalanceService;
 
   @Operation(summary = "Api lấy chi tiết tài khoản điểm theo id khách hàng")
   @PreAuthorize(Authority.Customer.READ_CUSTOMER_ACCOUNT)
@@ -145,4 +150,49 @@ public class CustomerController extends BaseController {
           String cifWallet) {
     return ResponseUtils.success(customerService.getCustomer(cifBank, cifWallet));
   }
+
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân cua KH")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-casa")
+    public ResponseEntity<ResponseData<Void>> calculatePointCasa(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey) {
+        customerBalanceService.calculatePointCasa();
+        return ResponseUtils.success();
+    }
+
+
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm cho giao dịch mua bán ngoại tệ tại quầy cua KH")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-currencyTransaction")
+    public ResponseEntity<ResponseData<Void>> calculatePointCurrencyTransaction(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(
+                    description = "Thời gian lay giao dich ngoai te từ ngày (dd/MM/yyyy)",
+                    example = "01/01/2024")
+            @DateTimeValidator(
+                    required = false,
+                    pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String startDate,
+            @Parameter(
+                    description = "Thời gian lay giao dich ngoai te đến ngày (dd/MM/yyyy)",
+                    example = "31/12/2024")
+            @DateTimeValidator(
+                    required = false,
+                    pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String endDate) {
+        customerBalanceService.calculatePointCurrencyTransaction(startDate, endDate);
+        return ResponseUtils.success();
+    }
 }

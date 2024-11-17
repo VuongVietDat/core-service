@@ -215,5 +215,50 @@ public class CustomerBalanceController extends BaseController {
             String cifWallet) {
         return ResponseUtils.success(customerBalanceService.getCurrentBalance(cifBank, cifWallet));
     }
+
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm dựa vào số dư CASA bình quân cua KH")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-casa")
+    public ResponseEntity<ResponseData<Void>> calculatePointCasa(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey) {
+        customerBalanceService.calculatePointCasa();
+        return ResponseUtils.success();
+    }
+
+
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm cho giao dịch mua bán ngoại tệ tại quầy cua KH")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/points-currencyTransaction")
+    public ResponseEntity<ResponseData<Void>> calculatePointCurrencyTransaction(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(
+                    description = "Thời gian lay giao dich ngoai te từ ngày (dd/MM/yyyy)",
+                    example = "01/01/2024")
+            @DateTimeValidator(
+                    required = false,
+                    pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String startDate,
+            @Parameter(
+                    description = "Thời gian lay giao dich ngoai te đến ngày (dd/MM/yyyy)",
+                    example = "31/12/2024")
+            @DateTimeValidator(
+                    required = false,
+                    pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String endDate) {
+        customerBalanceService.calculatePointCurrencyTransaction(startDate, endDate);
+        return ResponseUtils.success();
+    }
 }
 
