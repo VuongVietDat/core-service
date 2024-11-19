@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.ResponseData;
+import vn.com.atomi.loyalty.core.dto.output.CardTransactionInfo;
 import vn.com.atomi.loyalty.core.dto.output.CurrencyTransaction;
 import vn.com.atomi.loyalty.core.dto.output.CustomerCasa;
 import vn.com.atomi.loyalty.core.feign.fallback.LoyaltyCollectDataClientFallbackFactory;
@@ -28,4 +29,11 @@ public interface LoyaltyCollectDataClient {
     ResponseData<List<CurrencyTransaction>> getCustomerCurrencyTransactions(@RequestHeader(RequestConstant.REQUEST_ID) String requestId,
                                                                             @RequestParam(required = false) String startDate,
                                                                             @RequestParam(required = false) String endDate);
+
+
+    @Operation(summary = "Api (nội bộ) lấy thông tin giao dịch thẻ")
+    @GetMapping("/internal/customers/lstCardTransaction")
+    ResponseData<List<CardTransactionInfo>> getLstCardTransaction(@RequestHeader(RequestConstant.REQUEST_ID) String requestId,
+                                                                  @RequestParam(required = false) String startDate,
+                                                                  @RequestParam(required = false) String endDate);
 }
