@@ -41,4 +41,6 @@ public interface CustomerBalanceService {
     void calculatePointCasa();
 
     void calculatePointCurrencyTransaction(String startDate, String endDate);
+
+    void calculatePointCard(String startDate, String endDate);
 }

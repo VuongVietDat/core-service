@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
+import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.input.UsePointInput;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
@@ -19,6 +21,7 @@ import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
 import vn.com.atomi.loyalty.core.enums.*;
 import vn.com.atomi.loyalty.core.feign.LoyaltyCollectDataClient;
 import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
+import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.CustomRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceHistoryRepository;
 import vn.com.atomi.loyalty.core.repository.CustomerBalanceRepository;
@@ -31,8 +34,10 @@ import vn.com.atomi.loyalty.core.utils.Utils;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,6 +63,8 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
     private final PointExpiredHistoryRepository pointExpiredHistoryRepository;
 
     private final CustomerService customerService;
+
+    private final LoyaltyEventGetwayClient loyaltyEventGetwayClient;
 
     @Override
     public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
@@ -242,7 +249,12 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             rule,
                             PointEventSource.LV24H,
                             this.getExpireDate(rule)));
-            customRepository.plusAmounts(results);
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+            }
+
         }
     }
 
@@ -299,8 +311,87 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             rule,
                             PointEventSource.LV24H,
                             this.getExpireDate(rule)));
-            customRepository.plusAmounts(results);
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+            }
         }
+    }
+
+    @Override
+    public void calculatePointCard(String startDate, String endDate) {
+        RulePOCOutput rulePOC = loyaltyConfigClient.getRulePoc(RequestUtils.extractRequestId(), "CARD").getData();
+        RuleOutput rule = this.convertToRuleOutput(rulePOC);
+        List<CardTransactionInfo> cardTransactionInfos = loyaltyCollectDataClient.getLstCardTransaction(RequestUtils.extractRequestId(), startDate, endDate).getData()
+                .stream()
+                .filter(cardTransactionInfo -> Long.parseLong(cardTransactionInfo.getCif()) >= rulePOC.getMinTransaction())
+                .collect(Collectors.toList());
+        for (CardTransactionInfo cardTransactionInfo : cardTransactionInfos) {
+            // lấy thông tin của KH
+            CustomerOutput customerOutput = customerService.getCustomer(cardTransactionInfo.getCustomerName(), null);
+            // lấy thông tin tài khoản điểm của KH
+            CustomerBalance customerBalance =
+                    customerBalanceRepository
+                            .findByDeletedFalseAndCustomerId(customerOutput.getId())
+                            .orElse(null);
+            if (customerBalance == null) {
+                LOGGER.warn("Not found customer balance with customerId: {}", customerOutput.getId());
+            }
+            LocalDateTime transactionDate = LocalDateTime.now();
+            var amount = BigInteger.valueOf(Long.parseLong(cardTransactionInfo.getTotalAmount()));
+            long limitPoint = rulePOC.getLimitPointPerUser();
+            String refNo = UUID.randomUUID().toString();
+            AllocationPointTransactionInput allocationTransaction = new AllocationPointTransactionInput();
+            allocationTransaction.setAmount(Long.valueOf(String.valueOf(amount)));
+            allocationTransaction.setRefNo(refNo);
+            allocationTransaction.setTransactionAt(transactionDate);
+            allocationTransaction.setCurrency("VND");
+            allocationTransaction.setTransactionType("CARD");
+            allocationTransaction.setTransactionGroup("FUNDTF");
+            List<TransactionInput> results = new ArrayList<>();
+            // tính điểm
+            var totalPoint = BigInteger.ZERO;
+            var basePoint = BigInteger.ZERO;
+            long consumptionPoint = 0;
+            basePoint =
+                    amount
+                            .divide(BigInteger.valueOf(rulePOC.getExchangeValue()))
+                            .multiply(BigInteger.valueOf(rulePOC.getExchangePoint()));
+            totalPoint = totalPoint.add(basePoint);
+            consumptionPoint = totalPoint.longValue();
+            results.add(
+                    super.modelMapper.convertToTransactionInput(
+                            allocationTransaction,
+                            PointType.CONSUMPTION_POINT,
+                            consumptionPoint,
+                            customerOutput.getId(),
+                            rule,
+                            PointEventSource.LV24H,
+                            this.getExpireDate(rule)));
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+            }
+
+        }
+    }
+
+    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput)
+    {
+        NotificationInput notificationInput = new NotificationInput();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss.SSS");
+        String startTime = LocalDateTime.now().format(formatter);
+        long date = new Date().getTime();
+        notificationInput.setLanguage("VN");
+        notificationInput.setRequestId(String.valueOf(date));
+        notificationInput.setClientTime(startTime);
+        notificationInput.setTransTime(String.valueOf(date));
+        notificationInput.setTitle("Cộng điểm Loyalty");
+        notificationInput.setContent("Quý khách được cộng " + consumptionPoint + "điểm Loyalty");
+        notificationInput.setUserName(customerOutput.getPhone());
+        return notificationInput;
     }
 
     public static RuleOutput convertToRuleOutput(RulePOCOutput rulePOC) {
