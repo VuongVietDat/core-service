@@ -7,15 +7,13 @@ import org.mapstruct.*;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
+import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerPointAccountProjection;
-import vn.com.atomi.loyalty.core.entity.Customer;
-import vn.com.atomi.loyalty.core.entity.CustomerBalanceHistory;
-import vn.com.atomi.loyalty.core.entity.CustomerGroup;
-import vn.com.atomi.loyalty.core.entity.CustomerGroupApproval;
+import vn.com.atomi.loyalty.core.entity.*;
 import vn.com.atomi.loyalty.core.enums.ApprovalStatus;
 import vn.com.atomi.loyalty.core.enums.ApprovalType;
 import vn.com.atomi.loyalty.core.enums.PointEventSource;
@@ -186,4 +184,9 @@ public interface ModelMapper {
   @Mapping(target = "dob", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   @Mapping(target = "issueDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   Customer fromCustomerKafkaInput(@MappingTarget Customer customer, CustomerKafkaInput input);
+
+  List<GetListPackageOutput> convertPackageOutput(List<Packages> lstPackage);
+  List<GetListBenefitOutput> convertBenefitOutput(List<PkgBenefit> lstBenefit);
+  PkgPurchaseHistory convertPerchaseHistoryInput(PurchasePackageInput purchasePackageInput);
+  GetListPackageOutput convertRegistedPackageOutput(Packages purchasePackageInput);
 }
