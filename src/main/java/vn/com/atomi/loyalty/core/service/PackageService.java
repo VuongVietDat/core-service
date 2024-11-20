@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface PackageService {
   List<GetListPackageOutput> getListPackage();
-  List<GetListBenefitOutput> getListBenefit(Integer packageId);
+  List<GetListBenefitOutput> getListBenefit(Long packageId);
   void purchasePackage(PurchasePackageInput purchasePackageInput);
-  GetListPackageOutput getRegistedPackage(String cifNo);
+  RegistedPackageOuput getRegistedPackage(String cifNo);
 }

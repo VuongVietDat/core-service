@@ -33,6 +33,7 @@ public class PkgBenefit {
     private String name;
 
     @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(name = "TYPE")

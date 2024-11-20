@@ -13,35 +13,26 @@ import java.time.LocalDate;
 @Setter
 @Getter
 public class GetListBenefitOutput {
-
   @Schema(description = "ID bản ghi")
   private Long id;
 
-  @Schema(description = "Mã gói hội viên")
-  private String code;
+  @Schema(description = "ID gói hội viên")
+  private String packageId;
 
-  @Schema(description = "Tên gói hội viên")
+  @Schema(description = "Tên ưu đãi")
   private String name;
 
-  @Schema(description = "Phí tham gia gói hội viên")
-  private Integer fee;
+  @Schema(description = "Loại ưu đãi")
+  private String type;
 
-  @Schema(description = "Loại tiền phí")
-  private String currency;
+  @Schema(description = "Thứ tự hiển thị")
+  private Integer displayOrder;
 
   @Schema(description = "Đường dẫn ảnh")
   private String urlImgage;
 
-  @Schema(description = "Thư tự hiển thị")
-  private Integer displayOrder;
+  @Schema(description = "Mô tả")
+  private String description;
 
-  @Schema(description = "Ngày hiệu lực")
-  private LocalDate effectiveDate;
-
-  @Schema(description = "Ngày hết hạn")
-  private LocalDate expriredDate;
-
-  @Schema(description = "Mô tả gói hội viên")
-  private Integer description;
 
 }

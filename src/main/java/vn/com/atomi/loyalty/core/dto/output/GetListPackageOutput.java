@@ -24,22 +24,31 @@ public class GetListPackageOutput {
   @Schema(description = "ID bản ghi")
   private Long id;
 
-  @Schema(description = "ID gói hội viên")
-  private String packageId;
+  @Schema(description = "Mã gói hội viên")
+  private String code;
 
-  @Schema(description = "Tên ưu đãi")
+  @Schema(description = "Tên gói hội viên")
   private String name;
 
-  @Schema(description = "Loại ưu đãi")
-  private String type;
+  @Schema(description = "Phí tham gia gói hội viên")
+  private Integer fee;
 
-  @Schema(description = "Thứ tự hiển thị")
-  private String displayOrder;
+  @Schema(description = "Loại tiền phí")
+  private String currency;
 
   @Schema(description = "Đường dẫn ảnh")
-  private Integer urlImgage;
+  private String urlImgage;
 
-  @Schema(description = "Mô tả")
+  @Schema(description = "Thư tự hiển thị")
+  private Integer displayOrder;
+
+  @Schema(description = "Ngày hiệu lực")
+  private String effectiveDate;
+
+  @Schema(description = "Ngày hết hạn")
+  private String expriredDate;
+
+  @Schema(description = "Mô tả gói hội viên")
   private String description;
 
 }

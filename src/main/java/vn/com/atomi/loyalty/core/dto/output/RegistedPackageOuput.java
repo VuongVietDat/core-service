@@ -1,13 +1,8 @@
-package vn.com.atomi.loyalty.core.dto.input;
+package vn.com.atomi.loyalty.core.dto.output;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import vn.com.atomi.loyalty.core.enums.ChangeType;
 
 import java.sql.Date;
 
@@ -17,7 +12,7 @@ import java.sql.Date;
  */
 @Setter
 @Getter
-public class PurchasePackageInput {
+public class RegistedPackageOuput {
 
   @Schema(description = "ID khách hàng bên loyalty")
   private Long customerId;
@@ -34,13 +29,13 @@ public class PurchasePackageInput {
   @Schema(description = "ID giao dịch")
   private String transId;
 
-  @Schema(description = "Ngày đăng ký  format : dd/MM/yyyy HH:mm:ss")
+  @Schema(description = "Ngày đăng ký")
   private String purchasedDate;
 
-  @Schema(description = "Ngày hiệu lực format : dd/MM/yyyy")
+  @Schema(description = "Ngày hiệu lực")
   private String effectiveDate;
 
-  @Schema(description = "Ngày hết hạn  format : dd/MM/yyyy")
+  @Schema(description = "Ngày hết hạn")
   private String expiredDate;
 
   @Schema(description = "Số tiền")
