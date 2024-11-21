@@ -110,4 +110,13 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               + "  and (:cifBank is null or c.cifBank = :cifBank) "
               + "  and (:cifWallet is null or c.cifWallet = :cifWallet)")
   Optional<Customer> findByDeletedFalseAndCifWallet(String cifWallet, String cifBank);
+
+  @Query(
+          value =
+                  "select c "
+                + "from Customer c "
+                + "where c.deleted = false "
+                + "  and (:cifBank is null or c.cifBank = :cifBank) "
+                + "  and (:status is null or c.status = :status)")
+  Page<Customer> findByParams(String cifBank, Status status, Pageable pageable);
 }

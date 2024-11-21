@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -14,6 +15,7 @@ import vn.com.atomi.loyalty.core.dto.input.ApprovalInput;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
+import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.entity.PkgPurchaseHistory;
 import vn.com.atomi.loyalty.core.enums.ApprovalStatus;
 import vn.com.atomi.loyalty.core.enums.ApprovalType;
@@ -71,10 +73,11 @@ public class PackageServiceImpl extends BaseService implements PackageService {
   private PkgPurchaseHistory mappingPurchasePackage(PurchasePackageInput purchasePackageInput){
     PkgPurchaseHistory pkgPurchaseHistory = new PkgPurchaseHistory();
     try {
-      var customer = customerRepository.findByCifBank(purchasePackageInput.getCifNo());
-      customer.ifPresent(value -> purchasePackageInput.setCustomerId(value.getId()));
-
-      pkgPurchaseHistory.setCustomerId( purchasePackageInput.getCustomerId() );
+      var customer = customerRepository.findByParams(purchasePackageInput.getCifNo(),
+              Status.ACTIVE, PageRequest.of(0, 1));
+      if(customer.getContent() != null) {
+        pkgPurchaseHistory.setCustomerId( customer.getContent().get(0).getId() );
+      }
       pkgPurchaseHistory.setCifNo( purchasePackageInput.getCifNo() );
       pkgPurchaseHistory.setPackageId( purchasePackageInput.getPackageId() );
       pkgPurchaseHistory.setRefNo( purchasePackageInput.getRefNo() );
