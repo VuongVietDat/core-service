@@ -219,4 +219,6 @@ public interface ModelMapper {
               .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
     }
   }
+
+  List<CChainMissionOuput> convertChainMissionOutput(List<CChainMission> lstPackage);
 }

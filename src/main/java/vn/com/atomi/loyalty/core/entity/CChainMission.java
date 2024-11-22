@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+import vn.com.atomi.loyalty.core.enums.Chain;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,13 +39,14 @@ public class CChainMission {
     @Column(name = "NAME", nullable = false, length = 200)
     private String name;
 
-    @NotNull
-    @Column(name = "STATUS", nullable = false)
-    private Boolean status = false;
+    @Size(max = 10)
+    @Nationalized
+    @Column(name = "STATUS", length = 10)
+    private Status status;
 
-    @NotNull
-    @Column(name = "BENEFIT_TYPE", nullable = false)
-    private Boolean benefitType = false;
+    @Size(max = 10)
+    @Column(name = "BENEFIT_TYPE", length = 10)
+    private String benefitType;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -54,18 +57,21 @@ public class CChainMission {
     @Column(name = "PRICE", precision = 12, scale = 2)
     private BigDecimal price;
 
-    @Size(max = 3)
-    @Column(name = "CURRENCY", length = 3)
+    @Size(max = 10)
+    @Column(name = "CURRENCY", length = 10)
     private String currency;
 
-    @Column(name = "IS_CHAINED")
-    private Boolean isChained;
+    @Size(max = 10)
+    @Column(name = "IS_CHAINED", length = 10)
+    private Chain isChained;
 
-    @Column(name = "IS_ORDERED")
-    private Boolean isOrdered;
+    @Size(max = 10)
+    @Column(name = "IS_ORDERED", length = 10)
+    private String isOrdered;
 
-    @Column(name = "GROUP_TYPE")
-    private Boolean groupType;
+    @Size(max = 10)
+    @Column(name = "GROUP_TYPE", length = 10)
+    private String groupType;
 
     @Size(max = 100)
     @Nationalized

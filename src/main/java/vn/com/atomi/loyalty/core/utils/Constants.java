@@ -21,6 +21,7 @@ public class Constants {
 
   public static final String DEFAULT_DAY_END_TIME = "23:59:59";
 
+
   private Constants() {
     throw new IllegalStateException("Utility class");
   }

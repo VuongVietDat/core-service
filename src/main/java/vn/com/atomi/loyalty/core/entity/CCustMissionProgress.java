@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
@@ -25,25 +23,17 @@ public class CCustMissionProgress {
     private Long id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(name = "CUSTOMER_ID", nullable = false)
-    private Customer customer;
+    @Column(name = "CUSTOMER_ID", nullable = false)
+    private Long customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(name = "CHAIN_ID")
-    private CChainMission chain;
+    @Column(name = "CHAIN_ID")
+    private Integer chain;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(name = "MISSION_ID")
-    private CMission mission;
+    @Column(name = "MISSION_ID")
+    private Integer mission;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(name = "PARENT_CHAIN_ID")
-    private CChainMission parentChain;
+    @Column(name = "PARENT_CHAIN_ID")
+    private Integer parentChain;
 
     @Size(max = 20)
     @Column(name = "STATUS", length = 20)
