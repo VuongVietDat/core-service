@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @AllArgsConstructor
@@ -39,11 +38,11 @@ public class CMission {
 
     @NotNull
     @Column(name = "STATUS", nullable = false)
-    private Boolean status = false;
+    private String status;
 
     @NotNull
     @Column(name = "BENEFIT_TYPE", nullable = false)
-    private Boolean benefitType = false;
+    private String benefitType;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -51,8 +50,8 @@ public class CMission {
     @Column(name = "END_DATE")
     private LocalDate endDate;
 
-    @Column(name = "PRICE", precision = 12, scale = 2)
-    private BigDecimal price;
+    @Column(name = "PRICE")
+    private Long price;
 
     @Size(max = 3)
     @Column(name = "CURRENCY", length = 3)

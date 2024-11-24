@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Value;
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
 import vn.com.atomi.loyalty.core.enums.Chain;
 import vn.com.atomi.loyalty.core.enums.Status;
@@ -16,7 +16,12 @@ import java.time.LocalDate;
 /**
  * DTO for {@link vn.com.atomi.loyalty.core.entity.CChainMission}
  */
-@Value
+@Builder
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class CChainMissionOuput implements Serializable {
 
     @Schema(description = "ID chuỗi nhiệm vụ")
@@ -35,10 +40,10 @@ public class CChainMissionOuput implements Serializable {
     private String benefitType;
 
     @Schema(description = "Ngày bắt đầu")
-    private LocalDate startDate;
+    private String startDate;
 
     @Schema(description = "Ngày kết thúc")
-    private LocalDate endDate;
+    private String endDate;
 
     @Schema(description = "Giá")
     private BigDecimal price;

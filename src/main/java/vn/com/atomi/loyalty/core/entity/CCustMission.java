@@ -1,8 +1,6 @@
 package vn.com.atomi.loyalty.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +16,12 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "C_CUST_MISSION")
 public class CCustMission {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID", nullable = false)
+    private Long id;
+
     @NotNull
     @Column(name = "CUST_ID", nullable = false)
     private Long custId;
@@ -30,7 +34,5 @@ public class CCustMission {
     @Column(name = "REG_DATE", nullable = false)
     private LocalDate regDate;
 
-    @Column(name = "ID")
-    private Long id;
 
 }

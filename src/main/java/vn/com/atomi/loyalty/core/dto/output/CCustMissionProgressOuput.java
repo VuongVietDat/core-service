@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -12,7 +12,12 @@ import java.time.LocalDate;
 /**
  * DTO for {@link vn.com.atomi.loyalty.core.entity.CCustMissionProgress}
  */
-@Value
+@Builder
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class CCustMissionProgressOuput implements Serializable {
 
     @Schema(description = "ID quá trình thực hiện")
