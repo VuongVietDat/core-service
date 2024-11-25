@@ -18,8 +18,12 @@ import java.time.LocalDate;
 public class CCustMission {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CUST_MISSION_ID_SEQ")
+    @SequenceGenerator(
+            name = "C_CUST_MISSION_ID_SEQ",
+            sequenceName = "C_CUST_MISSION_ID_SEQ",
+            allocationSize = 1)
     private Long id;
 
     @NotNull
@@ -28,7 +32,7 @@ public class CCustMission {
 
     @NotNull
     @Column(name = "CHAIN_ID", nullable = false)
-    private Integer chainId;
+    private Long chainId;
 
     @NotNull
     @Column(name = "REG_DATE", nullable = false)

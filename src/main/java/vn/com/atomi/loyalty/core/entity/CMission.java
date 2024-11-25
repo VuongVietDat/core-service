@@ -1,9 +1,6 @@
 package vn.com.atomi.loyalty.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -11,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.time.LocalDate;
 
@@ -22,23 +20,29 @@ import java.time.LocalDate;
 @Table(name = "C_MISSION")
 public class CMission {
     @Id
-    @Column(name = "ID", nullable = false)
-    private Integer id;
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_MISSION_ID_SEQ")
+    @SequenceGenerator(
+            name = "C_MISSION_ID_SEQ",
+            sequenceName = "C_MISSION_ID_SEQ",
+            allocationSize = 1)
+    private Long id;
 
     @NotNull
-    @Column(name = "CODE", nullable = false)
+    @Column(name = "CODE", nullable = false, length = 30)
     private String code;
 
     @NotNull
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", nullable = false, length = 200)
     private String name;
 
     @NotNull
-    @Column(name = "STATUS", nullable = false)
-    private String status;
+    @Column(name = "STATUS", nullable = false, length = 10)
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @NotNull
-    @Column(name = "BENEFIT_TYPE", nullable = false)
+    @Column(name = "BENEFIT_TYPE", nullable = false, length = 1)
     private String benefitType;
 
     @Column(name = "START_DATE")
@@ -50,13 +54,13 @@ public class CMission {
     @Column(name = "PRICE")
     private Long price;
 
-    @Column(name = "CURRENCY")
+    @Column(name = "CURRENCY", length = 3)
     private String currency;
 
-    @Column(name = "IMAGE")
+    @Column(name = "IMAGE", length = 200)
     private String image;
 
-    @Column(name = "NOTES")
+    @Column(name = "NOTES", length = 2000)
     private String notes;
 
     @Column(name = "IS_DELETED")

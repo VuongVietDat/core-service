@@ -1,9 +1,6 @@
 package vn.com.atomi.loyalty.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -25,8 +22,13 @@ import java.time.LocalDate;
 @Table(name = "C_CHAIN_MISSION")
 public class CChainMission {
     @Id
-    @Column(name = "ID", nullable = false)
-    private Integer id;
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CHAIN_MISSION_ID_SEQ")
+    @SequenceGenerator(
+            name = "C_CHAIN_MISSION_ID_SEQ",
+            sequenceName = "C_CHAIN_MISSION_ID_SEQ",
+            allocationSize = 1)
+    private Long id;
 
     @Size(max = 30)
     @NotNull
@@ -40,8 +42,8 @@ public class CChainMission {
     private String name;
 
     @Size(max = 10)
-    @Nationalized
     @Column(name = "STATUS", length = 10)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Size(max = 10)
@@ -54,15 +56,16 @@ public class CChainMission {
     @Column(name = "END_DATE")
     private LocalDate endDate;
 
-    @Column(name = "PRICE", precision = 12, scale = 2)
-    private BigDecimal price;
+    @Column(name = "PRICE", length = 20)
+    private Long price;
 
-    @Size(max = 10)
-    @Column(name = "CURRENCY", length = 10)
+    @Size(max = 3)
+    @Column(name = "CURRENCY", length = 3)
     private String currency;
 
     @Size(max = 10)
     @Column(name = "IS_CHAINED", length = 10)
+    @Enumerated(EnumType.STRING)
     private Chain isChained;
 
     @Size(max = 10)

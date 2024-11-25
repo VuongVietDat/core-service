@@ -45,8 +45,8 @@ public class MissionController extends BaseController {
 
     @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đang thực hiện")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @GetMapping("/internal/mission/mission-inprogress")
-    public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getMissionInProgress(
+    @GetMapping("/internal/mission/registed-chain-mission")
+    public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getRegistedChainMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
@@ -55,8 +55,8 @@ public class MissionController extends BaseController {
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
             @RequestParam(required = false)
-            String cifNo) {
-        List<CChainMissionOuput> lstResponse = missionService.getMissionInProgress(cifNo);
+            String cifNo, String status) {
+        List<CChainMissionOuput> lstResponse = missionService.getRegistedChainMission(cifNo, status);
         return ResponseUtils.success(lstResponse);
     }
     @Operation(summary = "Api lấy danh sách nhiệm vụ")
@@ -76,6 +76,22 @@ public class MissionController extends BaseController {
         return ResponseUtils.success(lstResponse);
     }
 
+    @Operation(summary = "Api chi tiết chuỗi nhiệm vụ")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @GetMapping("/internal/mission/chain-mission-detail")
+    public ResponseEntity<ResponseData<CChainMissionOuput>> getChainMissionDetail(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(description = "Mã định danh gói hội viên")
+            @RequestParam(required = false)
+            Long id) {
+        CChainMissionOuput lstResponse = missionService.getChainMissionDetail(id);
+        return ResponseUtils.success(lstResponse);
+    }
     @Operation(summary = "Api chi tiết nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/mission/mission-detail")
@@ -88,7 +104,7 @@ public class MissionController extends BaseController {
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
             @RequestParam(required = false)
-            Integer id) {
+            Long id) {
         CMissionOuput lstResponse = missionService.getMissionDetail(id);
         return ResponseUtils.success(lstResponse);
     }

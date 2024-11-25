@@ -221,5 +221,6 @@ public interface ModelMapper {
   }
 
   List<CChainMissionOuput> convertChainMissionOutput(List<CChainMission> lstPackage);
+  CChainMissionOuput convertChainMissionDetailOutput(CChainMission mission);
   CMissionOuput convertMissionDetailOutput(CMission mission);
 }

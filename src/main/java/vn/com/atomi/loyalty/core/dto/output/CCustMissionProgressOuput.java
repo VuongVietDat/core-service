@@ -27,10 +27,10 @@ public class CCustMissionProgressOuput implements Serializable {
     private Long customer;
 
     @Schema(description = "ID bảng chuỗi nhiệm vụ")
-    private Integer chain;
+    private Long chain;
 
     @Schema(description = "ID nhiệm vụ")
-    private Integer mission;
+    private Long mission;
 
     @Schema(description = "Trạng thái của nhiệm vụ (PENDING, INPROGRESS, COMPLETED).")
     private String status;
@@ -42,11 +42,11 @@ public class CCustMissionProgressOuput implements Serializable {
     private Short orderNo;
 
     @Schema(description = "Thời gian bắt đầu nhiệm vụ/chuỗi nhiệm vụ.")
-    private LocalDate startDate;
+    private String startDate;
 
     @Schema(description = "Thời gian kết thúc nhiệm vụ/chuỗi nhiệm vụ.")
-    private LocalDate endDate;
+    private String endDate;
 
     @Schema(description = "Thời gian hoàn thành nhiệm vụ")
-    private LocalDate completedAt;
+    private String completedAt;
 }

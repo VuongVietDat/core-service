@@ -21,10 +21,10 @@ import java.time.LocalDate;
 public class CMissionOuput implements Serializable {
 
     @Schema(description = "ID nhiệm vụ")
-    private Integer id;
+    private Long id;
 
     @Schema(description = "ID chuỗi nhiệm vụ")
-    private Integer chainId;
+    private Long chainId;
 
     @Schema(description = "Thứ tự hiển thị")
     private Integer orderNo;

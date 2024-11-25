@@ -21,6 +21,9 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
   @Query(value = "SELECT ccms FROM CChainMission ccms WHERE (ccms.isDeleted is null or ccms.isDeleted = false) " +
           " and ccms.isChained = :isChained AND ccms.status = :status ")
   List<CChainMission> getNewChainMission(Chain isChained, Status status);
+  @Query(value = "SELECT ccms FROM CChainMission ccms WHERE (ccms.isDeleted is null or ccms.isDeleted = false) " +
+          " and ccms.id = :id AND ccms.status = :status ")
+  CChainMission getChainMissionDetail(Long id, Status status);
 
   @Query(value = " SELECT ccm FROM CChainMission ccm " +
           " WHERE (ccm.isDeleted IS NULL OR ccm.isDeleted = false) " +
@@ -49,8 +52,9 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
           " AND IS_CHAINED = 'Y' " +
           " AND STATUS = 'ACTIVE'" +
           " AND EXISTS (" +
-          " SELECT 1 FROM C_CUST_MISSION_PROGRESS CMP " +
-          " WHERE ccm.ID = CMP.CHAIN_ID AND CMP.CUSTOMER_ID  = :customerId " +
-          " AND ( CMP.MISSION_ID IS NOT NULL OR CMP.PARENT_CHAIN_ID IS NULL )) ", nativeQuery = true)
-  List<Object[]> getChainMissionProgress(Long customerId);
+          " SELECT 1 FROM C_CUST_MISSION_PROGRESS cmp " +
+          " WHERE ccm.ID = CMP.CHAIN_ID AND cmp.CUSTOMER_ID  = :customerId" +
+          " AND cmp.STATUS = :status " +
+          " AND ( CMP.MISSION_ID IS NOT NULL OR cmp.PARENT_CHAIN_ID IS NULL )) ", nativeQuery = true)
+  List<Object[]> getRegistedChainMission(Long customerId, String status);
 }

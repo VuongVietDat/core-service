@@ -25,7 +25,7 @@ import java.time.LocalDate;
 public class CChainMissionOuput implements Serializable {
 
     @Schema(description = "ID chuỗi nhiệm vụ")
-    private Integer id;
+    private Long id;
 
     @Schema(description = "Mã chuỗi nhiệm vụ")
     private String code;

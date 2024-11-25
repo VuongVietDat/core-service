@@ -51,11 +51,11 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return super.modelMapper.convertChainMissionOutput(chainMission);
   }
   @Override
-  public List<CChainMissionOuput> getMissionInProgress(String cifNo) {
+  public List<CChainMissionOuput> getRegistedChainMission(String cifNo, String status) {
     var customer = customerRepository.findByParams(cifNo,
             Status.ACTIVE, PageRequest.of(0, 1));
     if(customer.getContent() != null) {
-      var chainMission = chainMissionRepository.getChainMissionProgress(customer.getContent().get(0).getId());
+      var chainMission = chainMissionRepository.getRegistedChainMission(customer.getContent().get(0).getId(), status);
       return this.mappingMissionProgress(chainMission);
     }
     return new ArrayList<>();
@@ -70,8 +70,13 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return response;
   }
   @Override
-  public CMissionOuput getMissionDetail(Integer id) {
-    var mission = missionRepository.findById(id);
+  public CChainMissionOuput getChainMissionDetail(Long id) {
+    var mission = chainMissionRepository.getChainMissionDetail(id, Status.ACTIVE);
+    return modelMapper.convertChainMissionDetailOutput(mission);
+  }
+  @Override
+  public CMissionOuput getMissionDetail(Long id) {
+    var mission = missionRepository.getMissionDetail(id, Status.ACTIVE);
     return modelMapper.convertMissionDetailOutput(mission);
   }
 
@@ -80,7 +85,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
           .map(data -> {
               CChainMissionOuput output = new CChainMissionOuput();
 
-                output.setId((Integer) data[0]);  // Assuming column 0 is chainId
+                output.setId((Long) data[0]);  // Assuming column 0 is chainId
                 output.setCode((String) data[1]);  // Assuming column 1 is missionId
                 output.setName((String) data[2]);  // Assuming column 2 is orderNo
                 output.setGroupType(data.length > 3 ? (String) data[3] : null);  // Assuming column 3 is groupType
@@ -107,8 +112,8 @@ public class MissionServiceImpl extends BaseService implements MissionService {
           .map(data -> {
                 CMissionOuput output = new CMissionOuput();
 
-                output.setChainId((Integer) data[0]);  // Assuming column 0 is chainId
-                output.setId((Integer) data[1]);  // Assuming column 1 is missionId
+                output.setChainId((Long) data[0]);  // Assuming column 0 is chainId
+                output.setId((Long) data[1]);  // Assuming column 1 is missionId
                 output.setOrderNo(Integer.parseInt((String) data[2]));  // Assuming column 2 is orderNo
                 output.setGroupType((String) data[3]);  // Assuming column 3 is groupType
                 output.setCode(data.length > 4 ? (String) data[4] : null);  // Assuming column 4 is code

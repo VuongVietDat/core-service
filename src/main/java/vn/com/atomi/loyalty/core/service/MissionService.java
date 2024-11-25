@@ -11,7 +11,8 @@ import java.util.List;
  */
 public interface MissionService {
   List<CChainMissionOuput> getNewChainMission();
-  List<CChainMissionOuput> getMissionInProgress(String cifNo);
+  List<CChainMissionOuput> getRegistedChainMission(String cifNo, String status);
   List<CMissionOuput> getListMission(Long chainId);
-  CMissionOuput getMissionDetail(Integer id);;
+  CChainMissionOuput getChainMissionDetail(Long id);
+  CMissionOuput getMissionDetail(Long id);
 }

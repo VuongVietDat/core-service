@@ -18,8 +18,12 @@ import java.time.LocalDate;
 @Table(name = "C_CUST_MISSION_PROGRESS")
 public class CCustMissionProgress {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CUST_MISSION_PROGRESS_ID_SEQ")
+    @SequenceGenerator(
+            name = "C_CUST_MISSION_PROGRESS_ID_SEQ",
+            sequenceName = "C_CUST_MISSION_PROGRESS_ID_SEQ",
+            allocationSize = 1)
     private Long id;
 
     @NotNull
@@ -27,23 +31,23 @@ public class CCustMissionProgress {
     private Long customer;
 
     @Column(name = "CHAIN_ID")
-    private Integer chain;
+    private Long chain;
 
     @Column(name = "MISSION_ID")
-    private Integer mission;
+    private Long mission;
 
     @Column(name = "PARENT_CHAIN_ID")
-    private Integer parentChain;
+    private Long parentChain;
 
-    @Size(max = 20)
-    @Column(name = "STATUS", length = 20)
+    @Size(max = 10)
+    @Column(name = "STATUS", length = 10)
     private String status;
 
     @Column(name = "GROUP_TYPE")
     private Boolean groupType;
 
     @Column(name = "ORDER_NO")
-    private Short orderNo;
+    private Integer orderNo;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;

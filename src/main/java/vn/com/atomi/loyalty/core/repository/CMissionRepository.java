@@ -2,7 +2,9 @@ package vn.com.atomi.loyalty.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import vn.com.atomi.loyalty.core.entity.CChainMission;
 import vn.com.atomi.loyalty.core.entity.CMission;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ public interface CMissionRepository extends JpaRepository<CMission, Long> {
                    ORDER BY cms2.ORDER_NO, cms2.MISSION_ID""", nativeQuery = true)
     List<Object[]> getListMission(Long chainId);
 
-    @Query( value = "SELECT cmn FROM CMission cmn WHERE cmn.id = :id")
-    CMission findById(Integer id);
+    @Query( value = "SELECT cmn FROM CMission cmn " +
+            " WHERE (cmn.isDeleted is null or cmn.isDeleted = false) and cmn.id = :id " +
+            " AND cmn.status = :status")
+    CMission getMissionDetail(Long id, Status status);
 }
