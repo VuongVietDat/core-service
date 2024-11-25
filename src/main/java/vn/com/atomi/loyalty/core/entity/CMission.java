@@ -25,15 +25,12 @@ public class CMission {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @Size(max = 30)
     @NotNull
-    @Column(name = "CODE", nullable = false, length = 30)
+    @Column(name = "CODE", nullable = false)
     private String code;
 
-    @Size(max = 200)
     @NotNull
-    @Nationalized
-    @Column(name = "NAME", nullable = false, length = 200)
+    @Column(name = "NAME", nullable = false)
     private String name;
 
     @NotNull
@@ -53,32 +50,25 @@ public class CMission {
     @Column(name = "PRICE")
     private Long price;
 
-    @Size(max = 3)
-    @Column(name = "CURRENCY", length = 3)
+    @Column(name = "CURRENCY")
     private String currency;
 
-    @Size(max = 100)
-    @Nationalized
-    @Column(name = "IMAGE", length = 100)
+    @Column(name = "IMAGE")
     private String image;
 
-    @Size(max = 2000)
-    @Nationalized
-    @Column(name = "NOTES", length = 2000)
+    @Column(name = "NOTES")
     private String notes;
 
     @Column(name = "IS_DELETED")
     private Boolean isDeleted;
 
-    @Size(max = 20)
-    @Column(name = "CREATED_BY", length = 20)
+    @Column(name = "CREATED_BY")
     private String createdBy;
 
     @Column(name = "CREATED_AT")
     private LocalDate createdAt;
 
-    @Size(max = 20)
-    @Column(name = "UPDATED_BY", length = 20)
+    @Column(name = "UPDATED_BY")
     private String updatedBy;
 
     @Column(name = "UPDATED_AT")

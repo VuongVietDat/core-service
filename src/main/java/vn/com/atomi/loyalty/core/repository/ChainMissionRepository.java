@@ -18,7 +18,7 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
 //  @Query(value = "select PACKAGES_ID_SEQ.nextval from DUAL", nativeQuery = true)
 //  Long getSequence();
 
-  @Query(value = "SELECT ccms FROM CChainMission ccms WHERE ccms.isDeleted = false " +
+  @Query(value = "SELECT ccms FROM CChainMission ccms WHERE (ccms.isDeleted is null or ccms.isDeleted = false) " +
           " and ccms.isChained = :isChained AND ccms.status = :status ")
   List<CChainMission> getNewChainMission(Chain isChained, Status status);
 
