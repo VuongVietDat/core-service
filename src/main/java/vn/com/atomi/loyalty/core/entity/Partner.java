@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
+import vn.com.atomi.loyalty.base.data.BaseEntity;
 import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.time.LocalDate;
@@ -16,10 +17,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @Table(name = "C_PARTNER")
-public class Partner {
+public class Partner extends BaseEntity {
     @Id
-    @Column(name = "ID", nullable = false)
-    private Integer id;
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "c_partner_id_seq")
+    @SequenceGenerator(name = "c_partner_id_seq", sequenceName = "c_partner_id_seq", allocationSize = 1)
+    private Long id;
 
     @Size(max = 20)
     @NotNull
@@ -66,23 +69,6 @@ public class Partner {
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    @Column(name = "IS_DELETED")
-    private Boolean isDeleted;
-
-    @Size(max = 20)
-    @Column(name = "CREATED_BY", length = 20)
-    private String createdBy;
-
-    @Column(name = "CREATED_AT")
-    private LocalDate createdAt;
-
-    @Size(max = 20)
-    @Column(name = "UPDATED_BY", length = 20)
-    private String updatedBy;
-
-    @Column(name = "UPDATED_AT")
-    private LocalDate updatedAt;
 
     @Size(max = 255)
     @Column(name = "IS_LOCAL")
