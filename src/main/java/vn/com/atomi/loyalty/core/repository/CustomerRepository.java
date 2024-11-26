@@ -86,7 +86,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
               where c.deleted = false
               and (:status is null or c.status = :status)
               and (:customerId is null or c.id = :customerId)
-              and (:customerName is null or c.customerName = :customerName)
+              and (:customerName is null or lower(c.customerName) LIKE lower('%' || :customerName || '%') )
               and (:cifBank is null or c.cifBank = :cifBank)
               and (:rank is null or c.rank = :rank)
               and (:segment is null or c.segment = :segment)

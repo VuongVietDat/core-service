@@ -187,11 +187,13 @@ public interface ModelMapper {
       RuleOutput ruleOutput,
       PointEventSource eventSource,
       LocalDate expireAt);
-
+      
   @Mapping(target = "dob", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   @Mapping(target = "issueDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   Customer fromCustomerKafkaInput(@MappingTarget Customer customer, CustomerKafkaInput input);
-
+  
+  List<PartnersOutput> convertToPartnerOutputs(List<Partner> partners);
+  
   @Mapping(source = "effectiveDate", target = "effectiveDate", dateFormat = "dd-MM-yyyy")
   @Mapping(source = "expiredDate", target = "expiredDate", dateFormat = "dd-MM-yyyy")
   List<GetListPackageOutput> convertPackageOutput(List<Packages> lstPackage);

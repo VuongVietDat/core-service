@@ -66,6 +66,9 @@ public class CustomerBalanceHistoryOutput {
   @Schema(description = "Mã công thức sinh điểm")
   private String ruleCode;
 
+  @Schema(description = "Loại giao dịch")
+  private String transactionType;
+
   @Schema(description = "Thời gian giao dịch")
   @JsonFormat(pattern = DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)
   private LocalDateTime transactionAt;
