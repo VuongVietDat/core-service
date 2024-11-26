@@ -1,12 +1,20 @@
 package vn.com.atomi.loyalty.core.mapper;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.*;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
 import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
+import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
@@ -179,10 +187,42 @@ public interface ModelMapper {
       RuleOutput ruleOutput,
       PointEventSource eventSource,
       LocalDate expireAt);
-
+      
   @Mapping(target = "dob", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   @Mapping(target = "issueDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   Customer fromCustomerKafkaInput(@MappingTarget Customer customer, CustomerKafkaInput input);
-
+  
   List<PartnersOutput> convertToPartnerOutputs(List<Partner> partners);
+  
+  @Mapping(source = "effectiveDate", target = "effectiveDate", dateFormat = "dd-MM-yyyy")
+  @Mapping(source = "expiredDate", target = "expiredDate", dateFormat = "dd-MM-yyyy")
+  List<GetListPackageOutput> convertPackageOutput(List<Packages> lstPackage);
+  @AfterMapping
+  default void afterMapPackageOutput(@MappingTarget GetListPackageOutput output, Packages packages) {
+    if (packages.getEffectiveDate() != null) {
+      output.setEffectiveDate(packages.getEffectiveDate()
+              .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+    }
+    if (packages.getExpriredDate() != null) {
+      output.setExpriredDate(packages.getExpriredDate()
+              .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+    }
+  }
+  List<GetListBenefitOutput> convertBenefitOutput(List<PkgBenefit> lstBenefit);
+  RegistedPackageOuput convertRegistedPackageOutput(PkgPurchaseHistory purchaseHistory);
+  @AfterMapping
+  default void afterMapRegistedPackage(@MappingTarget GetListPackageOutput output, Packages packages) {
+    if (packages.getEffectiveDate() != null) {
+      output.setEffectiveDate(packages.getEffectiveDate()
+              .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+    }
+    if (packages.getExpriredDate() != null) {
+      output.setExpriredDate(packages.getExpriredDate()
+              .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+    }
+  }
+
+  List<CChainMissionOuput> convertChainMissionOutput(List<CChainMission> lstPackage);
+  CChainMissionOuput convertChainMissionDetailOutput(CChainMission mission);
+  CMissionOuput convertMissionDetailOutput(CMission mission);
 }

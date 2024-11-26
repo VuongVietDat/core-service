@@ -15,26 +15,32 @@ import vn.com.atomi.loyalty.core.enums.PointType;
  */
 public interface CustomerBalanceService {
 
-  CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet);
+    CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet);
 
-  ResponsePage<ExternalCustomerBalanceHistoryOutput> getBalanceHistories(
-      Long customerId,
-      ChangeType changeType,
-      String startTransactionDate,
-      String endTransactionDate,
-      Pageable pageable);
+    ResponsePage<ExternalCustomerBalanceHistoryOutput> getBalanceHistories(
+            Long customerId,
+            ChangeType changeType,
+            String startTransactionDate,
+            String endTransactionDate,
+            Pageable pageable);
 
-  ResponsePage<CustomerBalanceHistoryOutput> getBalanceHistories(
-      Long customerId,
-      ChangeType changeType,
-      PointType pointType,
-      String startTransactionDate,
-      String endTransactionDate,
-      String startExpiredDate,
-      String endExpiredDate,
-      Pageable pageable);
+    ResponsePage<CustomerBalanceHistoryOutput> getBalanceHistories(
+            Long customerId,
+            ChangeType changeType,
+            PointType pointType,
+            String startTransactionDate,
+            String endTransactionDate,
+            String startExpiredDate,
+            String endExpiredDate,
+            Pageable pageable);
 
-  void executeTransactionMinus(UsePointInput usePointInput);
+    void executeTransactionMinus(UsePointInput usePointInput);
 
-  void executePointExpiration();
+    void executePointExpiration();
+
+    void calculatePointCasa();
+
+    void calculatePointCurrencyTransaction(String startDate, String endDate);
+
+    void calculatePointCard(String startDate, String endDate);
 }

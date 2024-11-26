@@ -31,5 +31,5 @@ public interface CustomerBalanceRepository extends JpaRepository<CustomerBalance
               + "  and (:cifWallet is null or c.cifWallet = :cifWallet)")
   CustomerBalanceProjection findCurrentBalance(String cifBank, String cifWallet);
 
-  Optional<CustomerBalance> findByDeletedFalseAndId(Long customerId);
+  Optional<CustomerBalance> findByDeletedFalseAndCustomerId(Long customerId);
 }
