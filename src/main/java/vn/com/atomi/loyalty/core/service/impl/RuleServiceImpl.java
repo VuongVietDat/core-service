@@ -30,7 +30,9 @@ public class RuleServiceImpl extends BaseService implements RuleService {
 //    var ruleOutputs = ruleRepository.getRuleCurrentActive(type);
     var ruleOutputs =
             loyaltyConfigClient
-                    .getAllActiveRule(RequestUtils.extractRequestId(), type, transactionAt)
+                    .getAllActiveRule(RequestUtils.extractRequestId(), type,
+//                            transactionAt)
+                            "22/12/2024")
                     .getData();
     if (CollectionUtils.isEmpty(ruleOutputs)) {
       return renewCacheActiveRule(type, transactionAt);
