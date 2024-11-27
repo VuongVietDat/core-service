@@ -20,10 +20,7 @@ import vn.com.atomi.loyalty.core.entity.CCustMissionProgress;
 import vn.com.atomi.loyalty.core.entity.CMission;
 import vn.com.atomi.loyalty.core.entity.CMissionSequential;
 import vn.com.atomi.loyalty.core.entity.Customer;
-import vn.com.atomi.loyalty.core.enums.Chain;
-import vn.com.atomi.loyalty.core.enums.ErrorCode;
-import vn.com.atomi.loyalty.core.enums.PointType;
-import vn.com.atomi.loyalty.core.enums.Status;
+import vn.com.atomi.loyalty.core.enums.*;
 import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.*;
 import vn.com.atomi.loyalty.core.service.MissionService;
@@ -101,50 +98,54 @@ public class MissionServiceImpl extends BaseService implements MissionService {
   }
   @Override
   public Long purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
-      // kiem tra khach hang ton tai
-    Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
-    if(!customer.isPresent()) {
+        // kiem tra khach hang ton tai
+        Long transId = null;
+        Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
+        if(!customer.isPresent()) {
         throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
-    }
-    purchaseChainMission.setCustomerId(customer.get().getId());
-    // kiem tra diem kha dung
-    CustomerBalanceProjection customerBalance = customerBalanceRepository.findCurrentBalance(purchaseChainMission.getCifNo(), null);
-    if(customerBalance == null) {
+        }
+        purchaseChainMission.setCustomerId(customer.get().getId());
+        // kiem tra diem kha dung
+        CustomerBalanceProjection customerBalance = customerBalanceRepository.findCurrentBalance(purchaseChainMission.getCifNo(), null);
+        if(customerBalance == null) {
         throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
-    } else if(customerBalance.getAvailableAmount() < purchaseChainMission.getTxnAmount()) {
+        } else if(customerBalance.getAvailableAmount() < purchaseChainMission.getTxnAmount()) {
           throw new BaseException(ErrorCode.CUSTOMER_BALANCE_NOT_ENOUGH);
-    }
+        }
 
-    // kiem tra khach hang da dang ky goi nhiem vu truoc do
-    CCustMissionProgress missionProgress = cCustMissionProgressRepository.
+        // kiem tra khach hang da dang ky goi nhiem vu truoc do
+        CCustMissionProgress missionProgress = cCustMissionProgressRepository.
             findByCustomerAndChainId(
                     customer.get().getId(),
                     purchaseChainMission.getChainId(),
                     Constants.Mission.TYPE_CHAIN,
                     Constants.Mission.STATUS_PENDING);
-    if(missionProgress != null) {
+        if(missionProgress != null) {
         throw new BaseException(ErrorCode.CUSTOMER_REGISTED_CHAIN_MISSION);
-    }
-    // tao chuoi nhiem vu gan theo khach hang
-      List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission);
+        }
+        // tao chuoi nhiem vu gan theo khach hang
+        List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission);
+        if(Currency.PNT.name().equalsIgnoreCase(purchaseChainMission.getTxnCurrency())) {
+            // truong hop thanh toan bang point call minus point
+            transId = customRepository.minusAmount(
+                    purchaseChainMission.getCustomerId(),
+                    purchaseChainMission.getTxnAmount(),
+                    purchaseChainMission.getRefNo(),
+                    LocalDateTime.parse(purchaseChainMission.getTransactionAt(),
+                            DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)),
+                    purchaseChainMission.getContent(),
+                    PointType.CONSUMPTION_POINT);
 
-    // call minus point
-    Long transId = customRepository.minusAmount(
-        purchaseChainMission.getCustomerId(),
-        purchaseChainMission.getTxnAmount(),
-        purchaseChainMission.getRefNo(),
-        LocalDateTime.parse(purchaseChainMission.getTransactionAt(),
-            DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)),
-        purchaseChainMission.getContent(),
-        PointType.CONSUMPTION_POINT);
-
-      if (transId > 0) {
-          notificationService.sendNotification(
-                  Constants.Notification.PLUS,
-                  purchaseChainMission.getTxnAmount(),
-                  customer.get().getPhone());
-      }
-      return transId;
+            if (transId > 0) {
+                notificationService.sendNotification(
+                        Constants.Notification.PLUS,
+                        purchaseChainMission.getTxnAmount(),
+                        customer.get().getPhone());
+            }
+        } else {
+            // truong hop thanh toan bang tien => luu thong tin xuong bang history
+        }
+        return transId;
   }
 
   private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission){

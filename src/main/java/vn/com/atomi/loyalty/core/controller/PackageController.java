@@ -62,7 +62,7 @@ public class PackageController extends BaseController {
     @Operation(summary = "Api nhận kết quả đăng ký gói hội viên")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/package/purchase-package")
-    public ResponseEntity<ResponseData<Void>> purchasePackage(
+    public ResponseEntity<ResponseData<String>> purchasePackage(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
@@ -71,14 +71,14 @@ public class PackageController extends BaseController {
             String apiKey,
             @Valid @RequestBody
             PurchasePackageInput purchasePackageInput) {
-        packageService.purchasePackage(purchasePackageInput);
-        return ResponseUtils.success();
+        ;
+        return ResponseUtils.success(packageService.purchasePackage(purchasePackageInput));
     }
 
     @Operation(summary = "Api gói hôi viên của khách hàng")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/package/registed-package")
-    public ResponseEntity<ResponseData<RegistedPackageOuput>> getRegistedPackage(@Parameter(
+    public ResponseEntity<ResponseData<GetListPackageOutput>> getRegistedPackage(@Parameter(
             description = "Chuỗi xác thực khi gọi api nội bộ",
             example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
@@ -87,7 +87,7 @@ public class PackageController extends BaseController {
             @Parameter(description = "Mã cif no core bank")
             @RequestParam(required = false)
             String cifNo) {
-        RegistedPackageOuput lstResponse = packageService.getRegistedPackage(cifNo);
+        GetListPackageOutput lstResponse = packageService.getRegistedPackage(cifNo);
         return ResponseUtils.success(lstResponse);
     }
 

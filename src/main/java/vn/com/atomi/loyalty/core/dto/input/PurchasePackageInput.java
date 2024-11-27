@@ -57,5 +57,7 @@ public class PurchasePackageInput {
 
   @Schema(description = "Kênh thanh toán")
   private String paymentChannel;
+  @Schema(description = "Mô tả")
+  private String notes;
 
 }
