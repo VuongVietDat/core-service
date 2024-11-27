@@ -17,8 +17,9 @@ public enum ErrorCode implements AbstractError {
       4003, "Nhóm khách hàng này đang được sử dụng ở chiến dịch.", HttpStatus.BAD_REQUEST),
   CUSTOMER_NOT_EXISTED(4004, "Khách hàng không tồn tại.", HttpStatus.BAD_REQUEST),
   NOT_ENOUGH_BALANCE(4005, "Bạn không đủ số dư để thực hiện thao tác.", HttpStatus.BAD_REQUEST),
-  PACKAGE_NOT_EXISTED(4001, "Không tồn tại gói hội viên.", HttpStatus.NOT_FOUND);
-
+  PACKAGE_NOT_EXISTED(4001, "Không tồn tại gói hội viên.", HttpStatus.NOT_FOUND),
+  EXISTED_PARTNER_CODE(4006, "Mã đối tác đã tồn tại", HttpStatus.BAD_REQUEST),
+  PARTNER_NOT_EXISTED(4007, "Đối tác không tồn tại", HttpStatus.BAD_REQUEST)
 ;
 
   private final int code;
