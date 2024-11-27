@@ -69,7 +69,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     if(!customer.isPresent()) {
       throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
     }
-    // check package by customer id
+    // check package by customer id case registed package before
     PkgPurchaseHistory packageResponse = purchaseHistoryRepository.getRegistedPackage(purchasePackageInput.getCifNo(), purchasePackageInput.getPackageId());
     if(packageResponse != null) {
       throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
@@ -104,7 +104,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
                   ,DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
         }
         pkgPurchaseHistory.setTxnAmount( purchasePackageInput.getTxnAmount() );
-        pkgPurchaseHistory.setTxnStatus( "SUCCESS" );
+        pkgPurchaseHistory.setTxnStatus(Constants.Status.ERROR);
         pkgPurchaseHistory.setTxnCurrency( purchasePackageInput.getTxnCurrency() );
         pkgPurchaseHistory.setPaymentMethod( purchasePackageInput.getPaymentMethod() );
     } catch (Exception ex) {

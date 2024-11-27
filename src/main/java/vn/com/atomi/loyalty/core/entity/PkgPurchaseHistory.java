@@ -36,7 +36,7 @@ public class PkgPurchaseHistory {
     @Column(name = "REF_NO")
     private String refNo;
 
-    @Column(name = "TRANS_ID")
+    @Column(name = "TXN_ID")
     private String transId;
 
     @Column(name = "PURCHASED_DATE")
@@ -54,7 +54,7 @@ public class PkgPurchaseHistory {
     @Column(name = "TXN_STATUS")
     private String txnStatus;
 
-    @Column(name = "TXN_CURRENCY")
+    @Column(name = "TXN_CURRENCY" ,columnDefinition = "CHAR(3)")
     private String txnCurrency;
 
     @Column(name = "PAYMENT_METHOD")

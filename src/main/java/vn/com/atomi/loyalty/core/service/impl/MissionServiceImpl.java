@@ -9,17 +9,26 @@ import org.springframework.stereotype.Service;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.exception.BaseException;
+import vn.com.atomi.loyalty.base.utils.RequestUtils;
+import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.output.CChainMissionOuput;
 import vn.com.atomi.loyalty.core.dto.output.CMissionOuput;
+import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
+import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
+import vn.com.atomi.loyalty.core.entity.CCustMissionProgress;
 import vn.com.atomi.loyalty.core.entity.CMission;
 import vn.com.atomi.loyalty.core.entity.CMissionSequential;
 import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.enums.Chain;
+import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.PointType;
 import vn.com.atomi.loyalty.core.enums.Status;
+import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.*;
 import vn.com.atomi.loyalty.core.service.MissionService;
+import vn.com.atomi.loyalty.core.service.NotificationService;
+import vn.com.atomi.loyalty.core.utils.Constants;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -52,6 +61,10 @@ public class MissionServiceImpl extends BaseService implements MissionService {
   private final CCustMissionProgressRepository cCustMissionProgressRepository;
 
   private final CMissionSequentialRepository missionSequentialRepository;
+
+  private final CustomerBalanceRepository customerBalanceRepository;
+
+  private final NotificationService notificationService;
 
   @Override
   public List<CChainMissionOuput> getNewChainMission() {
@@ -87,32 +100,65 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return modelMapper.convertMissionDetailOutput(mission);
   }
   @Override
-  public void purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
-      // get customer by cif
+  public Long purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
+      // kiem tra khach hang ton tai
     Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
-    if(customer.isPresent()) {
-        // tao chuoi nhiem vu
-        var missionDate = missionSequentialRepository.
-                saveDataMissionToCustomer(
-                        purchaseChainMission.getTransId(),
-                        purchaseChainMission.getCifNo(),
-                        purchaseChainMission.getChainId());
-        // get chuoi nhiem vu
+    if(!customer.isPresent()) {
+        throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+    }
+    purchaseChainMission.setCustomerId(customer.get().getId());
+    // kiem tra diem kha dung
+    CustomerBalanceProjection customerBalance = customerBalanceRepository.findCurrentBalance(purchaseChainMission.getCifNo(), null);
+    if(customerBalance == null) {
+        throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+    } else if(customerBalance.getAvailableAmount() < purchaseChainMission.getTxnAmount()) {
+          throw new BaseException(ErrorCode.CUSTOMER_BALANCE_NOT_ENOUGH);
+    }
 
-        // call minus point
-        Long transId = customRepository.minusAmount(
+    // kiem tra khach hang da dang ky goi nhiem vu truoc do
+    CCustMissionProgress missionProgress = cCustMissionProgressRepository.
+            findByCustomerAndChainId(
+                    customer.get().getId(),
+                    purchaseChainMission.getChainId(),
+                    Constants.Mission.TYPE_CHAIN,
+                    Constants.Mission.STATUS_PENDING);
+    if(missionProgress != null) {
+        throw new BaseException(ErrorCode.CUSTOMER_REGISTED_CHAIN_MISSION);
+    }
+    // tao chuoi nhiem vu gan theo khach hang
+      List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission);
+
+    // call minus point
+    Long transId = customRepository.minusAmount(
         purchaseChainMission.getCustomerId(),
         purchaseChainMission.getTxnAmount(),
         purchaseChainMission.getRefNo(),
         LocalDateTime.parse(purchaseChainMission.getTransactionAt(),
-        DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)),
+            DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)),
         purchaseChainMission.getContent(),
         PointType.CONSUMPTION_POINT);
-    } else {
-        // error customer not found
-    }
+
+      if (transId > 0) {
+          notificationService.sendNotification(
+                  Constants.Notification.PLUS,
+                  purchaseChainMission.getTxnAmount(),
+                  customer.get().getPhone());
+      }
+      return transId;
   }
 
+  private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission){
+      // tao chuoi nhiem vu gan theo khach hang
+      var chainMission = cCustMissionProgressRepository.
+              getDataChainMission(
+                      purchaseChainMission.getRefNo(),
+                      purchaseChainMission.getCifNo(),
+                      purchaseChainMission.getChainId());
+
+      // save data
+      return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission));
+
+  }
   private List<CChainMissionOuput> mappingMissionProgress (List<Object[]> rawData){
       return rawData.stream()
           .map(data -> {
@@ -168,25 +214,25 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
           }).collect(Collectors.toList());
   }
-//  private CMissionOuput mappingMission (CMission data){
-//        CMissionOuput output = new CMissionOuput();
-//        try {
-//            output.setId(data.getId());
-//            output.setCode(data.getCode());
-//            output.setName(data.getName());
-//            output.setBenefitType(data.getBenefitType());
-//            output.setPrice(new BigDecimal(data.getPrice()));
-//            output.setCurrency(data.getCurrency());
-//            output.setNotes(data.getNotes());
-//            if (data.getStartDate() != null) {
-//                output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-//            }
-//            if (data.getEndDate() != null) {
-//                output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-//            }
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//        return output;
-//  }
+
+    private List<CCustMissionProgress> mappingChainMissionToProgress (List<CCustMissionProgress> rawData){
+        return rawData.stream()
+                .map(data -> {
+                    CCustMissionProgress output = new CCustMissionProgress();
+
+                    output.setCustomer(data.getCustomer());
+                    output.setParentId(data.getParentId());
+                    output.setMissionId(data.getMissionId());
+                    output.setMissionType(data.getMissionType());
+                    output.setOrderNo(data.getOrderNo());
+                    output.setGroupType(data.getGroupType());
+                    output.setStartDate(data.getStartDate());
+                    output.setEndDate(data.getEndDate());
+                    output.setStatus(Constants.Mission.STATUS_PENDING);
+                    output.setTxnRefNo(data.getTxnRefNo());
+                    return output;
+
+                }).collect(Collectors.toList());
+    }
+
 }

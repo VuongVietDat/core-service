@@ -49,4 +49,5 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
           )
 """, nativeQuery = true)
   List<Object[]> getRegistedChainMission(Long customerId);
+
 }

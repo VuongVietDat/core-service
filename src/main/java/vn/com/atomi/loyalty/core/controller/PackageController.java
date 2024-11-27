@@ -69,7 +69,8 @@ public class PackageController extends BaseController {
             @RequestHeader(RequestConstant.SECURE_API_KEY)
             @SuppressWarnings("unused")
             String apiKey,
-            @Valid @RequestBody PurchasePackageInput purchasePackageInput) {
+            @Valid @RequestBody
+            PurchasePackageInput purchasePackageInput) {
         packageService.purchasePackage(purchasePackageInput);
         return ResponseUtils.success();
     }
