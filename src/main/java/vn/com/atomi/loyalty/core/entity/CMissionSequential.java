@@ -28,14 +28,14 @@ public class CMissionSequential {
     @Column(name = "PARENT_ID")
     private Long parent;
 
-    @Column(name = "MISSION_TYPE", length = 1)
+    @Column(name = "MISSION_TYPE", columnDefinition = "CHAR(1)")
     private String missionType;
 
     @Column(name = "ORDER_NO")
     private Short orderNo;
 
-    @Column(name = "IS_DELETED")
-    private Boolean isDeleted;
+    @Column(name = "IS_DELETED", columnDefinition = "CHAR(1)")
+    private String isDeleted;
 
     @Size(max = 20)
     @Column(name = "CREATED_BY", length = 20)

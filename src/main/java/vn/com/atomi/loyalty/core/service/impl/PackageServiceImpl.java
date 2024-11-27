@@ -69,13 +69,12 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     if(!customer.isPresent()) {
       throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
     }
-    purchasePackageInput.setCustomerId(customer.get().getId());
     // check package by customer id
     PkgPurchaseHistory packageResponse = purchaseHistoryRepository.getRegistedPackage(purchasePackageInput.getCifNo(), purchasePackageInput.getPackageId());
-    if(packageResponse == null) {
+    if(packageResponse != null) {
       throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
     }
-    PkgPurchaseHistory history = mappingPurchasePackage(purchasePackageInput);
+    PkgPurchaseHistory history = mappingPurchasePackage(purchasePackageInput, customer.get());
     purchaseHistoryRepository.save(history);
   }
   @Override
@@ -84,9 +83,10 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     return super.modelMapper.convertRegistedPackageOutput(packageResponse);
   }
 
-  private PkgPurchaseHistory mappingPurchasePackage(PurchasePackageInput purchasePackageInput){
+  private PkgPurchaseHistory mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){
     PkgPurchaseHistory pkgPurchaseHistory = new PkgPurchaseHistory();
     try {
+        pkgPurchaseHistory.setCustomerId( customer.getId() );
         pkgPurchaseHistory.setCifNo( purchasePackageInput.getCifNo() );
         pkgPurchaseHistory.setPackageId( purchasePackageInput.getPackageId() );
         pkgPurchaseHistory.setRefNo( purchasePackageInput.getRefNo() );
