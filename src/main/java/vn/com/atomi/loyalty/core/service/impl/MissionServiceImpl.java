@@ -9,10 +9,14 @@ import org.springframework.stereotype.Service;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.exception.BaseException;
+import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.output.CChainMissionOuput;
 import vn.com.atomi.loyalty.core.dto.output.CMissionOuput;
 import vn.com.atomi.loyalty.core.entity.CMission;
+import vn.com.atomi.loyalty.core.entity.CMissionSequential;
+import vn.com.atomi.loyalty.core.entity.Customer;
 import vn.com.atomi.loyalty.core.enums.Chain;
+import vn.com.atomi.loyalty.core.enums.PointType;
 import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.repository.*;
 import vn.com.atomi.loyalty.core.service.MissionService;
@@ -21,10 +25,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -41,9 +47,11 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
   private final CMissionRepository missionRepository;
 
+  private final CustomRepository customRepository;
+
   private final CCustMissionProgressRepository cCustMissionProgressRepository;
 
-
+  private final CMissionSequentialRepository missionSequentialRepository;
 
   @Override
   public List<CChainMissionOuput> getNewChainMission() {
@@ -51,12 +59,11 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return super.modelMapper.convertChainMissionOutput(chainMission);
   }
   @Override
-  public List<CChainMissionOuput> getRegistedChainMission(String cifNo, String status) {
-    var customer = customerRepository.findByParams(cifNo,
-            Status.ACTIVE, PageRequest.of(0, 1));
-    if(customer.getContent() != null) {
-      var chainMission = chainMissionRepository.getRegistedChainMission(customer.getContent().get(0).getId(), status);
-      return this.mappingMissionProgress(chainMission);
+  public List<CChainMissionOuput> getRegistedChainMission(String cifNo) {
+        Optional<Customer> customer = customerRepository.findByCifBank(cifNo);
+        if(customer.isPresent()) {
+        var chainMission = chainMissionRepository.getRegistedChainMission(customer.get().getId());
+        return this.mappingMissionProgress(chainMission);
     }
     return new ArrayList<>();
   }
@@ -78,6 +85,32 @@ public class MissionServiceImpl extends BaseService implements MissionService {
   public CMissionOuput getMissionDetail(Long id) {
     var mission = missionRepository.getMissionDetail(id, Status.ACTIVE);
     return modelMapper.convertMissionDetailOutput(mission);
+  }
+  @Override
+  public void purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
+      // get customer by cif
+    Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
+    if(customer.isPresent()) {
+        // tao chuoi nhiem vu
+        var missionDate = missionSequentialRepository.
+                saveDataMissionToCustomer(
+                        purchaseChainMission.getTransId(),
+                        purchaseChainMission.getCifNo(),
+                        purchaseChainMission.getChainId());
+        // get chuoi nhiem vu
+
+        // call minus point
+        Long transId = customRepository.minusAmount(
+        purchaseChainMission.getCustomerId(),
+        purchaseChainMission.getTxnAmount(),
+        purchaseChainMission.getRefNo(),
+        LocalDateTime.parse(purchaseChainMission.getTransactionAt(),
+        DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)),
+        purchaseChainMission.getContent(),
+        PointType.CONSUMPTION_POINT);
+    } else {
+        // error customer not found
+    }
   }
 
   private List<CChainMissionOuput> mappingMissionProgress (List<Object[]> rawData){
@@ -135,25 +168,25 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
           }).collect(Collectors.toList());
   }
-  private CMissionOuput mappingMission (CMission data){
-        CMissionOuput output = new CMissionOuput();
-        try {
-            output.setId(data.getId());
-            output.setCode(data.getCode());
-            output.setName(data.getName());
-            output.setBenefitType(data.getBenefitType());
-            output.setPrice(new BigDecimal(data.getPrice()));
-            output.setCurrency(data.getCurrency());
-            output.setNotes(data.getNotes());
-            if (data.getStartDate() != null) {
-                output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-            }
-            if (data.getEndDate() != null) {
-                output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return output;
-  }
+//  private CMissionOuput mappingMission (CMission data){
+//        CMissionOuput output = new CMissionOuput();
+//        try {
+//            output.setId(data.getId());
+//            output.setCode(data.getCode());
+//            output.setName(data.getName());
+//            output.setBenefitType(data.getBenefitType());
+//            output.setPrice(new BigDecimal(data.getPrice()));
+//            output.setCurrency(data.getCurrency());
+//            output.setNotes(data.getNotes());
+//            if (data.getStartDate() != null) {
+//                output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+//            }
+//            if (data.getEndDate() != null) {
+//                output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+//            }
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return output;
+//  }
 }

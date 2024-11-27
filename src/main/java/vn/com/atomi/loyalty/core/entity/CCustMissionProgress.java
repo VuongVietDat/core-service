@@ -30,24 +30,24 @@ public class CCustMissionProgress {
     @Column(name = "CUSTOMER_ID", nullable = false)
     private Long customer;
 
-    @Column(name = "CHAIN_ID")
-    private Long chain;
+    @Column(name = "PARENT_ID")
+    private Long parentId;
 
     @Column(name = "MISSION_ID")
-    private Long mission;
+    private Long missionId;
 
-    @Column(name = "PARENT_CHAIN_ID")
-    private Long parentChain;
+    @Column(name = "MISSION_TYPE", length = 1)
+    private String missionType;
 
-    @Size(max = 10)
-    @Column(name = "STATUS", length = 10)
+    @Size(max = 20)
+    @Column(name = "STATUS", length = 20)
     private String status;
 
     @Column(name = "GROUP_TYPE")
     private Boolean groupType;
 
     @Column(name = "ORDER_NO")
-    private Integer orderNo;
+    private Short orderNo;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -57,5 +57,9 @@ public class CCustMissionProgress {
 
     @Column(name = "COMPLETED_AT")
     private LocalDate completedAt;
+
+    @Size(max = 20)
+    @Column(name = "TXN_ID", length = 20)
+    private String txnId;
 
 }

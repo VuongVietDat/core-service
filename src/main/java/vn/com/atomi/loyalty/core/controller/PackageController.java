@@ -37,8 +37,7 @@ public class PackageController extends BaseController {
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
             @SuppressWarnings("unused")
-            String apiKey
-    ) {
+            String apiKey) {
         List<GetListPackageOutput> lstResponse = packageService.getListPackage();
         return ResponseUtils.success(lstResponse);
     }
