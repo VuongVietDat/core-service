@@ -19,7 +19,7 @@ public interface PkgBenefitRepository extends JpaRepository<PkgBenefit, Long> {
   Long getSequence();
 
   @Query(value = "select ps from PkgBenefit ps " +
-          " where (:packageId is null or ps.packageId = :packageId) " +
+          " where ps.packageId = :packageId " +
           " and ps.status = :status")
   List<PkgBenefit> getListBenefit(Long packageId, Status status);
 }

@@ -60,4 +60,16 @@ public class RulePOCOutput {
 
     @Schema(description = "Trạng thái:</br> ACTIVE: Hiệu lực</br> INACTIVE: Không hiệu lực")
     private Status status;
+
+    @Schema(description = "Id chien dich")
+    private Long campaignId;
+
+    @Schema(description = "Ma chien dich")
+    private String campaignCode;
+
+    @Schema(description = "Id ngan sach")
+    private Long budgetId;
+
+    @Schema(description = "Ma ngan sach")
+    private String budgetCode;
 }

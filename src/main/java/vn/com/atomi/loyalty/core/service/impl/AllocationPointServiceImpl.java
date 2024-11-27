@@ -10,15 +10,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.utils.JsonUtils;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
@@ -135,6 +133,26 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         }
         List<TransactionInput> results = new ArrayList<>();
         for (RuleOutput rule : rules) {
+
+            CountPeriod period = countPeriodRepository.findByCustomerId(customerInput.getId())
+                    .orElseGet(() -> {
+                        CountPeriod newPeriod = new CountPeriod();
+                        newPeriod.setCustomerId(customerInput.getId());
+                        newPeriod.setCurrentStreak(0);
+                        newPeriod.setPaymentType(PaymentType.INVOICE);
+                        return newPeriod;
+                    });
+            Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            if (period.getLastPaymentDate() == null || isSameMonthAndYear(period.getLastPaymentDate(), today, 1, RequestConstant.GREATER)) {
+                // Trường hợp lần thanh toán đầu tiên hoặc lớn hơn 1 tháng từ lần thanh toán cuối
+                period.setCurrentStreak(1);
+            } else {
+                //Ngày thanh toán gần nhất và ngày hiện tại không cùng tháng
+                if (!isSameMonthAndYear(period.getLastPaymentDate(), today, 0 , null)) {
+                    period.setCurrentStreak(period.getCurrentStreak() + 1);
+                }
+            }
+
             // kiểm tra điều kiện của quy tắc
             if (!CollectionUtils.isEmpty(rule.getRuleConditionOutputs())
                     && !this.checkCondition(allocationTransaction, customerInput, rule)) {
@@ -161,16 +179,21 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                             .divide(BigInteger.valueOf(ruleAllocationOutput.getExchangeValue()))
                             .multiply(BigInteger.valueOf(ruleAllocationOutput.getExchangePoint()));
             totalPoint = totalPoint.add(basePoint);
+
             // thưởng thêm
-            if (!CollectionUtils.isEmpty(rule.getRuleBonusOutputs())) {
-                totalPoint =
-                        totalPoint.add(
-                                this.calculatorBonus(
-                                        rule.getRuleBonusOutputs(),
-                                        basePoint,
-                                        customerInput,
-                                        allocationTransaction,
-                                        transactionDate));
+            if( period.getCurrentStreak() == 2 && isSameMonthAndYear(period.getLastPaymentDate(), today, 1, null)) {
+                if (!CollectionUtils.isEmpty(rule.getRuleBonusOutputs())) {
+                    totalPoint =
+                            totalPoint.add(
+                                    this.calculatorBonus(
+                                            rule.getRuleBonusOutputs(),
+                                            basePoint,
+                                            customerInput,
+                                            allocationTransaction,
+                                            transactionDate));
+                }
+                period.setCurrentStreak(0);
+                period.setStreakResetDate(today);
             }
             rankPoint = totalPoint.longValue();
             consumptionPoint = totalPoint.longValue();
@@ -255,24 +278,9 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
             if (transactionIds.size() > 0) {
                 NotificationInput notificationInput = this.convertInput(consumptionPoint, customerInput);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
-
-                CountPeriod period = countPeriodRepository.findByCustomerId(customerInput.getId())
-                        .orElseGet(() -> {
-                            CountPeriod newPeriod = new CountPeriod();
-                            newPeriod.setCustomerId(customerInput.getId());
-                            newPeriod.setCurrentStreak(0);
-                            newPeriod.setPaymentType(PaymentType.INVOICE);
-                            return newPeriod;
-                        });
-                Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                if (period.getLastPaymentDate() == null || ChronoUnit.DAYS.between(period.getLastPaymentDate().toInstant(), today.toInstant()) > 30) {
-                    period.setCurrentStreak(1);
-                } else {
-                    period.setCurrentStreak(period.getCurrentStreak() + 1);
-                }
-                period.setLastPaymentDate(today);
-                countPeriodRepository.save(period);
             }
+            period.setLastPaymentDate(today);
+            countPeriodRepository.save(period);
         }
     }
 
@@ -463,8 +471,9 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
             }
             // thưởng thêm với giao dịch thực hiện vào ngày sinh nhật
             if (BonusType.BONUS_DOB.equals(ruleBonusOutput.getType())
-                    && customerInput.getDob() != null
-                    && customerInput.getDob().isEqual(transactionDate)) {
+//                    && customerInput.getDob() != null
+//                    && customerInput.getDob().isEqual(transactionDate)
+            ) {
                 if (PlusType.FIX.equals(ruleBonusOutput.getPlusType())) {
                     bonusPoint = bonusPoint.add(value);
                 }
@@ -528,6 +537,8 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                     }
                 }
             }
+
+
         }
 
         return bonusPoint.toBigInteger();
@@ -546,5 +557,24 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         notificationInput.setContent("Quý khách được cộng " + consumptionPoint + "điểm Loyalty");
         notificationInput.setUserName(customerOutput.getPhone());
         return notificationInput;
+    }
+
+    private boolean isSameMonthAndYear(Date date1, Date date2, int month, String condition) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(date1);
+        cal2.setTime(date2);
+        // Tính số tháng chênh lệch
+        int monthDifference = (cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR)) * 12
+                + (cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH));
+        if (condition.equalsIgnoreCase(RequestConstant.GREATER_EQUAL)) {
+            return monthDifference >= month;
+        }
+        if (condition.equalsIgnoreCase(RequestConstant.GREATER)) {
+            return monthDifference > month;
+        }
+        else {
+            return monthDifference == month;
+        }
     }
 }

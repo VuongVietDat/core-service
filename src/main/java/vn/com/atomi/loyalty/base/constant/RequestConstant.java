@@ -59,6 +59,10 @@ public class RequestConstant {
 
   public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
 
+  public static final String GREATER = "GREATER";
+
+  public static final String GREATER_EQUAL = "GREATER_EQUAL";
+
   public static final List<String> WHITE_LIST_REQUEST =
       Arrays.asList(
           "/swagger-ui.html/**",

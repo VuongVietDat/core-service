@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author haidv
@@ -62,43 +63,50 @@ public class PackageServiceImpl extends BaseService implements PackageService {
   }
   @Override
   public void purchasePackage(PurchasePackageInput purchasePackageInput) {
-    purchaseHistoryRepository.save(this.mappingPurchasePackage(purchasePackageInput));
+    // get customer by cif
+    Optional<Customer> customer = customerRepository.
+            findByCifBank(purchasePackageInput.getCifNo());
+    if(!customer.isPresent()) {
+      throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+    }
+    // check package by customer id
+    PkgPurchaseHistory packageResponse = purchaseHistoryRepository.getRegistedPackage(purchasePackageInput.getCifNo(), purchasePackageInput.getPackageId());
+    if(packageResponse != null) {
+      throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
+    }
+    PkgPurchaseHistory history = mappingPurchasePackage(purchasePackageInput, customer.get());
+    purchaseHistoryRepository.save(history);
   }
   @Override
   public RegistedPackageOuput getRegistedPackage(String cifNo) {
-    var packageResponse = purchaseHistoryRepository.getRegistedPackage(cifNo);
+    var packageResponse = purchaseHistoryRepository.getRegistedPackage(cifNo, null);
     return super.modelMapper.convertRegistedPackageOutput(packageResponse);
   }
 
-  private PkgPurchaseHistory mappingPurchasePackage(PurchasePackageInput purchasePackageInput){
+  private PkgPurchaseHistory mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){
     PkgPurchaseHistory pkgPurchaseHistory = new PkgPurchaseHistory();
     try {
-      var customer = customerRepository.findByParams(purchasePackageInput.getCifNo(),
-              Status.ACTIVE, PageRequest.of(0, 1));
-      if(customer.getContent() != null) {
-        pkgPurchaseHistory.setCustomerId( customer.getContent().get(0).getId() );
-      }
-      pkgPurchaseHistory.setCifNo( purchasePackageInput.getCifNo() );
-      pkgPurchaseHistory.setPackageId( purchasePackageInput.getPackageId() );
-      pkgPurchaseHistory.setRefNo( purchasePackageInput.getRefNo() );
-      pkgPurchaseHistory.setTransId( purchasePackageInput.getTransId() );
-      if (StringUtils.isNotBlank(purchasePackageInput.getPurchasedDate())) {
-        pkgPurchaseHistory.setPurchasedDate(LocalDate.parse(purchasePackageInput.getPurchasedDate()
-                , DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
-      }
-      if (StringUtils.isNotBlank(purchasePackageInput.getEffectiveDate())) {
-        pkgPurchaseHistory.setEffectiveDate(LocalDate.parse(purchasePackageInput.getEffectiveDate()
-                ,DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-      }
-      if (StringUtils.isNotBlank(purchasePackageInput.getExpiredDate())) {
-        pkgPurchaseHistory.setExpiredDate(LocalDate.parse(purchasePackageInput.getExpiredDate()
-                ,DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-      }
-      pkgPurchaseHistory.setTxnAmount( purchasePackageInput.getTxnAmount() );
-      pkgPurchaseHistory.setTxnStatus( purchasePackageInput.getTxnStatus() );
-      pkgPurchaseHistory.setTxnCurrency( purchasePackageInput.getTxnCurrency() );
-      pkgPurchaseHistory.setPaymentMethod( purchasePackageInput.getPaymentMethod() );
-      pkgPurchaseHistory.setPaymentChannel( purchasePackageInput.getPaymentChannel() );
+        pkgPurchaseHistory.setCustomerId( customer.getId() );
+        pkgPurchaseHistory.setCifNo( purchasePackageInput.getCifNo() );
+        pkgPurchaseHistory.setPackageId( purchasePackageInput.getPackageId() );
+        pkgPurchaseHistory.setRefNo( purchasePackageInput.getRefNo() );
+        pkgPurchaseHistory.setTransId( purchasePackageInput.getTransId() );
+        if (StringUtils.isNotBlank(purchasePackageInput.getPurchasedDate())) {
+          pkgPurchaseHistory.setPurchasedDate(LocalDate.parse(purchasePackageInput.getPurchasedDate()
+                  , DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
+        }
+        if (StringUtils.isNotBlank(purchasePackageInput.getEffectiveDate())) {
+          pkgPurchaseHistory.setEffectiveDate(LocalDate.parse(purchasePackageInput.getEffectiveDate()
+                  ,DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+        }
+        if (StringUtils.isNotBlank(purchasePackageInput.getExpiredDate())) {
+          pkgPurchaseHistory.setExpiredDate(LocalDate.parse(purchasePackageInput.getExpiredDate()
+                  ,DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+        }
+        pkgPurchaseHistory.setTxnAmount( purchasePackageInput.getTxnAmount() );
+        pkgPurchaseHistory.setTxnStatus( "SUCCESS" );
+        pkgPurchaseHistory.setTxnCurrency( purchasePackageInput.getTxnCurrency() );
+        pkgPurchaseHistory.setPaymentMethod( purchasePackageInput.getPaymentMethod() );
     } catch (Exception ex) {
       ex.printStackTrace();
     }

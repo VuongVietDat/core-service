@@ -21,8 +21,9 @@ public interface PkgPurchaseHistoryRepository extends JpaRepository<PkgPurchaseH
 
     @Query(value = "select ps from PkgPurchaseHistory ps " +
             " where ps.cifNo = :cifNo " +
+            " and (:packageId is null or ps.packageId <= :packageId )" +
             " and (ps.effectiveDate is null or ps.effectiveDate <= CURRENT_DATE )" +
             " and (ps.expiredDate is null or ps.expiredDate >= CURRENT_DATE) ")
-    PkgPurchaseHistory getRegistedPackage(String cifNo);
+    PkgPurchaseHistory getRegistedPackage(String cifNo, Long packageId);
 
 }
