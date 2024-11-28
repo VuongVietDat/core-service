@@ -12,10 +12,10 @@ public interface CMissionRepository extends JpaRepository<CMission, Long> {
 
     @Query(
             value = """
-                SELECT cms2.PARENT_ID, cmns.ID, to_char(cms2.ORDER_NO),
+                SELECT TO_CHAR(cms2.PARENT_ID), TO_CHAR(cmns.ID), to_char(cms2.ORDER_NO),
                 cms2.GROUP_TYPE,
                 cmns.CODE, cmns.NAME, cmns.BENEFIT_TYPE,
-                cmns.START_DATE, cmns.END_DATE, cmns.PRICE,
+                cmns.START_DATE, cmns.END_DATE, TO_CHAR(cmns.PRICE),
                 cmns.CURRENCY, cmns.IMAGE,cmns.NOTES
                 FROM (
                     SELECT PARENT_ID, MISSION_ID, NVL (ORDER_NO, PRIOR ORDER_NO) ORDER_NO, MISSION_TYPE,
@@ -25,7 +25,7 @@ public interface CMissionRepository extends JpaRepository<CMission, Long> {
                         WHERE ccms.ID = cms.PARENT_ID
                     ) GROUP_TYPE
                     FROM   C_MISSION_SEQUENTIAL cms
-                    WHERE (IS_DELETED IS NULL OR IS_DELETED = '0') AND MISSION_TYPE = 'M'
+                    WHERE (IS_DELETED IS NULL OR IS_DELETED = 'N') AND MISSION_TYPE = 'M'
                     CONNECT BY PRIOR MISSION_ID = PARENT_ID
                     START WITH MISSION_ID = :chainId
                 ) cms2
@@ -37,4 +37,34 @@ public interface CMissionRepository extends JpaRepository<CMission, Long> {
             " WHERE (cmn.isDeleted is null or cmn.isDeleted = false) and cmn.id = :id " +
             " AND cmn.status = :status")
     CMission getMissionDetail(Long id, Status status);
+
+    @Query(
+            value = """
+                SELECT 
+                    to_char(cms2.PARENT_ID), to_char(cmns.ID), to_char(cms2.ORDER_NO),
+                    cms2.GROUP_TYPE,
+                    cmns.CODE, cmns.NAME, cmns.BENEFIT_TYPE,
+                    cmns.START_DATE, cmns.END_DATE, TO_CHAR(cmns.PRICE),
+                    cmns.CURRENCY, cmns.IMAGE,cmns.NOTES, cms2.STATUS
+                FROM (
+                    SELECT PARENT_ID, MISSION_ID, NVL (ORDER_NO, PRIOR ORDER_NO) ORDER_NO, MISSION_TYPE,
+                    (
+                        SELECT DECODE (ccms.GROUP_TYPE, '0', 'OR', '1', 'AND', '?')
+                        FROM C_CHAIN_MISSION ccms
+                        WHERE ccms.ID = ccmp.PARENT_ID
+                    ) GROUP_TYPE,
+                    ccmp.STATUS
+                    FROM C_CUST_MISSION_PROGRESS ccmp
+                    WHERE EXISTS (
+                            SELECT 1 FROM C_CUSTOMER cc 
+                            WHERE CIF_BANK = :cifNo 
+                            AND ccmp.CUSTOMER_ID = cc.ID
+                    )
+                    AND MISSION_TYPE = 'M'
+                    CONNECT BY PRIOR MISSION_ID = PARENT_ID
+                    START WITH MISSION_ID = :chainId
+                ) cms2
+                JOIN C_MISSION cmns ON cms2.MISSION_TYPE = 'M'
+                AND cms2.MISSION_ID = cmns.ID AND cmns.STATUS = 'ACTIVE'""", nativeQuery = true)
+    List<Object[]> getListMissionInProgress(String cifNo, Long chainId);
 }

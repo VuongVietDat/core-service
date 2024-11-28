@@ -14,6 +14,7 @@ public interface MissionService {
   List<CChainMissionOuput> getNewChainMission();
   List<CChainMissionOuput> getRegistedChainMission(String cifNo);
   List<CMissionOuput> getListMission(Long chainId);
+  List<CMissionOuput> getListMissionInProgress(String cifNo, Long chainId);
   CChainMissionOuput getChainMissionDetail(Long id);
   CMissionOuput getMissionDetail(Long id);
   String purchaseChainMission(PurchaseChainMissionInput purchaseChainMission);

@@ -36,9 +36,6 @@ public class PurchaseChainMissionInput {
   @Schema(description = "Loại tiền")
   private String txnCurrency;
 
-  @Schema(description = "Nội dung đăng ký")
-  private String content;
-
   @Schema(description = "Phương thức thanh toán")
   private String paymentMethod;
 

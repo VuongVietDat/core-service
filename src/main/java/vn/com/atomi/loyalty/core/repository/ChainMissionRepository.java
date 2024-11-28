@@ -26,14 +26,15 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
   CChainMission getChainMissionDetail(Long id, Status status);
 
   @Query(value = """
-          SELECT ccm.id,
+          SELECT 
+             to_char(ccm.id),
              ccm.code,
              ccm.name,
              ccm.group_type,
              ccm.benefit_type,
              ccm.image,
              ccm.is_ordered,
-             ccm.price,
+             to_char(ccm.price),
              ccm.currency,
              ccm.notes,
              ccm.start_date,

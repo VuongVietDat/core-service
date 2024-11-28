@@ -31,7 +31,7 @@ public interface CMissionSequentialRepository extends JpaRepository<CMissionSequ
                         WHERE ccms.ID = cms.PARENT_ID
                     ) GROUP_TYPE
                 FROM   C_MISSION_SEQUENTIAL cms
-                WHERE (IS_DELETED IS NULL OR IS_DELETED = '0')
+                WHERE (IS_DELETED IS NULL OR IS_DELETED = 'N')
                 CONNECT BY PRIOR MISSION_ID = PARENT_ID
                 START WITH MISSION_ID = :chainId
                 ORDER BY MISSION_TYPE,ORDER_NO

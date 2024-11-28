@@ -32,7 +32,7 @@ public class MissionController extends BaseController {
 
     @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @GetMapping("/internal/mission/new-chain-mission")
+    @GetMapping("/internal/mission/get-new-chain-mission")
     public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getNewChainMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
@@ -47,7 +47,7 @@ public class MissionController extends BaseController {
 
     @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đang thực hiện")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @GetMapping("/internal/mission/registed-chain-mission")
+    @GetMapping("/internal/mission/get-registed-chain-mission")
     public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getRegistedChainMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
@@ -61,6 +61,24 @@ public class MissionController extends BaseController {
         List<CChainMissionOuput> lstResponse = missionService.getRegistedChainMission(cifNo);
         return ResponseUtils.success(lstResponse);
     }
+
+    @Operation(summary = "Api chi tiết chuỗi nhiệm vụ")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @GetMapping("/internal/mission/get-chain-mission-detail")
+    public ResponseEntity<ResponseData<CChainMissionOuput>> getChainMissionDetail(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(description = "Mã định danh gói hội viên")
+            @RequestParam(required = false)
+            Long id) {
+        CChainMissionOuput lstResponse = missionService.getChainMissionDetail(id);
+        return ResponseUtils.success(lstResponse);
+    }
+
     @Operation(summary = "Api lấy danh sách nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/mission/get-list-mission")
@@ -77,26 +95,28 @@ public class MissionController extends BaseController {
         List<CMissionOuput> lstResponse = missionService.getListMission(chainId);
         return ResponseUtils.success(lstResponse);
     }
-
-    @Operation(summary = "Api chi tiết chuỗi nhiệm vụ")
+    @Operation(summary = "Api lấy danh sách nhiệm vụ đang thực hiện")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @GetMapping("/internal/mission/chain-mission-detail")
-    public ResponseEntity<ResponseData<CChainMissionOuput>> getChainMissionDetail(
+    @GetMapping("/internal/mission/get-list-mission-inprogress")
+    public ResponseEntity<ResponseData<List<CMissionOuput>>> getListMissionInProgress(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
             @SuppressWarnings("unused")
             String apiKey,
+            @Parameter(description = "Mã cifNo")
+            @RequestParam(required = false)
+            String cifNo,
             @Parameter(description = "Mã định danh gói hội viên")
             @RequestParam(required = false)
-            Long id) {
-        CChainMissionOuput lstResponse = missionService.getChainMissionDetail(id);
+            Long chainId) {
+        List<CMissionOuput> lstResponse = missionService.getListMissionInProgress(cifNo, chainId);
         return ResponseUtils.success(lstResponse);
     }
     @Operation(summary = "Api chi tiết nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @GetMapping("/internal/mission/mission-detail")
+    @GetMapping("/internal/mission/get-mission-detail")
     public ResponseEntity<ResponseData<CMissionOuput>> getMissionDetail(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
