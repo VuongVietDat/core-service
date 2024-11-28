@@ -8,7 +8,7 @@ import vn.com.atomi.loyalty.core.enums.Status;
 
 public interface PartnerService {
 
-    ResponsePage<PartnersOutput> getListPartners(Status status,String keyword, Pageable pageable);
+    ResponsePage<PartnersOutput> getListPartners(Status status,String keyword,String startDate, Pageable pageable);
 
     void createPartner(PartnerInput partnerInput);
 
