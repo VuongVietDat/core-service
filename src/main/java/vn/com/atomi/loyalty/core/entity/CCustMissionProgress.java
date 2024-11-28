@@ -43,7 +43,7 @@ public class CCustMissionProgress {
     @Column(name = "STATUS", length = 10)
     private String status;
 
-    @Column(name = "GROUP_TYPE", columnDefinition = "CHAR(1)")
+    @Column(name = "GROUP_TYPE", columnDefinition = "NUMBER(1)")
     private String groupType;
 
     @Column(name = "ORDER_NO")
