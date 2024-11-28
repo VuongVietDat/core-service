@@ -71,7 +71,7 @@ public class Partner extends BaseEntity {
     private Status status;
 
     @Size(max = 255)
-    @Column(name = "IS_LOCAL")
+    @Column(name = "IS_LOCAL", columnDefinition = "CHAR(1)")
     private String isLocal;
 
 }
