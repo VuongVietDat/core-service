@@ -32,7 +32,7 @@ public class CMissionSequential {
     private String missionType;
 
     @Column(name = "ORDER_NO")
-    private Short orderNo;
+    private Integer orderNo;
 
     @Column(name = "IS_DELETED", columnDefinition = "CHAR(1)")
     private String isDeleted;

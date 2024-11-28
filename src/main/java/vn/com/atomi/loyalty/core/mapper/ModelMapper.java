@@ -208,7 +208,7 @@ public interface ModelMapper {
     }
   }
   List<GetListBenefitOutput> convertBenefitOutput(List<PkgBenefit> lstBenefit);
-  RegistedPackageOuput convertRegistedPackageOutput(PkgPurchaseHistory purchaseHistory);
+  GetListPackageOutput convertRegistedPackageOutput(Packages purchaseHistory);
   @AfterMapping
   default void afterMapRegistedPackage(@MappingTarget GetListPackageOutput output, Packages packages) {
     if (packages.getEffectiveDate() != null) {

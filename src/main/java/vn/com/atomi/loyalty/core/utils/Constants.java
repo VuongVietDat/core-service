@@ -21,6 +21,24 @@ public class Constants {
 
   public static final String DEFAULT_DAY_END_TIME = "23:59:59";
 
+  public class Status {
+    public static final String SUCCESS = "SUCCESS";
+    public static final String ERROR = "ERROR";
+  }
+  public class Mission {
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_INPROGRESS = "INPROGRESS";
+    public static final String STATUS_COMPLETED = "COMPLETED";
+    public static final String TYPE_CHAIN = "C";
+    public static final String TYPE_GROUP = "G";
+    public static final String TYPE_MISSION = "M";
+
+  }
+  public class Notification {
+    public static final String PLUS = "+";
+    public static final String MINUS = "-";
+  }
+
 
   private Constants() {
     throw new IllegalStateException("Utility class");

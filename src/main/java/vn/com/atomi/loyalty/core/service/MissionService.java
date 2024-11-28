@@ -16,5 +16,5 @@ public interface MissionService {
   List<CMissionOuput> getListMission(Long chainId);
   CChainMissionOuput getChainMissionDetail(Long id);
   CMissionOuput getMissionDetail(Long id);
-  void purchaseChainMission(PurchaseChainMissionInput purchaseChainMission);
+  Long purchaseChainMission(PurchaseChainMissionInput purchaseChainMission);
 }

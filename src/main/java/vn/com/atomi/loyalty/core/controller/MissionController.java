@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -113,18 +114,16 @@ public class MissionController extends BaseController {
     @Operation(summary = "Api đăng ký chuỗi nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/mission/purchase-mission")
-    public ResponseEntity<ResponseData<Void>> purchaseChainMission(
+    public ResponseEntity<ResponseData<Long>> purchaseChainMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
             @SuppressWarnings("unused")
             String apiKey,
-            @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
+            @Valid @RequestBody
             PurchaseChainMissionInput purchaseChainMission) {
-        missionService.purchaseChainMission(purchaseChainMission);
-        return ResponseUtils.success();
+        return ResponseUtils.success(missionService.purchaseChainMission(purchaseChainMission));
     }
 
 }
