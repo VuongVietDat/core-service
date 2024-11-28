@@ -114,7 +114,7 @@ public class MissionController extends BaseController {
     @Operation(summary = "Api đăng ký chuỗi nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/mission/purchase-mission")
-    public ResponseEntity<ResponseData<Long>> purchaseChainMission(
+    public ResponseEntity<ResponseData<String>> purchaseChainMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")

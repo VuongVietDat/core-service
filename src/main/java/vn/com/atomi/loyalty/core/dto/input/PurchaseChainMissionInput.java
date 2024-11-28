@@ -45,4 +45,7 @@ public class PurchaseChainMissionInput {
   @Schema(description = "Kênh thanh toán")
   private String paymentChannel;
 
+  @Schema(description = "Nội dung thanh toán")
+  private String notes;
+
 }

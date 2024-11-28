@@ -12,15 +12,14 @@ import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
 import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
+import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.CChainMissionOuput;
 import vn.com.atomi.loyalty.core.dto.output.CMissionOuput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
-import vn.com.atomi.loyalty.core.entity.CCustMissionProgress;
-import vn.com.atomi.loyalty.core.entity.CMission;
-import vn.com.atomi.loyalty.core.entity.CMissionSequential;
-import vn.com.atomi.loyalty.core.entity.Customer;
+import vn.com.atomi.loyalty.core.entity.*;
 import vn.com.atomi.loyalty.core.enums.*;
+import vn.com.atomi.loyalty.core.enums.Currency;
 import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.*;
 import vn.com.atomi.loyalty.core.service.MissionService;
@@ -33,10 +32,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -62,6 +58,8 @@ public class MissionServiceImpl extends BaseService implements MissionService {
   private final CustomerBalanceRepository customerBalanceRepository;
 
   private final NotificationService notificationService;
+
+  private final TransExternalRepository transExternalRepository;
 
   @Override
   public List<CChainMissionOuput> getNewChainMission() {
@@ -97,20 +95,20 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return modelMapper.convertMissionDetailOutput(mission);
   }
   @Override
-  public Long purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
+  public String purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
         // kiem tra khach hang ton tai
-        Long transId = null;
+        String responseId = "";
         Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
         if(!customer.isPresent()) {
-        throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+            throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
         }
         purchaseChainMission.setCustomerId(customer.get().getId());
         // kiem tra diem kha dung
         CustomerBalanceProjection customerBalance = customerBalanceRepository.findCurrentBalance(purchaseChainMission.getCifNo(), null);
         if(customerBalance == null) {
-        throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+            throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
         } else if(customerBalance.getAvailableAmount() < purchaseChainMission.getTxnAmount()) {
-          throw new BaseException(ErrorCode.CUSTOMER_BALANCE_NOT_ENOUGH);
+            throw new BaseException(ErrorCode.NOT_ENOUGH_BALANCE);
         }
 
         // kiem tra khach hang da dang ky goi nhiem vu truoc do
@@ -121,13 +119,13 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                     Constants.Mission.TYPE_CHAIN,
                     Constants.Mission.STATUS_PENDING);
         if(missionProgress != null) {
-        throw new BaseException(ErrorCode.CUSTOMER_REGISTED_CHAIN_MISSION);
+            throw new BaseException(ErrorCode.CUSTOMER_REGISTED_CHAIN_MISSION);
         }
         // tao chuoi nhiem vu gan theo khach hang
         List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission);
         if(Currency.PNT.name().equalsIgnoreCase(purchaseChainMission.getTxnCurrency())) {
             // truong hop thanh toan bang point call minus point
-            transId = customRepository.minusAmount(
+            Long transactionId = customRepository.minusAmount(
                     purchaseChainMission.getCustomerId(),
                     purchaseChainMission.getTxnAmount(),
                     purchaseChainMission.getRefNo(),
@@ -136,7 +134,8 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                     purchaseChainMission.getContent(),
                     PointType.CONSUMPTION_POINT);
 
-            if (transId > 0) {
+            if (transactionId > 0) {
+                responseId = transactionId.toString();
                 notificationService.sendNotification(
                         Constants.Notification.PLUS,
                         purchaseChainMission.getTxnAmount(),
@@ -144,8 +143,15 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             }
         } else {
             // truong hop thanh toan bang tien => luu thong tin xuong bang history
+
+            TransExternal history = transExternalRepository.save(mappingTransactionExternal(purchaseChainMission, customer.get()));
+            if(history != null) {
+                responseId = history.getId();
+            } else {
+                throw new BaseException(ErrorCode.CHAIN_MISSION_ERROR);
+            }
         }
-        return transId;
+        return responseId;
   }
 
   private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission){
@@ -234,6 +240,34 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                     return output;
 
                 }).collect(Collectors.toList());
+    }
+
+    private TransExternal mappingTransactionExternal(PurchaseChainMissionInput purchaseChainMission, Customer customer){
+        TransExternal response = new TransExternal();
+        try {
+            response.setId(UUID.randomUUID().toString());
+            response.setCustomer( customer.getId() );
+            response.setPhoneNo( customer.getPhone() );
+            response.setCifNo( purchaseChainMission.getCifNo() );
+            response.setRefId( purchaseChainMission.getChainId() );
+            response.setRefType( RefType.MISSION );
+            response.setTxnRefNo( purchaseChainMission.getRefNo() );
+            response.setTxnId( purchaseChainMission.getTransId() );
+            if (StringUtils.isNotBlank(purchaseChainMission.getTransactionAt())) {
+                response.setTxnDate(
+                        LocalDate.parse(purchaseChainMission.getTransactionAt()
+                        , DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
+            }
+            response.setTxnAmount( purchaseChainMission.getTxnAmount() );
+            response.setTxnStatus(Constants.Status.SUCCESS);
+            response.setTxnCurrency( purchaseChainMission.getTxnCurrency() );
+            response.setTxnMethod( purchaseChainMission.getPaymentMethod() );
+            response.setTxnChannel( purchaseChainMission.getPaymentChannel() );
+            response.setTxnNote( purchaseChainMission.getNotes() );
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return response;
     }
 
 }
