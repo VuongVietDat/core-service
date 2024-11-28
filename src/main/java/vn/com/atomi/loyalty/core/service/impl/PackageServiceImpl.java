@@ -73,7 +73,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
   }
   @Override
   public GetListPackageOutput getRegistedPackage(String cifNo) {
-    var packageResponse = packageRepository.getRegistedPackage(cifNo, RefType.PACKAGE, Status.ACTIVE);
+    var packageResponse = packageRepository.getRegistedPackage(Status.ACTIVE, cifNo, RefType.PACKAGE);
     return super.modelMapper.convertRegistedPackageOutput(packageResponse);
   }
 

@@ -25,6 +25,12 @@ public interface PackageRepository extends JpaRepository<Packages, Long> {
 
   @Query(value = "select ps from Packages ps where ps.status = :status")
   List<Packages> getListPackage(Status status);
-  @Query(value = "select ps from Packages ps where ps.id in (select tel.refId from TransExternal tel where tel.cifNo = :cifNo and tel.refType = :refType) and ps.status = :status ")
-  Packages getRegistedPackage(String cifNo, RefType reftType, Status status);
+  @Query(value = "select ps from Packages ps " +
+          " where ps.status = :status and " +
+          " ps.id in (" +
+          " select tel.refId " +
+          " from TransExternal tel " +
+          " where tel.cifNo = :cifNo " +
+          " and tel.refType = :refType) ")
+  Packages getRegistedPackage(Status status, String cifNo, RefType refType);
 }
