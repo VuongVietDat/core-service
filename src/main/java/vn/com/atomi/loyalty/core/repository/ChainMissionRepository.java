@@ -27,28 +27,18 @@ public interface ChainMissionRepository extends JpaRepository<CChainMission, Lon
 
   @Query(value = """
           SELECT 
-             to_char(ccm.id),
-             ccm.code,
-             ccm.name,
-             ccm.group_type,
-             ccm.benefit_type,
-             ccm.image,
-             ccm.is_ordered,
-             to_char(ccm.price),
-             ccm.currency,
-             ccm.notes,
-             ccm.start_date,
-             ccm.end_date
+             ccm.*
           FROM C_CHAIN_MISSION ccm
           WHERE (IS_DELETED IS NULL OR IS_DELETED = 0)
           AND IS_CHAINED = 'Y'
           AND STATUS = 'ACTIVE'
           AND EXISTS (
               SELECT 1 FROM C_CUST_MISSION_PROGRESS cmp
-              WHERE ccm.ID = cmp.MISSION_ID AND cmp.CUSTOMER_ID  = :customerId
-              AND MISSION_TYPE IN ('C','G')
-          )
-""", nativeQuery = true)
-  List<Object[]> getRegistedChainMission(Long customerId);
+              WHERE cmp.CUSTOMER_ID  = :customerId 
+              AND ccm.ID = cmp.MISSION_ID
+              AND cmp.MISSION_TYPE IN ('C')
+              AND cmp.STATUS = :status
+          ) """, nativeQuery = true)
+  List<CChainMission> getRegistedChainMission(Long customerId, String status);
 
 }

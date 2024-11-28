@@ -45,7 +45,7 @@ public class MissionController extends BaseController {
         return ResponseUtils.success(lstResponse);
     }
 
-    @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đang thực hiện")
+    @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đã đăng ký INPROGRESS|COMPLETED")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/mission/get-registed-chain-mission")
     public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getRegistedChainMission(
@@ -56,9 +56,12 @@ public class MissionController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
-            String cifNo) {
-        List<CChainMissionOuput> lstResponse = missionService.getRegistedChainMission(cifNo);
+            @RequestParam(required = true)
+            String cifNo,
+            @Parameter(description = "Trạng thái")
+            @RequestParam(required = true)
+            String status) {
+        List<CChainMissionOuput> lstResponse = missionService.getRegistedChainMission(cifNo, status);
         return ResponseUtils.success(lstResponse);
     }
 
@@ -73,7 +76,7 @@ public class MissionController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             Long id) {
         CChainMissionOuput lstResponse = missionService.getChainMissionDetail(id);
         return ResponseUtils.success(lstResponse);
@@ -90,7 +93,7 @@ public class MissionController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             Long chainId) {
         List<CMissionOuput> lstResponse = missionService.getListMission(chainId);
         return ResponseUtils.success(lstResponse);
@@ -106,10 +109,10 @@ public class MissionController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã cifNo")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             String cifNo,
             @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             Long chainId) {
         List<CMissionOuput> lstResponse = missionService.getListMissionInProgress(cifNo, chainId);
         return ResponseUtils.success(lstResponse);
@@ -125,7 +128,7 @@ public class MissionController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã định danh gói hội viên")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             Long id) {
         CMissionOuput lstResponse = missionService.getMissionDetail(id);
         return ResponseUtils.success(lstResponse);

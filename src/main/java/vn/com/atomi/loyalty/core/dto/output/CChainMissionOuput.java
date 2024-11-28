@@ -46,7 +46,7 @@ public class CChainMissionOuput implements Serializable {
     private String endDate;
 
     @Schema(description = "Giá")
-    private BigDecimal price;
+    private Long price;
 
     @Schema(description = "VND, USD, PNT")
     private String currency;

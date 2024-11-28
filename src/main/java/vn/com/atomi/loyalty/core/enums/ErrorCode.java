@@ -23,7 +23,8 @@ public enum ErrorCode implements AbstractError {
   CUSTOMER_REGISTED_PACKAGE(4101, "Khách hàng đã đăng ký gói hội viên.", HttpStatus.BAD_REQUEST),
   CUSTOMER_BALANCE_NOT_FOUND(4102, "Không tìm được tài khoản điểm.", HttpStatus.BAD_REQUEST),
   CUSTOMER_REGISTED_CHAIN_MISSION(4104, "Khách hàng đã đăng ký gói nhiệm vụ.", HttpStatus.BAD_REQUEST),
-  CHAIN_MISSION_ERROR(4201, "Đăng ký chuỗi nhiệm vụ không thành công.", HttpStatus.BAD_REQUEST);
+  CHAIN_MISSION_ERROR(4201, "Đăng ký chuỗi nhiệm vụ không thành công.", HttpStatus.BAD_REQUEST),
+  CHAIN_MISSION_NOT_FOUND(4202, "Không tìm thấy chuỗi nhiệm vụ.", HttpStatus.BAD_REQUEST);
 ;
 
   private final int code;

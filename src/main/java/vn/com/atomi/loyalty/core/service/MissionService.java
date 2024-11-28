@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface MissionService {
   List<CChainMissionOuput> getNewChainMission();
-  List<CChainMissionOuput> getRegistedChainMission(String cifNo);
+  List<CChainMissionOuput> getRegistedChainMission(String cifNo, String status);
   List<CMissionOuput> getListMission(Long chainId);
   List<CMissionOuput> getListMissionInProgress(String cifNo, Long chainId);
   CChainMissionOuput getChainMissionDetail(Long id);

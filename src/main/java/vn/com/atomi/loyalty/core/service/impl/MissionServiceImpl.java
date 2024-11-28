@@ -67,13 +67,14 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     return super.modelMapper.convertChainMissionOutput(chainMission);
     }
     @Override
-    public List<CChainMissionOuput> getRegistedChainMission(String cifNo) {
+    public List<CChainMissionOuput> getRegistedChainMission(String cifNo, String status) {
         Optional<Customer> customer = customerRepository.findByCifBank(cifNo);
-        if(customer.isPresent()) {
-            var chainMission = chainMissionRepository.getRegistedChainMission(customer.get().getId());
-            return this.mappingMissionProgress(chainMission);
+        if(!customer.isPresent()) {
+            throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
         }
-        return new ArrayList<>();
+        var chainMission = chainMissionRepository.getRegistedChainMission(customer.get().getId(), status);
+        return this.mappingMissionProgress(chainMission);
+
     }
     @Override
     public List<CMissionOuput> getListMission(Long chainId) {
@@ -170,12 +171,40 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                       purchaseChainMission.getRefNo(),
                       purchaseChainMission.getCifNo(),
                       purchaseChainMission.getChainId());
-
+      if(chainMission == null) {
+          throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);
+      }
       // save data
       return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission));
 
   }
-  private List<CChainMissionOuput> mappingMissionProgress (List<Object[]> rawData){
+
+    private List<CChainMissionOuput> mappingMissionProgress (List<CChainMission> rawData){
+        return rawData.stream()
+                .map(data -> {
+                    CChainMissionOuput output = new CChainMissionOuput();
+
+                    output.setId(data.getId());
+                    output.setCode(data.getCode());
+                    output.setName(data.getName());
+                    output.setGroupType(data.getGroupType());
+                    output.setBenefitType(data.getBenefitType());
+                    output.setImage(data.getImage());
+                    output.setIsOrdered(data.getIsOrdered());
+                    output.setPrice(data.getPrice());
+                    output.setCurrency(data.getCurrency());
+                    output.setNotes(data.getNotes());
+                    if(data.getStartDate() != null) {
+                        output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    if (data.getEndDate() != null) {
+                        output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    return output;
+
+                }).collect(Collectors.toList());
+    }
+  private List<CChainMissionOuput> mappingMissionProgressOld (List<Object[]> rawData){
       return rawData.stream()
           .map(data -> {
               CChainMissionOuput output = new CChainMissionOuput();
@@ -187,7 +216,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                 output.setBenefitType(data.length > 4 ? (String) data[4] : null);  // Assuming column 3 is groupType
                 output.setImage(data.length > 5 ? (String) data[5] : null);  // Assuming column 4 is code
                 output.setIsOrdered(data.length > 6 ? (String) data[6] : null);  // Assuming column 5 is name
-                output.setPrice(data.length > 7 ? new BigDecimal((String) data[7 ]) : null);  // Assuming column 6 is price
+                output.setPrice(data.length > 7 ? new BigDecimal((String) data[7 ]).longValue() : null);  // Assuming column 6 is price
                 output.setCurrency(data.length > 8 ? (String) data[8] : null);  // Assuming column 7 is currency
                 output.setNotes(data.length > 9 ? (String) data[9] : null);  // Assuming column 8 is currency
                 if (data.length > 10 && data[10] != null) {
@@ -245,7 +274,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                     output.setGroupType(data.getGroupType());
                     output.setStartDate(data.getStartDate());
                     output.setEndDate(data.getEndDate());
-                    output.setStatus(Constants.Mission.STATUS_PENDING);
+                    output.setStatus(Constants.Mission.STATUS_INPROGRESS);
                     output.setTxnRefNo(data.getTxnRefNo());
                     return output;
 
