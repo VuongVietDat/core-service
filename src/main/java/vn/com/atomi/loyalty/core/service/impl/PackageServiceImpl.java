@@ -82,6 +82,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     try {
         response.setId(UUID.randomUUID().toString());
         response.setCustomer( customer.getId() );
+        response.setPhoneNo( customer.getPhone() );
         response.setCifNo( purchasePackageInput.getCifNo() );
         response.setRefId( purchasePackageInput.getPackageId() );
         response.setRefType( RefType.PACKAGE );
