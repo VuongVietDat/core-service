@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
+import vn.com.atomi.loyalty.core.dto.output.EGCBiometricOutput;
 import vn.com.atomi.loyalty.core.dto.output.NotificationOutput;
-import vn.com.atomi.loyalty.core.dto.output.RuleOutput;
 import vn.com.atomi.loyalty.core.feign.fallback.LoyaltyEventGetwayFallbackFactory;
 
 import java.util.List;
@@ -29,4 +29,8 @@ public interface LoyaltyEventGetwayClient {
     ResponseData<List<NotificationOutput>> sendNotification(
             @RequestHeader(RequestConstant.REQUEST_ID) String requestId,
             @Valid @RequestBody NotificationInput request);
+
+    @Operation(summary = "Api (noi bo) lấy danh sách khách hàng hoàn thiện sinh trắc học")
+    @GetMapping("/internal/completebiometric")
+    ResponseData<List<EGCBiometricOutput>> getLstCompleteBiometric(@RequestHeader(RequestConstant.REQUEST_ID) String requestId);
 }

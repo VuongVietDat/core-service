@@ -1,10 +1,13 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
@@ -65,6 +68,8 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
     private final CustomerService customerService;
 
     private final LoyaltyEventGetwayClient loyaltyEventGetwayClient;
+
+    private final EntityManager entityManager;
 
     @Override
     public CustomerBalanceOutput getCurrentBalance(String cifBank, String cifWallet) {
@@ -251,7 +256,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             this.getExpireDate(rule)));
             List<Long> transactionIds = customRepository.plusAmounts(results);
             if (transactionIds.size() > 0) {
-                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerOutput);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
             }
 
@@ -313,7 +318,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             this.getExpireDate(rule)));
             List<Long> transactionIds = customRepository.plusAmounts(results);
             if (transactionIds.size() > 0) {
-                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerOutput);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
             }
         }
@@ -371,15 +376,76 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                             this.getExpireDate(rule)));
             List<Long> transactionIds = customRepository.plusAmounts(results);
             if (transactionIds.size() > 0) {
-                NotificationInput notificationInput = this.convertInput(consumptionPoint,customerOutput);
+                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerOutput);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
             }
 
         }
     }
 
-    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput)
-    {
+    @Override
+    public void calculateCompleteBiometric() {
+
+        RulePOCOutput rulePOC = loyaltyConfigClient.getRulePoc(RequestUtils.extractRequestId(), "BIOMETRIC").getData();
+        RuleOutput rule = this.convertToRuleOutput(rulePOC);
+
+        List<EGCBiometricOutput> egcBiometricOutputs = loyaltyEventGetwayClient.getLstCompleteBiometric(RequestUtils.extractRequestId()).getData()
+                .stream()
+                .filter(egcBiometricOutput -> egcBiometricOutput.getIsPlusPoint() == false)
+                .collect(Collectors.toList());
+
+        for (EGCBiometricOutput egcBiometricOutput : egcBiometricOutputs) {
+            // lấy thông tin của KH
+            CustomerOutput customerOutput = customerService.getCustomer(egcBiometricOutput.getCifBank(), null);
+            // lấy thông tin tài khoản điểm của KH
+            CustomerBalance customerBalance =
+                    customerBalanceRepository
+                            .findByDeletedFalseAndCustomerId(customerOutput.getId())
+                            .orElse(null);
+            if (customerBalance == null) {
+                LOGGER.warn("Not found customer balance with customerId: {}", customerOutput.getId());
+                return;
+            }
+
+            LocalDateTime transactionDate = LocalDateTime.now();
+            long limitPoint = rulePOC.getLimitPointPerUser();
+            String refNo = UUID.randomUUID().toString();
+            AllocationPointTransactionInput allocationTransaction = new AllocationPointTransactionInput();
+            allocationTransaction.setAmount(Long.valueOf(String.valueOf(limitPoint)));
+            allocationTransaction.setRefNo(refNo);
+            allocationTransaction.setTransactionAt(transactionDate);
+            allocationTransaction.setCurrency("VND");
+            allocationTransaction.setTransactionType("BIOMETRIC");
+            allocationTransaction.setTransactionGroup("FUNDTF");
+            List<TransactionInput> results = new ArrayList<>();
+            // tính điểm
+            var totalPoint = BigInteger.ZERO;
+            var basePoint = BigInteger.ZERO;
+            long consumptionPoint = 0;
+            basePoint = BigInteger.valueOf(limitPoint);
+            totalPoint = totalPoint.add(basePoint);
+            consumptionPoint = totalPoint.longValue();
+            results.add(
+                    super.modelMapper.convertToTransactionInput(
+                            allocationTransaction,
+                            PointType.CONSUMPTION_POINT,
+                            consumptionPoint,
+                            customerOutput.getId(),
+                            rule,
+                            PointEventSource.LV24H,
+                            this.getExpireDate(rule)));
+            List<Long> transactionIds = customRepository.plusAmounts(results);
+            if (transactionIds.size() > 0) {
+                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerOutput);
+                loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
+
+                this.updateCompleteBiometric(customerOutput.getCifBank());
+            }
+        }
+    }
+
+
+    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput) {
         NotificationInput notificationInput = new NotificationInput();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss.SSS");
         String startTime = LocalDateTime.now().format(formatter);
@@ -389,7 +455,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
         notificationInput.setClientTime(startTime);
         notificationInput.setTransTime(String.valueOf(date));
         notificationInput.setTitle("Cộng điểm Loyalty");
-        notificationInput.setContent("Quý khách được cộng " + consumptionPoint + "điểm Loyalty");
+        notificationInput.setContent("Quý khách được cộng " + consumptionPoint + " điểm Loyalty");
         notificationInput.setUserName(customerOutput.getPhone());
         return notificationInput;
     }
@@ -426,4 +492,16 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
             case NEVER -> null;
         };
     }
+
+    @Transactional
+    public void updateCompleteBiometric(String cifBank) {
+        StringBuilder updateCompleteBiometric = new StringBuilder("UPDATE EG_COMPLETE_BIOMETRIC SET IS_PLUS_POINT = 1 WHERE CIF_BANK = ?1 ");
+        Query query = entityManager.createNativeQuery(updateCompleteBiometric.toString().formatted());
+        int parameterIndex = 1;
+        query.setParameter(parameterIndex++, cifBank);
+        LOGGER.info("Query \n" + query.toString());
+        query.executeUpdate();
+
+    }
+
 }

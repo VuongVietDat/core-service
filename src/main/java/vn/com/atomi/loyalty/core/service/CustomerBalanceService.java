@@ -43,4 +43,6 @@ public interface CustomerBalanceService {
     void calculatePointCurrencyTransaction(String startDate, String endDate);
 
     void calculatePointCard(String startDate, String endDate);
+
+    void calculateCompleteBiometric();
 }
