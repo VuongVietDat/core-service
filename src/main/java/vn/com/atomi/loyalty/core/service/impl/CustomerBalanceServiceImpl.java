@@ -1,13 +1,10 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
@@ -439,7 +436,7 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
                 NotificationInput notificationInput = this.convertInput(consumptionPoint, customerOutput);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
 
-                this.updateCompleteBiometric(customerOutput.getCifBank());
+                loyaltyEventGetwayClient.automaticupdate(RequestUtils.extractRequestId(), customerOutput.getCifBank());
             }
         }
     }
@@ -492,16 +489,4 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
             case NEVER -> null;
         };
     }
-
-    @Transactional
-    public void updateCompleteBiometric(String cifBank) {
-        StringBuilder updateCompleteBiometric = new StringBuilder("UPDATE EG_COMPLETE_BIOMETRIC SET IS_PLUS_POINT = 1 WHERE CIF_BANK = ?1 ");
-        Query query = entityManager.createNativeQuery(updateCompleteBiometric.toString().formatted());
-        int parameterIndex = 1;
-        query.setParameter(parameterIndex++, cifBank);
-        LOGGER.info("Query \n" + query.toString());
-        query.executeUpdate();
-
-    }
-
 }
