@@ -32,7 +32,7 @@ public class TransExternal {
     private RefType refType;
 
     @Column(name = "CUSTOMER_ID")
-    private Long customer;
+    private Long customerId;
 
     @Column(name = "PHONE_NO", length = 13)
     private String phoneNo;

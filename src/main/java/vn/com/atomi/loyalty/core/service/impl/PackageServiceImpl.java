@@ -81,7 +81,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
       TransExternal response = new TransExternal();
     try {
         response.setId(UUID.randomUUID().toString());
-        response.setCustomer( customer.getId() );
+        response.setCustomerId( customer.getId() );
         response.setPhoneNo( customer.getPhone() );
         response.setCifNo( purchasePackageInput.getCifNo() );
         response.setRefId( purchasePackageInput.getPackageId() );

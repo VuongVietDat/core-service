@@ -132,7 +132,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             throw new BaseException(ErrorCode.CUSTOMER_REGISTED_CHAIN_MISSION);
         }
         // tao chuoi nhiem vu gan theo khach hang
-        List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission);
+        List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission, customer.get());
         if(Currency.PNT.name().equalsIgnoreCase(purchaseChainMission.getTxnCurrency())) {
             // truong hop thanh toan bang point call minus point
             Long transactionId = customRepository.minusAmount(
@@ -153,7 +153,6 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             }
         } else {
             // truong hop thanh toan bang tien => luu thong tin xuong bang history
-
             TransExternal history = transExternalRepository.save(mappingTransactionExternal(purchaseChainMission, customer.get()));
             if(history != null) {
                 responseId = history.getId();
@@ -164,7 +163,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         return responseId;
   }
 
-  private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission){
+  private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
       // tao chuoi nhiem vu gan theo khach hang
       var chainMission = cCustMissionProgressRepository.
               getDataChainMission(
@@ -175,7 +174,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
           throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);
       }
       // save data
-      return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission));
+      return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission, customer));
 
   }
 
@@ -204,33 +203,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
                 }).collect(Collectors.toList());
     }
-  private List<CChainMissionOuput> mappingMissionProgressOld (List<Object[]> rawData){
-      return rawData.stream()
-          .map(data -> {
-              CChainMissionOuput output = new CChainMissionOuput();
 
-                output.setId(data.length > 0 ? Long.valueOf((String) data[0]) : null);  // Assuming column 0 is chainId
-                output.setCode(data.length > 1 ? (String) data[1] : null);  // Assuming column 1 is missionId
-                output.setName(data.length > 2 ? (String) data[2] : null);  // Assuming column 2 is orderNo
-                output.setGroupType(data.length > 3 ? (String) data[3] : null);  // Assuming column 3 is groupType
-                output.setBenefitType(data.length > 4 ? (String) data[4] : null);  // Assuming column 3 is groupType
-                output.setImage(data.length > 5 ? (String) data[5] : null);  // Assuming column 4 is code
-                output.setIsOrdered(data.length > 6 ? (String) data[6] : null);  // Assuming column 5 is name
-                output.setPrice(data.length > 7 ? new BigDecimal((String) data[7 ]).longValue() : null);  // Assuming column 6 is price
-                output.setCurrency(data.length > 8 ? (String) data[8] : null);  // Assuming column 7 is currency
-                output.setNotes(data.length > 9 ? (String) data[9] : null);  // Assuming column 8 is currency
-                if (data.length > 10 && data[10] != null) {
-                    Timestamp startDate = (Timestamp) data[10];
-                    output.setStartDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(startDate.getTime()));
-                }
-                if (data.length > 11 && data[11] != null) {
-                    Timestamp endDate = (Timestamp) data[11];
-                    output.setEndDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(endDate.getTime()));
-                }
-                return output;
-
-          }).collect(Collectors.toList());
-  }
   private List<CMissionOuput> mappingListMission (List<Object[]> rawData){
       return rawData.stream()
           .map(data -> {
@@ -261,12 +234,13 @@ public class MissionServiceImpl extends BaseService implements MissionService {
           }).collect(Collectors.toList());
   }
 
-    private List<CCustMissionProgress> mappingChainMissionToProgress (List<CCustMissionProgress> rawData){
+    private List<CCustMissionProgress> mappingChainMissionToProgress (List<CCustMissionProgress> rawData, Customer customer){
         return rawData.stream()
                 .map(data -> {
                     CCustMissionProgress output = new CCustMissionProgress();
 
-                    output.setCustomer(data.getCustomer());
+                    output.setCustomerId(customer.getId());
+                    output.setCifNo(customer.getCifBank());
                     output.setParentId(data.getParentId());
                     output.setMissionId(data.getMissionId());
                     output.setMissionType(data.getMissionType());
@@ -285,7 +259,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         TransExternal response = new TransExternal();
         try {
             response.setId(UUID.randomUUID().toString());
-            response.setCustomer( customer.getId() );
+            response.setCustomerId( customer.getId() );
             response.setPhoneNo( customer.getPhone() );
             response.setCifNo( purchaseChainMission.getCifNo() );
             response.setRefId( purchaseChainMission.getChainId() );

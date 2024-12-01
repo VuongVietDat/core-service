@@ -426,4 +426,9 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
             case NEVER -> null;
         };
     }
+
+    @Override
+    public Long plusAmount(TransactionInput transactionInput) {
+        return customRepository.plusAmount(transactionInput);
+    }
 }

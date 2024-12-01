@@ -11,7 +11,7 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
 
     @Query(value= """
         SELECT cmps FROM CCustMissionProgress cmps 
-        WHERE cmps.customer = :customerId 
+        WHERE cmps.customerId = :customerId 
         AND cmps.missionId = :chainId 
         AND cmps.missionType = :missionType
         AND cmps.status = :status
@@ -20,7 +20,7 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
 
     @Query(value = """
             SELECT
-                cms2.ID, cms2.CUSTOMER_ID, cms2.PARENT_ID, cms2.MISSION_ID,
+                cms2.ID, null CUSTOMER_ID, null CIF_NO, cms2.PARENT_ID, cms2.MISSION_ID,
                 cms2.MISSION_TYPE, cms2.ORDER_NO, cms2.GROUP_TYPE,
                 (CASE WHEN cms2.MISSION_TYPE IN ('C','G') THEN ccmns.START_DATE ELSE cmns.START_DATE END) START_DATE,
                 (CASE WHEN cms2.MISSION_TYPE IN ('C','G') THEN ccmns.END_DATE ELSE cmns.END_DATE END) END_DATE,
@@ -28,7 +28,6 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
             FROM (
                 SELECT
                     ID,
-                    (SELECT ID FROM C_CUSTOMER cc WHERE CIF_BANK = :cifBank) CUSTOMER_ID,
                     PARENT_ID, MISSION_ID, MISSION_TYPE,
                     NVL(ORDER_NO, PRIOR ORDER_NO) ORDER_NO,
                     (
