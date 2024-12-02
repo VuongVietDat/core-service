@@ -31,7 +31,7 @@ public class Packages {
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "CODE")
+    @Column(name = "CODE", unique = true, nullable = false)
     private String code;
 
     @Column(name = "FEE")

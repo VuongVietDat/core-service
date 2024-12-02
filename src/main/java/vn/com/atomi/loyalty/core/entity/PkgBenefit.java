@@ -29,7 +29,7 @@ public class PkgBenefit {
     @Column(name = "PACKAGE_ID")
     private Long packageId;
 
-    @Column(name = "NAME")
+    @Column(name = "NAME",unique = true)
     private String name;
 
     @Column(name = "STATUS")

@@ -25,6 +25,10 @@ public interface PackageRepository extends JpaRepository<Packages, Long> {
 
   @Query(value = "select ps from Packages ps where ps.status = :status")
   List<Packages> getListPackage(Status status);
+
+  @Query(value = "select ps from Packages ps where ps.status = :status")
+  Page<Packages> getPagePackage(Status status,Pageable pageable);
+
   @Query(value = "select ps from Packages ps " +
           " where ps.status = :status and " +
           " ps.id in (" +

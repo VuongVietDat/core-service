@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -44,6 +45,7 @@ public class Partner extends BaseEntity {
 
     @Size(max = 20)
     @Column(name = "PHONE", length = 20)
+    @Pattern(regexp = "^[+]?[0-9]{10}$", message = "Invalid phone number")
     private String phone;
 
     @Size(max = 20)
@@ -70,7 +72,6 @@ public class Partner extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Size(max = 255)
     @Column(name = "IS_LOCAL", columnDefinition = "CHAR(1)")
     private String isLocal;
 

@@ -1,5 +1,7 @@
 package vn.com.atomi.loyalty.core.service;
 
+import org.springframework.data.domain.Pageable;
+import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.GetListBenefitOutput;
 import vn.com.atomi.loyalty.core.dto.output.GetListPackageOutput;
@@ -16,4 +18,7 @@ public interface PackageService {
   List<GetListBenefitOutput> getListBenefit(Long packageId);
   String purchasePackage(PurchasePackageInput purchasePackageInput);
   GetListPackageOutput getRegistedPackage(String cifNo);
+  ResponsePage<GetListPackageOutput> getPagePackage(Pageable pageable);
+
+  ResponsePage<GetListBenefitOutput>  getPageBenefit(Long packageId, Pageable pageable);
 }
