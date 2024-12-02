@@ -11,5 +11,8 @@ import java.util.List;
  */
 public interface NotificationService {
 
-    public ResponseData<List<NotificationOutput>> sendNotification(String caculationType, Long point, String phoneNumber);
+    public ResponseData<List<NotificationOutput>> sendNotification(
+                                                                   String title,
+                                                                   String content,
+                                                                   String phoneNumber);
 }

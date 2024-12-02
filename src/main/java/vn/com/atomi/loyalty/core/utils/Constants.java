@@ -20,6 +20,7 @@ public class Constants {
   public static final String DEFAULT_DAY_START_TIME = "00:00:00";
 
   public static final String DEFAULT_DAY_END_TIME = "23:59:59";
+  public static final String LOCATION_VN = "VN";
 
   public class Status {
     public static final String SUCCESS = "SUCCESS";
@@ -37,6 +38,11 @@ public class Constants {
   public class Notification {
     public static final String PLUS = "+";
     public static final String MINUS = "-";
+    public static final String MISSION_TITLE = "Đăng ký chuỗi nhiệm vụ thành công";
+    public static final String MISSION_CONTENT = "Quý khách đã đăng ký thành công chuỗi nhiệm vụ";
+    public static final String PACKAGE_TITLE = "Đăng ký gói hội viên thành công";
+    public static final String PACKAGE_CONTENT = "Đăng ký gói hội viên thành công";
+
   }
 
 

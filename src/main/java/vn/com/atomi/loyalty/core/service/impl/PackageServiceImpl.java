@@ -6,15 +6,19 @@ import org.springframework.stereotype.Service;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.exception.BaseException;
+import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.GetListBenefitOutput;
 import vn.com.atomi.loyalty.core.dto.output.GetListPackageOutput;
+import vn.com.atomi.loyalty.core.entity.CChainMission;
 import vn.com.atomi.loyalty.core.entity.Customer;
+import vn.com.atomi.loyalty.core.entity.Packages;
 import vn.com.atomi.loyalty.core.entity.TransExternal;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.RefType;
 import vn.com.atomi.loyalty.core.enums.Status;
 import vn.com.atomi.loyalty.core.repository.*;
+import vn.com.atomi.loyalty.core.service.NotificationService;
 import vn.com.atomi.loyalty.core.service.PackageService;
 import vn.com.atomi.loyalty.core.utils.Constants;
 
@@ -23,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author haidv
@@ -39,6 +44,8 @@ public class PackageServiceImpl extends BaseService implements PackageService {
   private final TransExternalRepository transExternalRepository;
 
   private final CustomerRepository customerRepository;
+
+  private final NotificationService notificationService;
 
   @Override
   public List<GetListPackageOutput> getListPackage() {
@@ -69,6 +76,17 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     }
     TransExternal history = mappingPurchasePackage(purchasePackageInput, customer.get());
     transExternalRepository.save(history);
+    if (history.getId() != null) {
+        // call push notification to app LPB
+      CompletableFuture.runAsync(() -> {
+          try {
+              this.handleNotification(customer.get(), purchasePackageInput);
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+          System.out.println("Push notification app LPB - Transaction Id: " + history.getId() + " already done!");
+      });
+    }
     return history.getId();
   }
   @Override
@@ -111,4 +129,17 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     }
     return response;
   }
+
+    public void handleNotification(Customer customer,
+                                   PurchasePackageInput purchasePackageInput) {
+        Optional<Packages> packages = packageRepository.findById(purchasePackageInput.getPackageId());
+        StringBuilder notiContent = new StringBuilder(Constants.Notification.MISSION_CONTENT + " ");
+        if(packages.isPresent()) {
+            notiContent.append(packages.get().getName());
+        }
+        notificationService.sendNotification(
+                Constants.Notification.PACKAGE_TITLE,
+                notiContent.toString(),
+                customer.getPhone());
+    }
 }

@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -52,8 +53,6 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     private final CustomRepository customRepository;
 
     private final CCustMissionProgressRepository cCustMissionProgressRepository;
-
-    private final CMissionSequentialRepository missionSequentialRepository;
 
     private final CustomerBalanceRepository customerBalanceRepository;
 
@@ -121,6 +120,11 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                 throw new BaseException(ErrorCode.NOT_ENOUGH_BALANCE);
             }
         }
+
+        var chainMission = chainMissionRepository.findById(purchaseChainMission.getChainId());
+        if(!chainMission.isPresent()) {
+            throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);
+        }
         // kiem tra khach hang da dang ky goi nhiem vu truoc do
         CCustMissionProgress missionProgress = cCustMissionProgressRepository.
             findByCustomerAndChainId(
@@ -145,11 +149,14 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                     PointType.CONSUMPTION_POINT);
 
             if (transactionId > 0) {
-                responseId = transactionId.toString();
-                notificationService.sendNotification(
-                        Constants.Notification.PLUS,
-                        purchaseChainMission.getTxnAmount(),
-                        customer.get().getPhone());
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        this.handleNotification(customer.get(), purchaseChainMission, chainMission.get());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("Push notification app LPB - Transaction Id: " + transactionId + " already done!");
+                });
             }
         } else {
             // truong hop thanh toan bang tien => luu thong tin xuong bang history
@@ -281,6 +288,15 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             ex.printStackTrace();
         }
         return response;
+    }
+
+    public void handleNotification(Customer customer,
+                                   PurchaseChainMissionInput purchaseChainMission,
+                                   CChainMission chainMission) {
+        notificationService.sendNotification(
+                Constants.Notification.MISSION_TITLE,
+                Constants.Notification.MISSION_CONTENT + " " + chainMission.getName(),
+                customer.getPhone());
     }
 
 }
