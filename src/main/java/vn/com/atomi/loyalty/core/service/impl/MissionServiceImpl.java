@@ -1,5 +1,8 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +62,8 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     private final NotificationService notificationService;
 
     private final TransExternalRepository transExternalRepository;
+
+    private final EntityManager entityManager;
 
     @Override
     public List<CChainMissionOuput> getNewChainMission() {
@@ -170,7 +175,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         return responseId;
     }
     public void completeMission(Long missionId, Long chainId, String  cifNo) {
-        cCustMissionProgressRepository.completeMission(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
+        this.updateProgresStatus(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
     }
     private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
       // tao chuoi nhiem vu gan theo khach hang
@@ -299,6 +304,32 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                 Constants.Notification.MISSION_TITLE,
                 Constants.Notification.MISSION_CONTENT + " " + chainMission.getName(),
                 customer.getPhone());
+    }
+
+    @Transactional
+    public void updateProgresStatus(Long missionId,
+                                    Long chainId,
+                                    String cifNo,
+                                    String status) {
+        try {
+            String sql = "UPDATE C_CUST_MISSION_PROGRESS cmp SET STATUS =  ? " +
+                    " WHERE cmp.MISSION_ID = ? " +
+                    " AND EXISTS (" +
+                    "   SELECT 1 FROM C_CUSTOMER ccm" +
+                    "   WHERE ccm.CIF_BANK = ?" +
+                    "   AND ccm.ID = cmp.CUSTOMER_ID" +
+                    " ) ";
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter(1, missionId);
+            query.setParameter(2, cifNo);
+            query.setParameter(3, status);
+            int updatedCount = query.executeUpdate();
+            if(updatedCount > 0) {
+                System.out.println("Update Sucessfully MissionId; " + missionId + " | customerId:" + cifNo);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

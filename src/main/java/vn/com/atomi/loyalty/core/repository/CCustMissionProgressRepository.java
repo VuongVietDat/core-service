@@ -47,18 +47,4 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
     """, nativeQuery = true)
     List<CCustMissionProgress> getDataChainMission(String refNo, String cifBank, Long chainId);
 
-    @Query(value= """
-        UPDATE CCustMissionProgress cmps
-        SET cmps.status = :status
-        WHERE cmps.missionId = :missionId 
-        AND EXISTS (
-            SELECT 1 FROM Customer crs 
-            WHERE crs.cifBank = :cifNo 
-            AND crs.id = cmps.customerId 
-        )
-    """)
-    void completeMission(Long missionId, Long chainId, String cifNo, String status);
-
-
-
 }
