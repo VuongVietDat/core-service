@@ -599,25 +599,27 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
         notificationInput.setClientTime(startTime);
         notificationInput.setTransTime(String.valueOf(date));
         notificationInput.setTitle("Tài khoản điểm Loyalty");
-        if(type.equals("CASA")) {
-            notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Casa bình quân. Điểm hiện tại " + customerBalance.getTotalAmount()+".");
-        }
-        if(type.equals("CARD")) {
-            notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Giao dịch thẻ tín dụng. Điểm hiện tại " + customerBalance.getTotalAmount()+".");
-        }
-        if(type.equals("NGOAITE")) {
-            notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Mua/bán ngoại tệ tại quầy. Điểm hiện tại " + customerBalance.getTotalAmount()+".");
-        }
-        if(type.equals("BIOMETRIC")) {
-            notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Hoàn thiện sinh trắc học. Điểm hiện tại " + customerBalance.getTotalAmount()+".");
-        }
-        if(type.equals("LOGIN")) {
-            notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Đăng nhập App. Điểm hiện tại " + customerBalance.getTotalAmount()+".");
-        }
+        notificationInput.setContent(getNotificationContent(type, consumptionPoint, customerBalance));
         notificationInput.setUserName(customerOutput.getPhone());
         return notificationInput;
     }
 
+    private static String getNotificationContent(String type, long consumptionPoint, CustomerBalance customerBalance) {
+        switch (type) {
+            case "CASA":
+                return "Quý khách tích thêm " + consumptionPoint + " khi thực hiện Casa bình quân. Điểm hiện tại " + customerBalance.getTotalAmount() + ".";
+            case "CARD":
+                return "Quý khách tích thêm " + consumptionPoint + " khi thực hiện Giao dịch thẻ tín dụng. Điểm hiện tại " + customerBalance.getTotalAmount() + ".";
+            case "NGOAITE":
+                return "Quý khách tích thêm " + consumptionPoint + " khi thực hiện Mua/bán ngoại tệ tại quầy. Điểm hiện tại " + customerBalance.getTotalAmount() + ".";
+            case "BIOMETRIC":
+                return "Quý khách tích thêm " + consumptionPoint + " khi thực hiện Hoàn thiện sinh trắc học. Điểm hiện tại " + customerBalance.getTotalAmount() + ".";
+            case "LOGIN":
+                return "Quý khách tích thêm " + consumptionPoint + " khi thực hiện Đăng nhập App. Điểm hiện tại " + customerBalance.getTotalAmount() + ".";
+            default:
+                return "";
+        }
+    }
     public static RuleOutput convertToRuleOutput(RulePOCOutput rulePOC) {
         return RuleOutput.builder()
                 .id(rulePOC.getId())
