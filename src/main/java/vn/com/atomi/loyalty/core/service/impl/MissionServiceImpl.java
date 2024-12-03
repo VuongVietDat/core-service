@@ -92,18 +92,18 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         }
         return response;
     }
-  @Override
-  public CChainMissionOuput getChainMissionDetail(Long id) {
+    @Override
+    public CChainMissionOuput getChainMissionDetail(Long id) {
     var mission = chainMissionRepository.getChainMissionDetail(id, Status.ACTIVE);
     return modelMapper.convertChainMissionDetailOutput(mission);
-  }
-  @Override
-  public CMissionOuput getMissionDetail(Long id) {
+    }
+    @Override
+    public CMissionOuput getMissionDetail(Long id) {
     var mission = missionRepository.getMissionDetail(id, Status.ACTIVE);
     return modelMapper.convertMissionDetailOutput(mission);
-  }
-  @Override
-  public String purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
+    }
+    @Override
+    public String purchaseChainMission(PurchaseChainMissionInput purchaseChainMission) {
         // kiem tra khach hang ton tai
         String responseId = "";
         Optional<Customer> customer = customerRepository.findByCifBank(purchaseChainMission.getCifNo());
@@ -168,9 +168,11 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             }
         }
         return responseId;
-  }
-
-  private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
+    }
+    public void finishMission(Long missionId, Long chainId, String  cifNo) {
+        cCustMissionProgressRepository.finishMission(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
+    }
+    private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
       // tao chuoi nhiem vu gan theo khach hang
       var chainMission = cCustMissionProgressRepository.
               getDataChainMission(
@@ -183,7 +185,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
       // save data
       return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission, customer));
 
-  }
+    }
 
     private List<CChainMissionOuput> mappingMissionProgress (List<CChainMission> rawData){
         return rawData.stream()
@@ -211,7 +213,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                 }).collect(Collectors.toList());
     }
 
-  private List<CMissionOuput> mappingListMission (List<Object[]> rawData){
+    private List<CMissionOuput> mappingListMission (List<Object[]> rawData){
       return rawData.stream()
           .map(data -> {
                 CMissionOuput output = new CMissionOuput();
@@ -239,7 +241,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
                 return output;
 
           }).collect(Collectors.toList());
-  }
+    }
 
     private List<CCustMissionProgress> mappingChainMissionToProgress (List<CCustMissionProgress> rawData, Customer customer){
         return rawData.stream()

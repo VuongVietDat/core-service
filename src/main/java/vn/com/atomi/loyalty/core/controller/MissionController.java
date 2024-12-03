@@ -149,4 +149,27 @@ public class MissionController extends BaseController {
         return ResponseUtils.success(missionService.purchaseChainMission(purchaseChainMission));
     }
 
+    @Operation(summary = "Api đăng ký chuỗi nhiệm vụ")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/mission/finish-mission")
+    public ResponseEntity<ResponseData<Void>> finishMission(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(description = "Mã định danh nhiệm vụ")
+            @RequestParam(required = true)
+            Long missionId,
+            @Parameter(description = "Mã định danh chuỗi nhiệm vụ")
+            @RequestParam(required = true)
+            Long chainId,
+            @Parameter(description = "Số CIF NO")
+            @RequestParam(required = true)
+            String cifNo) {
+            missionService.finishMission(missionId, chainId, cifNo);
+        return ResponseUtils.success();
+    }
+
 }
