@@ -2,12 +2,13 @@ package vn.com.atomi.loyalty.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import vn.com.atomi.loyalty.core.entity.CCustMissionProgress;
 import vn.com.atomi.loyalty.core.entity.CMissionSequential;
 import vn.com.atomi.loyalty.core.utils.Constants;
 
 import java.util.List;
-
+@Repository
 public interface CCustMissionProgressRepository extends JpaRepository<CCustMissionProgress, Long> {
 
     @Query(value= """
@@ -46,5 +47,19 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
             LEFT JOIN C_MISSION cmns ON cms2.MISSION_TYPE = 'M' AND cms2.MISSION_ID = cmns.ID AND cmns.STATUS = 'ACTIVE'
     """, nativeQuery = true)
     List<CCustMissionProgress> getDataChainMission(String refNo, String cifBank, Long chainId);
+
+    @Query(value= """
+        UPDATE CCustMissionProgress cmps
+        SET cmps.status = :status
+        WHERE cmps.missionId = :missionId 
+        AND EXISTS (
+            SELECT 1 FROM Customer crs 
+            WHERE crs.cifBank = :cifNo 
+            AND crs.id = cmps.customerId 
+        )
+    """, nativeQuery = true)
+    void completeMission(Long missionId, Long chainId, String cifNo, String status);
+
+
 
 }
