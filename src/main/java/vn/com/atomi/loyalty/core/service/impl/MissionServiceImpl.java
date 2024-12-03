@@ -169,8 +169,8 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         }
         return responseId;
     }
-    public void finishMission(Long missionId, Long chainId, String  cifNo) {
-        cCustMissionProgressRepository.finishMission(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
+    public void completeMission(Long missionId, Long chainId, String  cifNo) {
+        cCustMissionProgressRepository.completeMission(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
     }
     private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
       // tao chuoi nhiem vu gan theo khach hang

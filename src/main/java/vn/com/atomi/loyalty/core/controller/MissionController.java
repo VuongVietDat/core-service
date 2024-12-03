@@ -151,8 +151,8 @@ public class MissionController extends BaseController {
 
     @Operation(summary = "Api đăng ký chuỗi nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
-    @PostMapping("/internal/mission/finish-mission")
-    public ResponseEntity<ResponseData<Void>> finishMission(
+    @PostMapping("/internal/mission/complete-mission")
+    public ResponseEntity<ResponseData<Void>> completeMission(
             @Parameter(
                     description = "Chuỗi xác thực khi gọi api nội bộ",
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
@@ -168,7 +168,7 @@ public class MissionController extends BaseController {
             @Parameter(description = "Số CIF NO")
             @RequestParam(required = true)
             String cifNo) {
-            missionService.finishMission(missionId, chainId, cifNo);
+            missionService.completeMission(missionId, chainId, cifNo);
         return ResponseUtils.success();
     }
 

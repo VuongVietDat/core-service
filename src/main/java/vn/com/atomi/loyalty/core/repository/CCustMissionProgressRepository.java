@@ -57,7 +57,7 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
             AND crs.id = cmps.customerId 
         )
     """)
-    void finishMission(Long missionId, Long chainId, String cifNo, String status);
+    void completeMission(Long missionId, Long chainId, String cifNo, String status);
 
 
 
