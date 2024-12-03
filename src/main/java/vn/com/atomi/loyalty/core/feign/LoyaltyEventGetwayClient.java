@@ -8,6 +8,7 @@ import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.output.EGCBiometricOutput;
+import vn.com.atomi.loyalty.core.dto.output.EGLoginOutput;
 import vn.com.atomi.loyalty.core.dto.output.NotificationOutput;
 import vn.com.atomi.loyalty.core.feign.fallback.LoyaltyEventGetwayFallbackFactory;
 
@@ -39,4 +40,8 @@ public interface LoyaltyEventGetwayClient {
     ResponseData<String> automaticupdate(
             @RequestHeader(RequestConstant.REQUEST_ID) String requestId,
             @RequestParam String cifBank);
+
+    @Operation(summary = "Api (noi bo) lấy danh sách khách hàng đã login")
+    @GetMapping("/internal/login")
+    ResponseData<List<EGLoginOutput>> getListEGLogin(@RequestHeader(RequestConstant.REQUEST_ID) String requestId);
 }

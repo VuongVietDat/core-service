@@ -276,7 +276,11 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
             }
             List<Long> transactionIds = customRepository.plusAmounts(results);
             if (transactionIds.size() > 0) {
-                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerInput);
+                CustomerBalance customerBalanceAfter =
+                        customerBalanceRepository
+                                .findByDeletedFalseAndCustomerId(customerInput.getId())
+                                .orElse(null);
+                NotificationInput notificationInput = this.convertInput(consumptionPoint, customerInput, customerBalanceAfter);
                 loyaltyEventGetwayClient.sendNotification(RequestUtils.extractRequestId(), notificationInput);
             }
             period.setLastPaymentDate(today);
@@ -544,7 +548,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         return bonusPoint.toBigInteger();
     }
 
-    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput) {
+    public static NotificationInput convertInput(long consumptionPoint, CustomerOutput customerOutput, CustomerBalance customerBalanceAfter) {
         NotificationInput notificationInput = new NotificationInput();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss.SSS");
         String startTime = LocalDateTime.now().format(formatter);
@@ -553,8 +557,8 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         notificationInput.setRequestId(String.valueOf(date));
         notificationInput.setClientTime(startTime);
         notificationInput.setTransTime(String.valueOf(date));
-        notificationInput.setTitle("Cộng điểm Loyalty");
-        notificationInput.setContent("Quý khách được cộng " + consumptionPoint + "điểm Loyalty");
+        notificationInput.setTitle("Tài khoản điểm Loyalty");
+        notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Thanh toán hóa đơn. Điểm hiện tại "+ customerBalanceAfter.getTotalAmount() +".");
         notificationInput.setUserName(customerOutput.getPhone());
         return notificationInput;
     }

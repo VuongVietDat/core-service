@@ -3,12 +3,12 @@ package vn.com.atomi.loyalty.core.feign.fallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.exception.CommonErrorCode;
 import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.output.EGCBiometricOutput;
+import vn.com.atomi.loyalty.core.dto.output.EGLoginOutput;
 import vn.com.atomi.loyalty.core.dto.output.NotificationOutput;
 import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 
@@ -38,6 +38,12 @@ public class LoyaltyEventGetwayFallbackFactory implements FallbackFactory<Loyalt
             @Override
             public ResponseData<String> automaticupdate(String requestId, String cifBank) {
                 throw new BaseException(CommonErrorCode.EXECUTE_THIRTY_SERVICE_ERROR, cause);
+            }
+
+            @Override
+            public ResponseData<List<EGLoginOutput>> getListEGLogin(String requestId) {
+                log.info("getListEGLogin: set default empty array");
+                return new ResponseData<List<EGLoginOutput>>().success(new ArrayList<>());
             }
 
         };
