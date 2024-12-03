@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import vn.com.atomi.loyalty.base.annotations.DateTimeValidator;
+import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseController;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
@@ -39,10 +41,14 @@ public class PartnerController extends BaseController {
             Status status,
             @Parameter(description = "Từ khóa tìm kiếm theo mã/tên đối tác")
             @RequestParam(required = false)
-            String keyword
+            String keyword,
+            @Parameter(description = "Thời gian hiệu lực từ ngày (dd/MM/yyyy)", example = "01/01/2024")
+            @DateTimeValidator(required = false, pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String startDate
     ){
         return ResponseUtils.success(
-                partnerService.getListPartners(status, keyword, super.pageable(pageNo, pageSize, sort)));
+                partnerService.getListPartners(status, keyword, startDate, super.pageable(pageNo, pageSize, sort)));
     }
 
     @Operation(summary = "APi tạo mới đối tác")

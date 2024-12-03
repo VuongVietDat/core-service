@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 public class PartnerServiceImpl extends BaseService implements PartnerService {
     private final PartnerRepository partnerRepository;
     @Override
-    public ResponsePage<PartnersOutput> getListPartners(Status status,String keyword, Pageable pageable) {
+    public ResponsePage<PartnersOutput> getListPartners(Status status,String keyword,String startDate, Pageable pageable) {
         var page =
-                partnerRepository.findByCondition(status, keyword, pageable);
+                partnerRepository.findByCondition(status, keyword, Utils.convertToLocalDate(startDate), pageable);
 
         if (CollectionUtils.isEmpty(page.getContent()))
             return new ResponsePage<>(page, new ArrayList<>());
