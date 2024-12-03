@@ -19,6 +19,7 @@ import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.service.PackageService;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author haidv
@@ -107,6 +108,22 @@ public class PackageController extends BaseController {
             Long packageId) {
         ResponsePage<GetListBenefitOutput> responsePage = packageService.getPageBenefit(packageId,super.pageable(pageNo, pageSize, sort));
         return ResponseUtils.success(responsePage);
+    }
+
+    @Operation(summary = "Api nhận kết quả đăng ký gói hội viên")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/package/init-register-package")
+    public ResponseEntity<ResponseData<PurchasePackageInput>> initRegisterPackage(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Valid @RequestBody
+            PurchasePackageInput purchasePackageInput) {
+        ;
+        return null;
     }
 
 
