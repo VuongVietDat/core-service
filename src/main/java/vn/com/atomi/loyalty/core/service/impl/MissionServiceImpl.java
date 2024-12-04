@@ -182,7 +182,6 @@ public class MissionServiceImpl extends BaseService implements MissionService {
       var chainMission = cCustMissionProgressRepository.
               getDataChainMission(
                       purchaseChainMission.getRefNo(),
-                      purchaseChainMission.getCifNo(),
                       purchaseChainMission.getChainId());
       if(chainMission == null) {
           throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);

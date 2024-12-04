@@ -9,6 +9,7 @@ import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.GetListBenefitOutput;
+import vn.com.atomi.loyalty.core.dto.output.GetListCustomerBenefitOutput;
 import vn.com.atomi.loyalty.core.dto.output.GetListPackageOutput;
 import vn.com.atomi.loyalty.core.entity.CChainMission;
 import vn.com.atomi.loyalty.core.entity.Customer;
@@ -24,6 +25,7 @@ import vn.com.atomi.loyalty.core.utils.Constants;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -93,6 +95,12 @@ public class PackageServiceImpl extends BaseService implements PackageService {
   public GetListPackageOutput getRegistedPackage(String cifNo) {
     var packageResponse = packageRepository.getRegistedPackage(Status.ACTIVE, cifNo, RefType.PACKAGE);
     return super.modelMapper.convertRegistedPackageOutput(packageResponse);
+  }
+  @Override
+  public List<GetListCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo) {
+    var packageResponse = packageRepository.getRegistedPackage(Status.ACTIVE, cifNo, RefType.PACKAGE);
+    return new ArrayList<>();
+//    return super.modelMapper.convertRegistedPackageOutput(packageResponse);
   }
 
   private TransExternal mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){

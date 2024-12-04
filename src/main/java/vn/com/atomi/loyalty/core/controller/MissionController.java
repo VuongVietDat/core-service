@@ -149,7 +149,7 @@ public class MissionController extends BaseController {
         return ResponseUtils.success(missionService.purchaseChainMission(purchaseChainMission));
     }
 
-    @Operation(summary = "Api đăng ký chuỗi nhiệm vụ")
+    @Operation(summary = "Api thực hiện nhiệm vụ")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/mission/complete-mission")
     public ResponseEntity<ResponseData<Void>> completeMission(

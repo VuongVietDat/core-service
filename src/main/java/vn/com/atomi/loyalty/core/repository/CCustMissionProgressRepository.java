@@ -45,7 +45,7 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
             LEFT JOIN C_CHAIN_MISSION ccmns ON cms2.MISSION_TYPE IN ('C','G') AND cms2.MISSION_ID = ccmns.ID AND ccmns.STATUS = 'ACTIVE'
             LEFT JOIN C_MISSION cmns ON cms2.MISSION_TYPE = 'M' AND cms2.MISSION_ID = cmns.ID AND cmns.STATUS = 'ACTIVE'
     """, nativeQuery = true)
-    List<CCustMissionProgress> getDataChainMission(String refNo, String cifBank, Long chainId);
+    List<CCustMissionProgress> getDataChainMission(String refNo, Long chainId);
 
 //    @Query(value= """
 //        UPDATE CCustMissionProgress cmps

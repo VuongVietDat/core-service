@@ -75,7 +75,7 @@ public class PackageController extends BaseController {
         return ResponseUtils.success(packageService.purchasePackage(purchasePackageInput));
     }
 
-    @Operation(summary = "Api gói hôi viên của khách hàng")
+    @Operation(summary = "Api gói hội viên của khách hàng")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/package/registed-package")
     public ResponseEntity<ResponseData<GetListPackageOutput>> getRegistedPackage(@Parameter(
@@ -85,9 +85,27 @@ public class PackageController extends BaseController {
             @SuppressWarnings("unused")
             String apiKey,
             @Parameter(description = "Mã cif no core bank")
-            @RequestParam(required = false)
+            @RequestParam(required = true)
             String cifNo) {
         GetListPackageOutput lstResponse = packageService.getRegistedPackage(cifNo);
+        return ResponseUtils.success(lstResponse);
+    }
+    @Operation(summary = "Api truy vấn ưu đãi khách hàng đã đăng ký")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @GetMapping("/internal/package/list-customer-benefit")
+    public ResponseEntity<ResponseData<List<GetListCustomerBenefitOutput>>> getListCustomerBenefit(@Parameter(
+            description = "Chuỗi xác thực khi gọi api nội bộ",
+            example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey,
+            @Parameter(description = "Mã cif no core bank")
+            @RequestParam(required = true)
+            String cifNo,
+            @Parameter(description = "Mã định danh gói hội viên")
+            @RequestParam(required = true)
+            Long packageId) {
+        List<GetListCustomerBenefitOutput> lstResponse = packageService.getListCustomerBenefit(packageId, cifNo);
         return ResponseUtils.success(lstResponse);
     }
 
