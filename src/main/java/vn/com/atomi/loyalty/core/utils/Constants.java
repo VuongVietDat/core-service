@@ -42,6 +42,8 @@ public class Constants {
     public static final String MISSION_CONTENT = "Quý khách đã đăng ký thành công chuỗi nhiệm vụ";
     public static final String PACKAGE_TITLE = "Đăng ký gói hội viên thành công";
     public static final String PACKAGE_CONTENT = "Đăng ký gói hội viên thành công";
+    public static final String POINT_TITLE = "Tài khoản điểm loyalty";
+    public static final String POINT_CONTENT = "Số điểm /a Số dư tài khoản điểm /b";
 
   }
 

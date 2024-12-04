@@ -141,7 +141,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     public void handleNotification(Customer customer,
                                    PurchasePackageInput purchasePackageInput) {
         Optional<Packages> packages = packageRepository.findById(purchasePackageInput.getPackageId());
-        StringBuilder notiContent = new StringBuilder(Constants.Notification.MISSION_CONTENT + " ");
+        StringBuilder notiContent = new StringBuilder(Constants.Notification.PACKAGE_CONTENT + " ");
         if(packages.isPresent()) {
             notiContent.append(packages.get().getName());
         }

@@ -18,6 +18,7 @@ import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.CChainMissionOuput;
 import vn.com.atomi.loyalty.core.dto.output.CMissionOuput;
+import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.entity.*;
@@ -25,12 +26,14 @@ import vn.com.atomi.loyalty.core.enums.*;
 import vn.com.atomi.loyalty.core.enums.Currency;
 import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.*;
+import vn.com.atomi.loyalty.core.service.CustomerBalanceService;
 import vn.com.atomi.loyalty.core.service.MissionService;
 import vn.com.atomi.loyalty.core.service.NotificationService;
 import vn.com.atomi.loyalty.core.utils.Constants;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,7 +66,10 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
     private final TransExternalRepository transExternalRepository;
 
+    private final CustomerBalanceService customerBalanceService;
+
     private final EntityManager entityManager;
+    private final DecimalFormat decimalFormat = new DecimalFormat("#,###");
 
     @Override
     public List<CChainMissionOuput> getNewChainMission() {
@@ -142,6 +148,9 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         }
         // tao chuoi nhiem vu gan theo khach hang
         List<CCustMissionProgress> lstMissionProgress = this.saveMissonProgress(purchaseChainMission, customer.get());
+        if(lstMissionProgress.isEmpty()) {
+            // xu ly chuoi nhiem vu khong thanh cong
+        }
         if(Currency.PNT.name().equalsIgnoreCase(purchaseChainMission.getTxnCurrency())) {
             // truong hop thanh toan bang point call minus point
             Long transactionId = customRepository.minusAmount(
@@ -299,10 +308,32 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     public void handleNotification(Customer customer,
                                    PurchaseChainMissionInput purchaseChainMission,
                                    CChainMission chainMission) {
-        notificationService.sendNotification(
+        try {
+            // thong bao mua chuoi hoi vien thanh cong
+            notificationService.sendNotification(
                 Constants.Notification.MISSION_TITLE,
                 Constants.Notification.MISSION_CONTENT + " " + chainMission.getName(),
                 customer.getPhone());
+
+            // thong bao cong diem vao tai khoan diem
+            CustomerBalanceOutput custBalance = customerBalanceService.
+                    getCurrentBalance(
+                            purchaseChainMission.getCifNo(),
+                            null);
+            String balanceNoti = Constants.Notification.POINT_CONTENT + " " + chainMission.getName();
+            balanceNoti.replace("/a",
+                    Constants.Notification.MINUS +
+                               decimalFormat.format(purchaseChainMission.getTxnAmount()));
+            balanceNoti.replace("/b",
+                               decimalFormat.format(custBalance.getAvailableAmount()));
+
+            notificationService.sendNotification(
+                    Constants.Notification.POINT_TITLE,
+                    balanceNoti,
+                    customer.getPhone());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Transactional
