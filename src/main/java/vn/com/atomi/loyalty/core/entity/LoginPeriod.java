@@ -1,9 +1,11 @@
 package vn.com.atomi.loyalty.core.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import vn.com.atomi.loyalty.base.data.BaseEntity;
-import vn.com.atomi.loyalty.core.enums.PaymentType;
 
 import java.util.Date;
 
@@ -13,8 +15,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "C_COUNTPERIOD")
-public class CountPeriod extends BaseEntity {
+@Table(name = "C_LOGINPERIOD")
+public class LoginPeriod extends BaseEntity {
 
     @Id
     @Column(name = "CUSTOMER_ID")
@@ -23,13 +25,12 @@ public class CountPeriod extends BaseEntity {
     @Column(name = "CURRENT_STREAK", nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer currentStreak;
 
-    @Column(name = "LAST_PAYMENT_DATE")
-    private Date lastPaymentDate;
+    @Column(name = "LAST_LOGIN_DATE")
+    private Date lastLoginDate;
 
     @Column(name = "STREAK_RESET_DATE")
     private Date streakResetDate;
 
-    @Column(name = "PAYMENT_TYPE")
-    @Enumerated(EnumType.STRING)
-    private PaymentType paymentType;
+    @Column(name = "MONTH_PLUS_POINT")
+    private Date monthPlusPoint;
 }

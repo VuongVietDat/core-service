@@ -292,6 +292,20 @@ public class CustomerBalanceController extends BaseController {
         return ResponseUtils.success();
     }
 
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm khách hàng hoàn thiện sinh trắc học")
+    @PreAuthorize(Authority.ROLE_SYSTEM)
+    @PostMapping("/internal/customers/points/completebiometric")
+    public ResponseEntity<ResponseData<Void>> calculateCompleteBiometric(
+            @Parameter(
+                    description = "Chuỗi xác thực khi gọi api nội bộ",
+                    example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
+            @RequestHeader(RequestConstant.SECURE_API_KEY)
+            @SuppressWarnings("unused")
+            String apiKey) {
+        customerBalanceService.calculateCompleteBiometric();
+        return ResponseUtils.success();
+    }
+
     @Operation(summary = "Api (nội bộ) cộng điểm")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/customers/points/plus-point")
@@ -301,12 +315,9 @@ public class CustomerBalanceController extends BaseController {
                     example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
             @SuppressWarnings("unused")
-            String apiKey,
             @Parameter(description = "Tham số cộng điểm")
             @RequestParam(required = true)
             TransactionInput transactionInput) {
         return ResponseUtils.success(customerBalanceService.plusAmount(transactionInput));
     }
-
 }
-
