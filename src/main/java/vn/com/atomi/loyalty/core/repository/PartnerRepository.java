@@ -18,6 +18,13 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
                             + "from Partner r "
                             + "where"
                             + " (:status is null or r.status = :status) "
+                            + "and (:keyword IS NULL OR (lower(r.code) LIKE lower('%' || :keyword || '%') " +
+                                                    "OR lower(r.name) LIKE lower('%' || :keyword || '%')))"
+                            + "and (:startDate is null or r.startDate >= :startDate)"
                             + "order by r.updatedAt desc ")
-    Page<Partner> findByCondition(Status status, Pageable pageable);
+    Page<Partner> findByCondition(Status status, String keyword, LocalDate startDate, Pageable pageable);
+
+    Optional<Partner> findByDeletedFalseAndCode(String code);
+
+    Optional<Partner> findByDeletedFalseAndId(Long id);
 }

@@ -58,4 +58,7 @@ public class CMissionOuput implements Serializable {
 
     @Schema(description = "0 | OR, 1 | AND")
     private  String groupType;
+
+    @Schema(description = "Trạng thái thực hiện")
+    private  String status;
 }

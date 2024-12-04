@@ -19,12 +19,13 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "C_MISSION")
 public class CMission {
+    // dung chung sequence bang chain_mission tranh bi trung sequence
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_MISSION_ID_SEQ")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "C_CHAIN_MISSION_ID_SEQ")
     @SequenceGenerator(
-            name = "C_MISSION_ID_SEQ",
-            sequenceName = "C_MISSION_ID_SEQ",
+            name = "C_CHAIN_MISSION_ID_SEQ",
+            sequenceName = "C_CHAIN_MISSION_ID_SEQ",
             allocationSize = 1)
     private Long id;
 

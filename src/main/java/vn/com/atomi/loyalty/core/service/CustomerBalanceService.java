@@ -2,6 +2,7 @@ package vn.com.atomi.loyalty.core.service;
 
 import org.springframework.data.domain.Pageable;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
+import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
 import vn.com.atomi.loyalty.core.dto.input.UsePointInput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceHistoryOutput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
@@ -47,4 +48,6 @@ public interface CustomerBalanceService {
     void calculateCompleteBiometric();
 
     void  calculateLogin();
+
+    Long plusAmount(TransactionInput transactionInput);
 }

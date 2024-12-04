@@ -1,4 +1,4 @@
-package vn.com.atomi.loyalty.core.dto.output;
+package vn.com.atomi.loyalty.core.dto.input;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -11,11 +11,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PartnersOutput {
-
-    @Schema(description = "ID bản ghi")
-    private Integer id;
-
+public class PartnerInput {
     @Schema(description = "Mã đối tác")
     private String code;
 
@@ -41,10 +37,10 @@ public class PartnersOutput {
     private String represensative;
 
     @Schema(description = "Ngày bắt đầu hiệu lực")
-    private LocalDate startDate;
+    private String startDate;
 
-    @Schema(description = "Ngày hết hiệu lực")
-    private LocalDate endDate;
+    @Schema(description = "Ngày kết thúc hiệu lực")
+    private String endDate;
 
     @Schema(description = "Trạng thái")
     private Status status;

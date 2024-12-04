@@ -28,7 +28,10 @@ public class CCustMissionProgress {
 
     @NotNull
     @Column(name = "CUSTOMER_ID", nullable = false)
-    private Long customer;
+    private Long customerId;
+
+    @Column(name = "CIF_NO", columnDefinition = "VARCHAR2(50)")
+    private String cifNo;
 
     @Column(name = "PARENT_ID")
     private Long parentId;
@@ -36,18 +39,18 @@ public class CCustMissionProgress {
     @Column(name = "MISSION_ID")
     private Long missionId;
 
-    @Column(name = "MISSION_TYPE", length = 1)
+    @Column(name = "MISSION_TYPE", columnDefinition = "CHAR(1)")
     private String missionType;
 
     @Size(max = 20)
-    @Column(name = "STATUS", length = 20)
+    @Column(name = "STATUS", length = 10)
     private String status;
 
-    @Column(name = "GROUP_TYPE")
-    private Boolean groupType;
+    @Column(name = "GROUP_TYPE", columnDefinition = "NUMBER(1)")
+    private String groupType;
 
     @Column(name = "ORDER_NO")
-    private Short orderNo;
+    private Integer orderNo;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -59,7 +62,7 @@ public class CCustMissionProgress {
     private LocalDate completedAt;
 
     @Size(max = 20)
-    @Column(name = "TXN_ID", length = 20)
-    private String txnId;
+    @Column(name = "TXN_REF_NO", length = 20)
+    private String txnRefNo;
 
 }

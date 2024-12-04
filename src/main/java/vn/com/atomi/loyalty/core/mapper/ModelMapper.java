@@ -12,10 +12,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.*;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
-import vn.com.atomi.loyalty.core.dto.input.CustomerGroupInput;
-import vn.com.atomi.loyalty.core.dto.input.CustomerKafkaInput;
-import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
-import vn.com.atomi.loyalty.core.dto.input.TransactionInput;
+import vn.com.atomi.loyalty.core.dto.input.*;
 import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
 import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
@@ -191,7 +188,9 @@ public interface ModelMapper {
   @Mapping(target = "dob", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   @Mapping(target = "issueDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   Customer fromCustomerKafkaInput(@MappingTarget Customer customer, CustomerKafkaInput input);
-  
+
+  @Mapping(target = "startDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  @Mapping(target = "endDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
   List<PartnersOutput> convertToPartnerOutputs(List<Partner> partners);
   
   @Mapping(source = "effectiveDate", target = "effectiveDate", dateFormat = "dd-MM-yyyy")
@@ -209,7 +208,7 @@ public interface ModelMapper {
     }
   }
   List<GetListBenefitOutput> convertBenefitOutput(List<PkgBenefit> lstBenefit);
-  RegistedPackageOuput convertRegistedPackageOutput(PkgPurchaseHistory purchaseHistory);
+  GetListPackageOutput convertRegistedPackageOutput(Packages purchaseHistory);
   @AfterMapping
   default void afterMapRegistedPackage(@MappingTarget GetListPackageOutput output, Packages packages) {
     if (packages.getEffectiveDate() != null) {
@@ -225,4 +224,14 @@ public interface ModelMapper {
   List<CChainMissionOuput> convertChainMissionOutput(List<CChainMission> lstPackage);
   CChainMissionOuput convertChainMissionDetailOutput(CChainMission mission);
   CMissionOuput convertMissionDetailOutput(CMission mission);
+
+  @Mapping(target = "startDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  @Mapping(target = "endDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  Partner createPartner(PartnerInput partnerInput, LocalDate startDate, LocalDate endDate);
+
+  @Mapping(target = "startDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  @Mapping(target = "endDate", dateFormat = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+  Partner mappingToPartner(@MappingTarget Partner partner, PartnerInput partnerInput);
+
+  PartnersOutput convertToPartnerOutput(Partner partner);
 }

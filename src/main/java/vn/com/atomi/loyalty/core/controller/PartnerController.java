@@ -2,17 +2,19 @@ package vn.com.atomi.loyalty.core.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.com.atomi.loyalty.base.annotations.DateTimeValidator;
+import vn.com.atomi.loyalty.base.constant.DateConstant;
 import vn.com.atomi.loyalty.base.data.BaseController;
 import vn.com.atomi.loyalty.base.data.ResponseData;
 import vn.com.atomi.loyalty.base.data.ResponsePage;
 import vn.com.atomi.loyalty.base.data.ResponseUtils;
 import vn.com.atomi.loyalty.base.security.Authority;
+import vn.com.atomi.loyalty.core.dto.input.PartnerInput;
 import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
 import vn.com.atomi.loyalty.core.dto.output.PartnersOutput;
 import vn.com.atomi.loyalty.core.enums.Status;
@@ -36,10 +38,40 @@ public class PartnerController extends BaseController {
             String sort,
             @Parameter(description = "Trạng thái:</br> ACTIVE: Hiệu lực</br> INACTIVE: Không hiệu lực")
             @RequestParam(required = false)
-            Status status
+            Status status,
+            @Parameter(description = "Từ khóa tìm kiếm theo mã/tên đối tác")
+            @RequestParam(required = false)
+            String keyword,
+            @Parameter(description = "Thời gian hiệu lực từ ngày (dd/MM/yyyy)", example = "01/01/2024")
+            @DateTimeValidator(required = false, pattern = DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)
+            @RequestParam(required = false)
+            String startDate
     ){
         return ResponseUtils.success(
-                partnerService.getListPartners(status, super.pageable(pageNo, pageSize, sort)));
+                partnerService.getListPartners(status, keyword, startDate, super.pageable(pageNo, pageSize, sort)));
     }
 
+    @Operation(summary = "APi tạo mới đối tác")
+    @PostMapping("/partner")
+    public ResponseEntity<ResponseData<Void>> createPartner(
+            @RequestBody @Valid PartnerInput partnerInput) {
+        partnerService.createPartner(partnerInput);
+        return ResponseUtils.success();
+    }
+
+    @Operation(summary = "Api chỉnh sửa đối tác")
+    @PutMapping("/partner/{id}")
+    public ResponseEntity<ResponseData<Void>> updatePartner(
+            @Parameter(description = "ID bản ghi quà") @PathVariable Long id,
+            @RequestBody PartnerInput partnerInput) {
+        partnerService.update(id, partnerInput);
+        return ResponseUtils.success();
+    }
+
+    @Operation(summary = "Api lấy chi tiết bản ghi đối tác theo id")
+    @GetMapping("/partner/{id}")
+    public ResponseEntity<ResponseData<PartnersOutput>> get(
+            @Parameter(description = "ID bản ghi đối tác") @PathVariable Long id) {
+        return ResponseUtils.success(partnerService.get(id));
+    }
 }
