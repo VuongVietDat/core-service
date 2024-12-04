@@ -11,10 +11,8 @@ import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
 import vn.com.atomi.loyalty.core.dto.output.GetListBenefitOutput;
 import vn.com.atomi.loyalty.core.dto.output.GetListCustomerBenefitOutput;
 import vn.com.atomi.loyalty.core.dto.output.GetListPackageOutput;
-import vn.com.atomi.loyalty.core.entity.CChainMission;
-import vn.com.atomi.loyalty.core.entity.Customer;
-import vn.com.atomi.loyalty.core.entity.Packages;
-import vn.com.atomi.loyalty.core.entity.TransExternal;
+import vn.com.atomi.loyalty.core.dto.output.PkgCustomerBenefitOutput;
+import vn.com.atomi.loyalty.core.entity.*;
 import vn.com.atomi.loyalty.core.enums.ErrorCode;
 import vn.com.atomi.loyalty.core.enums.RefType;
 import vn.com.atomi.loyalty.core.enums.Status;
@@ -30,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author haidv
@@ -39,28 +38,30 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class PackageServiceImpl extends BaseService implements PackageService {
 
-  private final PackageRepository packageRepository;
+    private final PackageRepository packageRepository;
 
-  private final PkgBenefitRepository benefitRepository;
+    private final PkgBenefitRepository benefitRepository;
 
-  private final TransExternalRepository transExternalRepository;
+    private final TransExternalRepository transExternalRepository;
 
-  private final CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
-  private final NotificationService notificationService;
+    private final NotificationService notificationService;
 
-  @Override
-  public List<GetListPackageOutput> getListPackage() {
+    private final PkgCustomerBenefitRepository customerBenefitRepository;
+
+    @Override
+    public List<GetListPackageOutput> getListPackage() {
     var listPackagePage = packageRepository.getListPackage(Status.ACTIVE);
     return super.modelMapper.convertPackageOutput(listPackagePage);
-  }
-  @Override
-  public List<GetListBenefitOutput> getListBenefit(Long packageId) {
+    }
+    @Override
+    public List<GetListBenefitOutput> getListBenefit(Long packageId) {
     var listPackagePage = benefitRepository.getListBenefit(packageId, Status.ACTIVE);
     return super.modelMapper.convertBenefitOutput(listPackagePage);
-  }
-  @Override
-  public String purchasePackage(PurchasePackageInput purchasePackageInput) {
+    }
+    @Override
+    public String purchasePackage(PurchasePackageInput purchasePackageInput) {
     // get customer by cif
     Optional<Customer> customer = customerRepository.
             findByCifBank(purchasePackageInput.getCifNo());
@@ -76,6 +77,9 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     if(packageResponse != null) {
       throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
     }
+    // handle data save to pkg_customer_benefit
+
+
     TransExternal history = mappingPurchasePackage(purchasePackageInput, customer.get());
     transExternalRepository.save(history);
     if (history.getId() != null) {
@@ -90,20 +94,25 @@ public class PackageServiceImpl extends BaseService implements PackageService {
       });
     }
     return history.getId();
-  }
-  @Override
-  public GetListPackageOutput getRegistedPackage(String cifNo) {
+    }
+    @Override
+    public GetListPackageOutput getRegistedPackage(String cifNo) {
     var packageResponse = packageRepository.getRegistedPackage(Status.ACTIVE, cifNo, RefType.PACKAGE);
+        if(packageResponse == null) {
+            return new GetListPackageOutput();
+        }
     return super.modelMapper.convertRegistedPackageOutput(packageResponse);
-  }
-  @Override
-  public List<GetListCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo) {
-    var packageResponse = packageRepository.getRegistedPackage(Status.ACTIVE, cifNo, RefType.PACKAGE);
-    return new ArrayList<>();
-//    return super.modelMapper.convertRegistedPackageOutput(packageResponse);
-  }
+    }
+    @Override
+    public List<PkgCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo,String status) {
+        var customerBenefit = customerBenefitRepository.findByCondition(packageId, cifNo, status);
+        if(customerBenefit.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return this.convertCustomerBenefit(customerBenefit);
+    }
 
-  private TransExternal mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){
+    private TransExternal mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){
       TransExternal response = new TransExternal();
     try {
         response.setId(UUID.randomUUID().toString());
@@ -136,7 +145,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
       ex.printStackTrace();
     }
     return response;
-  }
+    }
 
     public void handleNotification(Customer customer,
                                    PurchasePackageInput purchasePackageInput) {
@@ -150,4 +159,37 @@ public class PackageServiceImpl extends BaseService implements PackageService {
                 notiContent.toString(),
                 customer.getPhone());
     }
+
+    List<PkgCustomerBenefitOutput> convertCustomerBenefit(List<PkgCustomerBenefit> benefits) {
+        return benefits.stream()
+                .map(data -> {
+                    PkgCustomerBenefitOutput output = new PkgCustomerBenefitOutput();
+
+                    output.setId(data.getId());
+                    output.setPackageId(data.getPackageId());
+                    output.setCustomerId(data.getCustomerId());
+                    output.setGiftPartnerId(data.getGiftPartnerId());
+                    output.setName(data.getName());
+                    output.setStatus(data.getStatus());
+                    output.setType(data.getType());
+                    output.setQuantity(data.getQuantity());
+                    if(data.getStartDate() != null) {
+                        output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    if (data.getEndDate() != null) {
+                        output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    output.setDisplayOrder(data.getDisplayOrder());
+                    output.setUrlImage(data.getUrlImage());
+                    output.setDescription(data.getDescription());
+                    return output;
+
+                }).collect(Collectors.toList());
+    }
+
+    private String startDate;
+    private String endDate;
+    private Integer displayOrder;
+    private String urlImgage;
+    private String description;
 }

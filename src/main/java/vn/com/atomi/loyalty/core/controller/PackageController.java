@@ -93,7 +93,7 @@ public class PackageController extends BaseController {
     @Operation(summary = "Api truy vấn ưu đãi khách hàng đã đăng ký")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/package/list-customer-benefit")
-    public ResponseEntity<ResponseData<List<GetListCustomerBenefitOutput>>> getListCustomerBenefit(@Parameter(
+    public ResponseEntity<ResponseData<List<PkgCustomerBenefitOutput>>> getListCustomerBenefit(@Parameter(
             description = "Chuỗi xác thực khi gọi api nội bộ",
             example = "eb6b9f6fb84a45d9c9b2ac5b2c5bac4f36606b13abcb9e2de01fa4f066968cd0")
             @RequestHeader(RequestConstant.SECURE_API_KEY)
@@ -104,8 +104,11 @@ public class PackageController extends BaseController {
             String cifNo,
             @Parameter(description = "Mã định danh gói hội viên")
             @RequestParam(required = true)
-            Long packageId) {
-        List<GetListCustomerBenefitOutput> lstResponse = packageService.getListCustomerBenefit(packageId, cifNo);
+            Long packageId,
+            @Parameter(description = "Trạng thái")
+            @RequestParam(required = true)
+            String status) {
+        List<PkgCustomerBenefitOutput> lstResponse = packageService.getListCustomerBenefit(packageId, cifNo, status);
         return ResponseUtils.success(lstResponse);
     }
 

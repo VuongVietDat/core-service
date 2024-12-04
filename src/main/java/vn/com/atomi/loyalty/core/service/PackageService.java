@@ -1,10 +1,7 @@
 package vn.com.atomi.loyalty.core.service;
 
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
-import vn.com.atomi.loyalty.core.dto.output.GetListBenefitOutput;
-import vn.com.atomi.loyalty.core.dto.output.GetListCustomerBenefitOutput;
-import vn.com.atomi.loyalty.core.dto.output.GetListPackageOutput;
-import vn.com.atomi.loyalty.core.dto.output.RegistedPackageOuput;
+import vn.com.atomi.loyalty.core.dto.output.*;
 
 import java.util.List;
 
@@ -17,5 +14,5 @@ public interface PackageService {
   List<GetListBenefitOutput> getListBenefit(Long packageId);
   String purchasePackage(PurchasePackageInput purchasePackageInput);
   GetListPackageOutput getRegistedPackage(String cifNo);
-  List<GetListCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo);
+  List<PkgCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo,String status);
 }
