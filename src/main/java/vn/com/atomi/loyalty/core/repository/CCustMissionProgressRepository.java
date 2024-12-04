@@ -8,7 +8,6 @@ import vn.com.atomi.loyalty.core.entity.CMissionSequential;
 import vn.com.atomi.loyalty.core.utils.Constants;
 
 import java.util.List;
-@Repository
 public interface CCustMissionProgressRepository extends JpaRepository<CCustMissionProgress, Long> {
 
     @Query(value= """
@@ -48,17 +47,17 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
     """, nativeQuery = true)
     List<CCustMissionProgress> getDataChainMission(String refNo, String cifBank, Long chainId);
 
-    @Query(value= """
-        UPDATE CCustMissionProgress cmps
-        SET cmps.status = :status
-        WHERE cmps.missionId = :missionId 
-        AND EXISTS (
-            SELECT 1 FROM Customer crs 
-            WHERE crs.cifBank = :cifNo 
-            AND crs.id = cmps.customerId 
-        )
-    """, nativeQuery = true)
-    void completeMission(Long missionId, Long chainId, String cifNo, String status);
+//    @Query(value= """
+//        UPDATE CCustMissionProgress cmps
+//        SET cmps.status = :status
+//        WHERE cmps.missionId = :missionId
+//        AND EXISTS (
+//            SELECT 1 FROM Customer crs
+//            WHERE crs.cifBank = :cifNo
+//            AND crs.id = cmps.customerId
+//        )
+//    """, nativeQuery = true)
+//    void completeMission(Long missionId, Long chainId, String cifNo, String status);
 
 
 
