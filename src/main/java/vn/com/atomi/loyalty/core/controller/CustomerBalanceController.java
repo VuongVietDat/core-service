@@ -320,7 +320,7 @@ public class CustomerBalanceController extends BaseController {
         return ResponseUtils.success();
     }
 
-
+    @Operation(summary = "Api (nội bộ) cộng điểm")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/customers/points/plus-point")
     public ResponseEntity<ResponseData<Long>> plusAmount(
