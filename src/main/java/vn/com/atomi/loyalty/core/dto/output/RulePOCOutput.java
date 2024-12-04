@@ -45,6 +45,9 @@ public class RulePOCOutput {
     @Schema(description = "Limit diem cho 1 user tren 1 su kien")
     private Long limitEventPerUser;
 
+    @Schema(description = "Diem thuong them")
+    private Long pointBonus;
+
     @Schema(
             description =
                     "Loại điểm:</br> ALL: Tất cả loại điẻm</br> RANK_POINT: Điểm xếp hạng</br> CONSUMPTION_POINT: Điểm tích lũy dùng để tiêu dùng")

@@ -45,5 +45,9 @@ public interface CustomerBalanceService {
 
     void calculatePointCard(String startDate, String endDate);
 
+    void calculateCompleteBiometric();
+
+    void  calculateLogin();
+
     Long plusAmount(TransactionInput transactionInput);
 }
