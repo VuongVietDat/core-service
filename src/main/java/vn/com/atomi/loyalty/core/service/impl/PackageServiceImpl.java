@@ -62,38 +62,39 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     }
     @Override
     public String purchasePackage(PurchasePackageInput purchasePackageInput) {
-    // get customer by cif
-    Optional<Customer> customer = customerRepository.
-            findByCifBank(purchasePackageInput.getCifNo());
-    if(!customer.isPresent()) {
-      throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
-    }
-    // check package by customer id case registed package before
-    TransExternal packageResponse = transExternalRepository.
+        // get customer by cif
+        Optional<Customer> customer = customerRepository.
+                findByCifBank(purchasePackageInput.getCifNo());
+        if(!customer.isPresent()) {
+          throw new BaseException(ErrorCode.CUSTOMER_NOT_EXISTED);
+        }
+        // check package by customer id case registed package before
+        Integer packageResponse = transExternalRepository.
             findTransExternalByCondition(
                     purchasePackageInput.getCifNo(),
                     purchasePackageInput.getPackageId(),
                     RefType.PACKAGE);
-    if(packageResponse != null) {
-      throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
-    }
-    // handle data save to pkg_customer_benefit
+        if(packageResponse != null) {
+          throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
+        }
+        // handle data save to pkg_customer_benefit
+        this.handleCloneDataCustomerBenefit(purchasePackageInput, customer.get());
 
-
-    TransExternal history = mappingPurchasePackage(purchasePackageInput, customer.get());
-    transExternalRepository.save(history);
-    if (history.getId() != null) {
-        // call push notification to app LPB
-      CompletableFuture.runAsync(() -> {
-          try {
-              this.handleNotification(customer.get(), purchasePackageInput);
-          } catch (Exception e) {
-              e.printStackTrace();
-          }
-          System.out.println("Push notification app LPB - Transaction Id: " + history.getId() + " already done!");
-      });
-    }
-    return history.getId();
+        // insert log to trans_external
+        TransExternal history = mappingPurchasePackage(purchasePackageInput, customer.get());
+        transExternalRepository.save(history);
+        if (history.getId() != null) {
+            // call push notification to app LPB
+          CompletableFuture.runAsync(() -> {
+              try {
+                  this.handleNotification(customer.get(), purchasePackageInput);
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+              System.out.println("Push notification app LPB - Transaction Id: " + history.getId() + " already done!");
+          });
+        }
+        return history.getId();
     }
     @Override
     public GetListPackageOutput getRegistedPackage(String cifNo) {
@@ -105,7 +106,14 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     }
     @Override
     public List<PkgCustomerBenefitOutput> getListCustomerBenefit(Long packageId, String cifNo,String status) {
-        var customerBenefit = customerBenefitRepository.findByCondition(packageId, cifNo, status);
+        List<String> lstStatus = new ArrayList<>();
+        if(Constants.Packages.STATUS_AVAILABLE.equalsIgnoreCase(status)) {
+            lstStatus.add(status);
+        } else {
+            lstStatus.add(Constants.Packages.STATUS_USED);
+            lstStatus.add(Constants.Packages.STATUS_EXPIRE);
+        }
+        var customerBenefit = customerBenefitRepository.findByCondition(packageId, cifNo, lstStatus);
         if(customerBenefit.isEmpty()) {
             return new ArrayList<>();
         }
@@ -186,10 +194,37 @@ public class PackageServiceImpl extends BaseService implements PackageService {
 
                 }).collect(Collectors.toList());
     }
+    private void handleCloneDataCustomerBenefit (PurchasePackageInput purchasePackageInput, Customer customer) {
+        var benefitList = benefitRepository.getListBenefit(purchasePackageInput.getPackageId(), Status.ACTIVE);
+        customerBenefitRepository.saveAll(mappingDataCreateCustomerBenefit(benefitList, customer));
+    }
+    private List<PkgCustomerBenefit> mappingDataCreateCustomerBenefit(List<PkgBenefit> benefits, Customer customer){
+        return benefits.stream()
+                .map(data -> {
+                    PkgCustomerBenefit output = new PkgCustomerBenefit();
+                    output.setCustomerId(customer.getId());
+                    output.setPackageId(data.getPackageId());
+                    output.setGiftPartnerId(data.getGiftPartnerId());
+                    output.setCifNo(customer.getCifBank());
+                    output.setName(data.getName());
+                    output.setStatus(Constants.Packages.STATUS_AVAILABLE);
+                    output.setType(data.getType());
+                    output.setQuantity(1);
+                    if(data.getStartDate() != null) {
+                        output.setStartDate(data.getStartDate().toLocalDate());
+                    }
+                    if(data.getEndDate() != null) {
+                        output.setEndDate(data.getEndDate().toLocalDate());
+                    }
+                    output.setDisplayOrder(data.getDisplayOrder());
+                    output.setUrlImage(data.getUrlImage());
+                    output.setDescription(data.getDescription());
+                    output.setCreatedAt(LocalDate.now());
+                    output.setCreatedBy(1L);
+                    return output;
 
-    private String startDate;
-    private String endDate;
-    private Integer displayOrder;
-    private String urlImgage;
-    private String description;
+                }).collect(Collectors.toList());
+
+    }
+
 }

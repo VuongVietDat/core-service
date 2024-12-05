@@ -26,6 +26,12 @@ public class Constants {
     public static final String SUCCESS = "SUCCESS";
     public static final String ERROR = "ERROR";
   }
+
+  public class Packages {
+    public static final String STATUS_AVAILABLE = "AVAILABLE";
+    public static final String STATUS_USED = "USED";
+    public static final String STATUS_EXPIRE = "EXPIRE";
+  }
   public class Mission {
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_INPROGRESS = "INPROGRESS";

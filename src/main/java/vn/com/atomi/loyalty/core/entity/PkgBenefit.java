@@ -29,6 +29,9 @@ public class PkgBenefit {
     @Column(name = "PACKAGE_ID")
     private Long packageId;
 
+    @Column(name = "GIFT_PARTNER_ID")
+    private Long giftPartnerId;
+
     @Column(name = "NAME")
     private String name;
 
@@ -42,11 +45,17 @@ public class PkgBenefit {
     @Column(name = "DISPLAY_ORDER")
     private Integer displayOrder;
 
-    @Column(name = "URL_IMGAGE")
-    private String urlImgage;
+    @Column(name = "URL_IMAGE")
+    private String urlImage;
 
     @Column(name = "DESCRIPTION")
     private String description;
+
+    @Column(name = "START_DATE")
+    private Date startDate;
+
+    @Column(name = "END_DATE")
+    private Date endDate;
 
     @Column(name = "CREATED_BY")
     private Integer createdBy;

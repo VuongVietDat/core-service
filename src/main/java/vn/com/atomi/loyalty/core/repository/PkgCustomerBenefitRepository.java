@@ -13,6 +13,6 @@ public interface PkgCustomerBenefitRepository extends JpaRepository<PkgCustomerB
     @Query(value = "select pcb from PkgCustomerBenefit pcb " +
             " where pcb.packageId = :packageId " +
             " and pcb.cifNo = :cifNo " +
-            " and :status is null or pcb.status = :status")
-    List<PkgCustomerBenefit> findByCondition(Long packageId, String cifNo,String status);
+            " and :lstStatus is null or pcb.status in (:lstStatus)")
+    List<PkgCustomerBenefit> findByCondition(Long packageId, String cifNo,List<String> lstStatus);
 }

@@ -45,7 +45,7 @@ public class MissionController extends BaseController {
         return ResponseUtils.success(lstResponse);
     }
 
-    @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đã đăng ký INPROGRESS|COMPLETED")
+    @Operation(summary = "Api lấy danh sách chuỗi nhiệm vụ đã đăng ký INPROGRESS|RESULT")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @GetMapping("/internal/mission/get-registed-chain-mission")
     public ResponseEntity<ResponseData<List<CChainMissionOuput>>> getRegistedChainMission(

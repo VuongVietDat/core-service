@@ -105,8 +105,8 @@ public class PackageController extends BaseController {
             @Parameter(description = "Mã định danh gói hội viên")
             @RequestParam(required = true)
             Long packageId,
-            @Parameter(description = "Trạng thái")
-            @RequestParam(required = true)
+            @Parameter(description = "Trạng thái NULL|USED|AVAILABLE")
+            @RequestParam(required = false)
             String status) {
         List<PkgCustomerBenefitOutput> lstResponse = packageService.getListCustomerBenefit(packageId, cifNo, status);
         return ResponseUtils.success(lstResponse);

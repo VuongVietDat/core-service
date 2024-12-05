@@ -48,8 +48,7 @@ public class PkgCustomerBenefit {
     @Column(name = "STATUS", nullable = false, length = 10)
     private String status;
 
-    @NotNull
-    @Column(name = "\"TYPE\"", nullable = false)
+    @Column(name = "TYPE", nullable = false, length = 10)
     private String type;
 
     @Column(name = "QUANTITY")
