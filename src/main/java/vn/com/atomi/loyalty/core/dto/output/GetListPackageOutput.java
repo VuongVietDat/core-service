@@ -37,7 +37,7 @@ public class GetListPackageOutput {
   private String currency;
 
   @Schema(description = "Đường dẫn ảnh")
-  private String urlImgage;
+  private String urlImage;
 
   @Schema(description = "Thư tự hiển thị")
   private Integer displayOrder;

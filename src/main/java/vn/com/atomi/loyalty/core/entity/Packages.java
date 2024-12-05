@@ -44,8 +44,8 @@ public class Packages {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "URL_IMGAGE")
-    private String urlImgage;
+    @Column(name = "URL_IMAGE")
+    private String urlImage;
 
     @Column(name = "DISPLAY_ORDER")
     private Integer displayOrder;

@@ -42,7 +42,7 @@ public class GetListCustomerBenefitOutput {
   private Integer displayOrder;
 
   @Schema(description = "Đường dẫn ảnh")
-  private String urlImgage;
+  private String urlImage;
 
   @Schema(description = "Mô tả")
   private String description;
