@@ -37,6 +37,9 @@ public class PkgGiftMapping {
     @Column(name = "GIFT_QUANTITY")
     private Integer giftQuantity;
 
+    @Column(name = "GIFT_TYPE")
+    private Integer giftType;
+
     @Size(max = 10)
     @NotNull
     @Nationalized
@@ -58,7 +61,7 @@ public class PkgGiftMapping {
     private LocalDate updatedAt;
 
     @NotNull
-    @Column(name = "IS_DELETED", nullable = false)
+    @Column(name = "IS_DELETED", nullable = false, columnDefinition = "CHAR(1)")
     private Boolean isDeleted = false;
 
 }

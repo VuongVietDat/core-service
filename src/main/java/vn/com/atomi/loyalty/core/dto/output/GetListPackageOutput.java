@@ -51,4 +51,5 @@ public class GetListPackageOutput {
   @Schema(description = "Mô tả gói hội viên")
   private String description;
 
+
 }

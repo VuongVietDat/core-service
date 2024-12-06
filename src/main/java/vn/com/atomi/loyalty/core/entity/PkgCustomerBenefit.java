@@ -24,7 +24,7 @@ public class PkgCustomerBenefit {
 
     @NotNull
     @Column(name = "PACKAGE_ID", nullable = false)
-    private Long packageField;
+    private Long packageId;
 
     @NotNull
     @Column(name = "CUSTOMER_ID", nullable = false)

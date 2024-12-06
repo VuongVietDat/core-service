@@ -2,9 +2,7 @@ package vn.com.atomi.loyalty.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import vn.com.atomi.loyalty.core.entity.PkgBenefit;
 import vn.com.atomi.loyalty.core.entity.PkgCustomerBenefit;
-import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.util.List;
 

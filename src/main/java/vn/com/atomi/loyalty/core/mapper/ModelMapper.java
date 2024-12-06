@@ -207,7 +207,7 @@ public interface ModelMapper {
               .format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
     }
   }
-  List<GetListBenefitOutput> convertBenefitOutput(List<PkgBenefit> lstBenefit);
+
   GetListPackageOutput convertRegistedPackageOutput(Packages purchaseHistory);
   @AfterMapping
   default void afterMapRegistedPackage(@MappingTarget GetListPackageOutput output, Packages packages) {

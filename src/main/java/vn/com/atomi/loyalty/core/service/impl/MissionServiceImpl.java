@@ -6,30 +6,32 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import vn.com.atomi.loyalty.base.constant.DateConstant;
+import vn.com.atomi.loyalty.base.constant.RequestConstant;
 import vn.com.atomi.loyalty.base.data.BaseService;
 import vn.com.atomi.loyalty.base.exception.BaseException;
 import vn.com.atomi.loyalty.base.utils.RequestUtils;
 import vn.com.atomi.loyalty.core.dto.input.NotificationInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchaseChainMissionInput;
 import vn.com.atomi.loyalty.core.dto.input.PurchasePackageInput;
-import vn.com.atomi.loyalty.core.dto.output.CChainMissionOuput;
-import vn.com.atomi.loyalty.core.dto.output.CMissionOuput;
-import vn.com.atomi.loyalty.core.dto.output.CustomerBalanceOutput;
-import vn.com.atomi.loyalty.core.dto.output.CustomerOutput;
+import vn.com.atomi.loyalty.core.dto.message.AllocationPointTransactionInput;
+import vn.com.atomi.loyalty.core.dto.output.*;
 import vn.com.atomi.loyalty.core.dto.projection.CustomerBalanceProjection;
 import vn.com.atomi.loyalty.core.entity.*;
 import vn.com.atomi.loyalty.core.enums.*;
 import vn.com.atomi.loyalty.core.enums.Currency;
+import vn.com.atomi.loyalty.core.feign.LoyaltyConfigClient;
 import vn.com.atomi.loyalty.core.feign.LoyaltyEventGetwayClient;
 import vn.com.atomi.loyalty.core.repository.*;
 import vn.com.atomi.loyalty.core.service.CustomerBalanceService;
 import vn.com.atomi.loyalty.core.service.MissionService;
 import vn.com.atomi.loyalty.core.service.NotificationService;
 import vn.com.atomi.loyalty.core.utils.Constants;
+import vn.com.atomi.loyalty.core.utils.Utils;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -38,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -58,7 +61,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
     private final CustomRepository customRepository;
 
-    private final CCustMissionProgressRepository cCustMissionProgressRepository;
+    private final CCustMissionProgressRepository missionProgressRepository;
 
     private final CustomerBalanceRepository customerBalanceRepository;
 
@@ -68,7 +71,10 @@ public class MissionServiceImpl extends BaseService implements MissionService {
 
     private final CustomerBalanceService customerBalanceService;
 
-    private final EntityManager entityManager;
+    private final GiftPartnerRepository giftPartnerRepository;
+
+    private final LoyaltyConfigClient loyaltyConfigClient;
+
     private final DecimalFormat decimalFormat = new DecimalFormat("#,###");
 
     @Override
@@ -137,7 +143,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);
         }
         // kiem tra khach hang da dang ky goi nhiem vu truoc do
-        CCustMissionProgress missionProgress = cCustMissionProgressRepository.
+        CCustMissionProgress missionProgress = missionProgressRepository.
             findByCustomerAndChainId(
                     customer.get().getId(),
                     purchaseChainMission.getChainId(),
@@ -183,12 +189,10 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         }
         return responseId;
     }
-    public void completeMission(Long missionId, Long chainId, String  cifNo) {
-        this.updateProgresStatus(missionId, chainId, cifNo, Constants.Mission.STATUS_COMPLETED);
-    }
+
     private List<CCustMissionProgress> saveMissonProgress (PurchaseChainMissionInput purchaseChainMission, Customer customer){
       // tao chuoi nhiem vu gan theo khach hang
-      var chainMission = cCustMissionProgressRepository.
+      var chainMission = missionProgressRepository.
               getDataChainMission(
                       purchaseChainMission.getRefNo(),
                       purchaseChainMission.getChainId());
@@ -196,8 +200,177 @@ public class MissionServiceImpl extends BaseService implements MissionService {
           throw new BaseException(ErrorCode.CHAIN_MISSION_NOT_FOUND);
       }
       // save data
-      return cCustMissionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission, customer));
+      return missionProgressRepository.saveAll(this.mappingChainMissionToProgress(chainMission, customer));
 
+    }
+
+    public void handleNotification(Customer customer,
+                                   PurchaseChainMissionInput purchaseChainMission,
+                                   CChainMission chainMission) {
+        try {
+            // thong bao mua chuoi hoi vien thanh cong
+            notificationService.sendNotification(
+                Constants.Notification.MISSION_TITLE,
+                Constants.Notification.MISSION_CONTENT + " " + chainMission.getName(),
+                customer.getPhone());
+
+            // thong bao cong diem vao tai khoan diem
+            CustomerBalanceOutput custBalance = customerBalanceService.
+                    getCurrentBalance(
+                            purchaseChainMission.getCifNo(),
+                            null);
+            String balanceNoti = Constants.Notification.POINT_CONTENT + " " + chainMission.getName();
+            balanceNoti.replace("/a",
+                    Constants.Notification.MINUS +
+                               decimalFormat.format(purchaseChainMission.getTxnAmount()));
+            balanceNoti.replace("/b",
+                               decimalFormat.format(custBalance.getAvailableAmount()));
+
+            notificationService.sendNotification(
+                    Constants.Notification.POINT_TITLE,
+                    balanceNoti,
+                    customer.getPhone());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    public void completeMission(Long missionId, Long chainId, String  cifNo) {
+        // xu ly nghiep vu khi thuc hien cap nhat nhiem vu
+        // 1: kiem tra nhiem vu hoan thanh co du thoa man dieu kien hoan thanh nhiem vu cha chua
+        // 2: tra thuong tung nhieu vu
+        List<CCustMissionProgress> listUpdateMission = new ArrayList<>();
+        CCustMissionProgress mission = missionProgressRepository.
+                getCCustMissionProgressByMissionIdAndParentIdAndCifNo(missionId, chainId, cifNo);
+        mission.setStatus(Constants.Mission.STATUS_COMPLETED);
+        listUpdateMission.add(mission);
+        if(mission != null) {
+            boolean canCompleteParent =
+                    Constants.Mission.TYPE_GROUP.equals(mission.getGroupType())
+                            ? this.checkGroupCompletion(mission)
+                            : checkAnyMissionCompleted(mission);
+            if (canCompleteParent) {
+                // tiep tuc kiem tra dieu kien cha xem co thoa man dieu kien khong
+                CCustMissionProgress parentMission = missionProgressRepository.
+                        getMissionParentProgress(mission.getParentId(), chainId, cifNo);
+                parentMission.setStatus(Constants.Mission.STATUS_COMPLETED);
+                listUpdateMission.add(parentMission);
+                if(parentMission != null) {
+                    canCompleteParent =
+                            Constants.Mission.TYPE_GROUP.equals(parentMission.getGroupType())
+                                    ? checkGroupCompletion(parentMission)
+                                    : checkAnyMissionCompleted(parentMission);
+                    if (canCompleteParent) {
+                        CCustMissionProgress chainMission = missionProgressRepository.
+                                getMissionParentProgress(mission.getParentId(), chainId, cifNo);
+                        chainMission.setStatus(Constants.Mission.STATUS_COMPLETED);
+                        listUpdateMission.add(chainMission);
+
+                    }
+                }
+            }
+        }
+        // kiem tra gift co qua can xu ly khong
+        listUpdateMission.forEach(data ->  this.handleMissionClaim(data));
+    }
+
+    public boolean checkGroupCompletion(CCustMissionProgress mission) {
+        // check all mission in chain mission has any mission not completed
+        Integer countCompleted = missionProgressRepository.checkGroupCompletion(
+                mission.getParentId(),
+                mission.getCustomerId(),
+                mission.getId(),
+                Constants.Mission.STATUS_COMPLETED);
+        if(countCompleted == 0) {
+            return true;
+        }
+        return false;
+    }
+    private boolean checkAnyMissionCompleted(CCustMissionProgress mission) {
+        // Check if at least one mission is 'COMPLETED' for OR type
+        Integer countCompleted = missionProgressRepository.checkMissionCompletion(
+                mission.getParentId(),
+                mission.getCustomerId(),
+                mission.getId(),
+                Constants.Mission.STATUS_COMPLETED);
+        if(countCompleted > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public void handleMissionClaim(CCustMissionProgress mission){
+
+        // kiem tra nhiem vu co mapping voi qua gi khong
+        List<GiftPartner> lstGift = giftPartnerRepository.findByCondition(mission.getCustomerId(), Constants.Mission.STATUS_COMPLETED);
+        boolean claimed = false;
+        if(lstGift != null) {
+            // tra thuong theo Gift
+            for (GiftPartner giftPartner : lstGift) {
+                if(Constants.Gift.TYPE_POINT.
+                        equalsIgnoreCase(giftPartner.getGiftType())) {
+                    // tra thuong cong point
+                    Long id = this.plusPoint(mission, giftPartner);
+                    if(id != null && id > 0) {
+                        claimed = true;
+                    }
+                } else {
+                    // dua vao bang gift claim
+                    Long id = this.claimGift(mission, giftPartner);
+                    if(id != null && id > 0) {
+                        claimed = true;
+                    }
+                }
+            }
+        }
+        if(claimed) {
+            mission.setStatus(Constants.Mission.STATUS_PAYED);
+        }
+        missionProgressRepository.save(mission);
+    }
+    public Long plusPoint(CCustMissionProgress mission, GiftPartner giftPartner) {
+        // kiem tra lai rule cho nay xem co the dung theo truong hop tao rule khong?????
+        String executeId = Utils.generateUniqueId();
+        ThreadContext.put(RequestConstant.REQUEST_ID, executeId);
+        RulePOCOutput rulePOC = loyaltyConfigClient.getRulePoc(RequestUtils.extractRequestId(), "CASA").getData();
+        RuleOutput rule = CustomerBalanceServiceImpl.convertToRuleOutput(rulePOC);
+
+        AllocationPointTransactionInput allocationTransaction = new AllocationPointTransactionInput();
+        allocationTransaction.setAmount(Long.valueOf(String.valueOf(giftPartner.getPrice())));
+        allocationTransaction.setRefNo(mission.getTxnRefNo());
+        allocationTransaction.setTransactionAt(mission.getCompletedAt().atStartOfDay());
+        allocationTransaction.setCurrency(giftPartner.getUnit());
+        allocationTransaction.setTransactionType(PointEventSource.MISSION.name());
+        allocationTransaction.setTransactionGroup("FUNDTF");
+        // convert data
+        var transaction = super.modelMapper.convertToTransactionInput(
+                allocationTransaction,
+                PointType.CONSUMPTION_POINT,
+                giftPartner.getPrice(),
+                mission.getCustomerId(),
+                rule,
+                PointEventSource.MISSION,
+                this.getExpireDate(rule));
+        // cong diem
+        Long id = customRepository.plusAmount(transaction);
+        if(id != null && id > 0) {
+            // send notification
+
+        }
+        return id;
+    }
+    public Long claimGift(CCustMissionProgress mission, GiftPartner giftPartner) {
+        // claim gift goi sang claim de xu ly
+        return 1L;
+    }
+    private LocalDate getExpireDate(RuleOutput ruleOutput) {
+        return switch (ruleOutput.getExpirePolicyType()) {
+            case AFTER_DATE -> Utils.convertToLocalDate(ruleOutput.getExpirePolicyValue());
+            case AFTER_DAY -> LocalDate.now().plusDays(Long.parseLong(ruleOutput.getExpirePolicyValue()));
+            case FIRST_DATE_OF_MONTH -> LocalDate.now()
+                    .plusMonths(Long.parseLong(ruleOutput.getExpirePolicyValue()))
+                    .with(TemporalAdjusters.firstDayOfMonth());
+            case NEVER -> null;
+        };
     }
 
     private List<CChainMissionOuput> mappingMissionProgress (List<CChainMission> rawData){
@@ -227,33 +400,33 @@ public class MissionServiceImpl extends BaseService implements MissionService {
     }
 
     private List<CMissionOuput> mappingListMission (List<Object[]> rawData){
-      return rawData.stream()
-          .map(data -> {
-                CMissionOuput output = new CMissionOuput();
+        return rawData.stream()
+                .map(data -> {
+                    CMissionOuput output = new CMissionOuput();
 
-                output.setChainId(data.length > 0 ? Long.valueOf((String) data[0]) : null);  // Assuming column 0 is chainId
-                output.setId(data.length > 1 ? Long.valueOf((String) data[1]) : null);  // Assuming column 1 is missionId
-                output.setOrderNo(data.length > 2 ? Integer.parseInt((String) data[2]) : null);  // Assuming column 2 is orderNo
-                output.setGroupType(data.length > 3 ? (String) data[3] : null);  // Assuming column 3 is groupType
-                output.setCode(data.length > 4 ? (String) data[4] : null);  // Assuming column 4 is code
-                output.setName(data.length > 5 ? (String) data[5] : null);  // Assuming column 5 is name
-                output.setBenefitType(data.length > 6 ? (String) data[6] : null);  // Assuming column 6 is benefitType
-                if (data.length > 7 && data[7] != null) {
-                    Timestamp startDate = (Timestamp) data[7];
-                    output.setStartDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(startDate.getTime()));
-                }
-                if (data.length > 8 && data[8] != null) {
-                    Timestamp endDate = (Timestamp) data[8];
-                    output.setEndDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(endDate.getTime()));
-                }
-                output.setPrice(data.length == 9? new BigDecimal((String) data[9]) : null);  // Assuming column 9 is price
-                output.setCurrency(data.length > 10 ? (String) data[10] : null);  // Assuming column 10 is currency
-                output.setImage(data.length > 11 ? (String) data[11] : null);  // Assuming column 11 is image
-                output.setNotes(data.length > 12 ? (String) data[12] : null);  // Assuming column 12 is notes
-                output.setStatus(data.length > 13 ? (String) data[13] : null);  // Assuming column 13 is notes
-                return output;
+                    output.setChainId(data.length > 0 ? Long.valueOf((String) data[0]) : null);  // Assuming column 0 is chainId
+                    output.setId(data.length > 1 ? Long.valueOf((String) data[1]) : null);  // Assuming column 1 is missionId
+                    output.setOrderNo(data.length > 2 ? Integer.parseInt((String) data[2]) : null);  // Assuming column 2 is orderNo
+                    output.setGroupType(data.length > 3 ? (String) data[3] : null);  // Assuming column 3 is groupType
+                    output.setCode(data.length > 4 ? (String) data[4] : null);  // Assuming column 4 is code
+                    output.setName(data.length > 5 ? (String) data[5] : null);  // Assuming column 5 is name
+                    output.setBenefitType(data.length > 6 ? (String) data[6] : null);  // Assuming column 6 is benefitType
+                    if (data.length > 7 && data[7] != null) {
+                        Timestamp startDate = (Timestamp) data[7];
+                        output.setStartDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(startDate.getTime()));
+                    }
+                    if (data.length > 8 && data[8] != null) {
+                        Timestamp endDate = (Timestamp) data[8];
+                        output.setEndDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(endDate.getTime()));
+                    }
+                    output.setPrice(data.length == 9? new BigDecimal((String) data[9]) : null);  // Assuming column 9 is price
+                    output.setCurrency(data.length > 10 ? (String) data[10] : null);  // Assuming column 10 is currency
+                    output.setImage(data.length > 11 ? (String) data[11] : null);  // Assuming column 11 is image
+                    output.setNotes(data.length > 12 ? (String) data[12] : null);  // Assuming column 12 is notes
+                    output.setStatus(data.length > 13 ? (String) data[13] : null);  // Assuming column 13 is notes
+                    return output;
 
-          }).collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
     private List<CCustMissionProgress> mappingChainMissionToProgress (List<CCustMissionProgress> rawData, Customer customer){
@@ -291,7 +464,7 @@ public class MissionServiceImpl extends BaseService implements MissionService {
             if (StringUtils.isNotBlank(purchaseChainMission.getTransactionAt())) {
                 response.setTxnDate(
                         LocalDate.parse(purchaseChainMission.getTransactionAt()
-                        , DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
+                                , DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
             }
             response.setTxnAmount( purchaseChainMission.getTxnAmount() );
             response.setTxnStatus(Constants.Status.SUCCESS);
@@ -304,62 +477,4 @@ public class MissionServiceImpl extends BaseService implements MissionService {
         }
         return response;
     }
-
-    public void handleNotification(Customer customer,
-                                   PurchaseChainMissionInput purchaseChainMission,
-                                   CChainMission chainMission) {
-        try {
-            // thong bao mua chuoi hoi vien thanh cong
-            notificationService.sendNotification(
-                Constants.Notification.MISSION_TITLE,
-                Constants.Notification.MISSION_CONTENT + " " + chainMission.getName(),
-                customer.getPhone());
-
-            // thong bao cong diem vao tai khoan diem
-            CustomerBalanceOutput custBalance = customerBalanceService.
-                    getCurrentBalance(
-                            purchaseChainMission.getCifNo(),
-                            null);
-            String balanceNoti = Constants.Notification.POINT_CONTENT + " " + chainMission.getName();
-            balanceNoti.replace("/a",
-                    Constants.Notification.MINUS +
-                               decimalFormat.format(purchaseChainMission.getTxnAmount()));
-            balanceNoti.replace("/b",
-                               decimalFormat.format(custBalance.getAvailableAmount()));
-
-            notificationService.sendNotification(
-                    Constants.Notification.POINT_TITLE,
-                    balanceNoti,
-                    customer.getPhone());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Transactional
-    public void updateProgresStatus(Long missionId,
-                                    Long chainId,
-                                    String cifNo,
-                                    String status) {
-        try {
-            String sql = "UPDATE C_CUST_MISSION_PROGRESS cmp SET STATUS =  ? " +
-                    " WHERE cmp.MISSION_ID = ? " +
-                    " AND EXISTS (" +
-                    "   SELECT 1 FROM C_CUSTOMER ccm" +
-                    "   WHERE ccm.CIF_BANK = ?" +
-                    "   AND ccm.ID = cmp.CUSTOMER_ID" +
-                    " ) ";
-            Query query = entityManager.createNativeQuery(sql);
-            query.setParameter(1, missionId);
-            query.setParameter(2, cifNo);
-            query.setParameter(3, status);
-            int updatedCount = query.executeUpdate();
-            if(updatedCount > 0) {
-                System.out.println("Update Sucessfully MissionId; " + missionId + " | customerId:" + cifNo);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
 }

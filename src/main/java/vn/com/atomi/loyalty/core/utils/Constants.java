@@ -36,6 +36,7 @@ public class Constants {
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_INPROGRESS = "INPROGRESS";
     public static final String STATUS_COMPLETED = "COMPLETED";
+    public static final String STATUS_PAYED = "PAYED";
     public static final String TYPE_CHAIN = "C";
     public static final String TYPE_GROUP = "G";
     public static final String TYPE_MISSION = "M";
@@ -51,6 +52,11 @@ public class Constants {
     public static final String POINT_TITLE = "Tài khoản điểm loyalty";
     public static final String POINT_CONTENT = "Số điểm /a Số dư tài khoản điểm /b";
 
+  }
+  public class Gift {
+    public static final String TYPE_POINT = "P";
+    public static final String TYPE_VOUCHER = "V";
+    public static final String TYPE_GIFT = "G";
   }
 
 

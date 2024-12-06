@@ -85,6 +85,6 @@ public class Packages {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
-    private List<PkgBenefit> benefits = new ArrayList<>();;
+//    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
+//    private List<PkgBenefit> benefits = new ArrayList<>();;
 }

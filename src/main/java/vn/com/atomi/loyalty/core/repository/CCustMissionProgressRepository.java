@@ -47,18 +47,38 @@ public interface CCustMissionProgressRepository extends JpaRepository<CCustMissi
     """, nativeQuery = true)
     List<CCustMissionProgress> getDataChainMission(String refNo, Long chainId);
 
-//    @Query(value= """
-//        UPDATE CCustMissionProgress cmps
-//        SET cmps.status = :status
-//        WHERE cmps.missionId = :missionId
-//        AND EXISTS (
-//            SELECT 1 FROM Customer crs
-//            WHERE crs.cifBank = :cifNo
-//            AND crs.id = cmps.customerId
-//        )
-//    """, nativeQuery = true)
-//    void completeMission(Long missionId, Long chainId, String cifNo, String status);
 
+    CCustMissionProgress getCCustMissionProgressByMissionIdAndParentIdAndCifNo(Long missionId, Long chainId, String cifNo);
 
+    @Query(value= """
+        SELECT cmps FROM C_CUST_MISSION_PROGRESS cmps 
+        WHERE cmps.MISSION_ID = :missionId
+        AND cmps.CIF_NO = :cifNo
+        AND EXISTS (
+            SELECT 1 FROM C_CUST_MISSION_PROGRESS cmp
+            WHERE (cmp.IS_DELETED IS NULL OR cmp.IS_DELETED = 'N')
+            AND cmps.ID = cmp.ID
+            CONNECT BY PRIOR cmp.MISSION_ID = cmp.PARENT_ID
+            START WITH cmp.MISSION_ID = :chainId
+        )
+    """, nativeQuery = true)
+    CCustMissionProgress getMissionParentProgress(Long missionId, Long chainId, String cifNo);
 
+    @Query(value= """
+        SELECT count(1) FROM CCustMissionProgress cmps 
+        WHERE cmps.customerId = :customerId
+        AND cmps.parentId = :parentId
+        AND cmps.id != :id
+        AND cmps.status != :status
+    """)
+    Integer checkGroupCompletion(Long parentId, Long customerId, Long id, String status);
+
+    @Query(value= """
+        SELECT count(1) FROM CCustMissionProgress cmps 
+        WHERE cmps.customerId = :customerId
+        AND cmps.parentId = :parentId
+        AND cmps.id != :id
+        AND cmps.status = :status
+    """)
+    Integer checkMissionCompletion(Long parentId, Long customerId, Long id, String status);
 }
