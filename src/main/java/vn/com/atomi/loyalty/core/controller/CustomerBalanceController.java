@@ -306,7 +306,7 @@ public class CustomerBalanceController extends BaseController {
         return ResponseUtils.success();
     }
 
-    @Operation(summary = "Api (nội bộ) thực hiện tính điểm khách hàng hoàn thiện sinh trắc học")
+    @Operation(summary = "Api (nội bộ) thực hiện tính điểm khách hàng đăng nhập")
     @PreAuthorize(Authority.ROLE_SYSTEM)
     @PostMapping("/internal/customers/points/login")
     public ResponseEntity<ResponseData<Void>> calculateLogin(
