@@ -26,9 +26,7 @@ public class PkgBenefit {
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
     @JoinColumn(name = "PACKAGE_ID", nullable = false)
     private Packages packageField;
 
@@ -83,7 +81,7 @@ public class PkgBenefit {
     private LocalDate updatedAt;
 
     @NotNull
-    @Column(name = "IS_DELETED", nullable = false)
+    @Column(name = "IS_DELETED", nullable = false, columnDefinition = "CHAR(1)")
     private Boolean isDeleted = false;
 
 }

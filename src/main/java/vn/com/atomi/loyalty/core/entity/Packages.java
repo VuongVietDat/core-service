@@ -11,6 +11,8 @@ import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,10 +36,13 @@ public class Packages {
     @Column(name = "CODE")
     private String code;
 
+    @Column(name = "DURATION")
+    private Integer duration;
+
     @Column(name = "FEE")
     private Integer fee;
 
-    @Column(name = "CURRENCY")
+    @Column(name = "CURRENCY", columnDefinition = "CHAR(3)")
     private String currency;
 
     @Column(name = "STATUS")
@@ -68,6 +73,18 @@ public class Packages {
     @Column(name = "UPDATED_AT")
     private LocalDate updatedAt;
 
+    @Column(name = "APPROVAL_BY")
+    private Integer approvalBy;
+
+    @Column(name = "APPROVAL_AT")
+    private LocalDate approvalAt;
+
+    @Column(name = "APPROVAL_STATUS", columnDefinition = "CHAR(1)")
+    private String approvalStatus;
+
     @Column(name = "DESCRIPTION")
     private String description;
+
+    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
+    private List<PkgBenefit> benefits = new ArrayList<>();;
 }
