@@ -143,12 +143,12 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
                         return newPeriod;
                     });
             Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            if (period.getLastPaymentDate() == null || isSameMonthAndYear(period.getLastPaymentDate(), today, 1, RequestConstant.GREATER)) {
+            if (period.getLastPaymentDate() == null || isSameMonthAndYear(today, period.getLastPaymentDate(), 1, RequestConstant.GREATER)) {
                 // Trường hợp lần thanh toán đầu tiên hoặc lớn hơn 1 tháng từ lần thanh toán cuối
                 period.setCurrentStreak(1);
             } else {
                 //Ngày thanh toán gần nhất và ngày hiện tại không cùng tháng
-                if (!isSameMonthAndYear(period.getLastPaymentDate(), today, 0 , null)) {
+                if (!isSameMonthAndYear(today, period.getLastPaymentDate(), 0, null)) {
                     period.setCurrentStreak(period.getCurrentStreak() + 1);
                 }
             }
@@ -181,7 +181,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
             totalPoint = totalPoint.add(basePoint);
 
             // thưởng thêm
-            if( period.getCurrentStreak() == 2 && isSameMonthAndYear(period.getLastPaymentDate(), today, 1, null)) {
+            if (period.getCurrentStreak() == 2 && isSameMonthAndYear(today, period.getLastPaymentDate(), 1, null)) {
                 if (!CollectionUtils.isEmpty(rule.getRuleBonusOutputs())) {
                     totalPoint =
                             totalPoint.add(
@@ -558,7 +558,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         notificationInput.setClientTime(startTime);
         notificationInput.setTransTime(String.valueOf(date));
         notificationInput.setTitle("Tài khoản điểm Loyalty");
-        notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Thanh toán hóa đơn. Điểm hiện tại "+ customerBalanceAfter.getTotalAmount() +".");
+        notificationInput.setContent("Quý khách tích thêm " + consumptionPoint + " khi thực hiện Thanh toán hóa đơn. Điểm hiện tại " + customerBalanceAfter.getTotalAmount() + ".");
         notificationInput.setUserName(customerOutput.getPhone());
         return notificationInput;
     }
@@ -576,8 +576,7 @@ public class AllocationPointServiceImpl extends BaseService implements Allocatio
         }
         if (condition.equalsIgnoreCase(RequestConstant.GREATER)) {
             return monthDifference > month;
-        }
-        else {
+        } else {
             return monthDifference == month;
         }
     }
