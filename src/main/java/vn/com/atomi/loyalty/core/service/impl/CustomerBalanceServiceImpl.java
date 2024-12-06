@@ -337,11 +337,11 @@ public class CustomerBalanceServiceImpl extends BaseService implements CustomerB
         RuleOutput rule = this.convertToRuleOutput(rulePOC);
         List<CardTransactionInfo> cardTransactionInfos = loyaltyCollectDataClient.getLstCardTransaction(RequestUtils.extractRequestId(), startDate, endDate).getData()
                 .stream()
-                .filter(cardTransactionInfo -> Long.parseLong(cardTransactionInfo.getCif()) >= rulePOC.getMinTransaction())
+                .filter(cardTransactionInfo -> Long.parseLong(cardTransactionInfo.getTotalAmount()) >= rulePOC.getMinTransaction())
                 .collect(Collectors.toList());
         for (CardTransactionInfo cardTransactionInfo : cardTransactionInfos) {
             // lấy thông tin của KH
-            CustomerOutput customerOutput = customerService.getCustomer(cardTransactionInfo.getCustomerName(), null);
+            CustomerOutput customerOutput = customerService.getCustomer(cardTransactionInfo.getCif(), null);
             // lấy thông tin tài khoản điểm của KH
             CustomerBalance customerBalance =
                     customerBalanceRepository
