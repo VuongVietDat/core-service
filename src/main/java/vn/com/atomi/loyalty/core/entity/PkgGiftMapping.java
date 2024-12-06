@@ -26,7 +26,7 @@ public class PkgGiftMapping {
 
     @NotNull
     @Column(name = "PACKAGE_ID", nullable = false)
-    private Long packageField;
+    private Long packageId;
 
     @Column(name = "PARTNER_ID")
     private Long partner;
