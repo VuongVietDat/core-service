@@ -9,26 +9,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "PKG_CUSTOMER_BENEFIT")
-public class PkgCustomerBenefit {
+@Table(name = "PKG_GIFT_MAPPING")
+public class PkgGiftMapping {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PKG_CUSTOMER_BENEFIT_id_gen")
-    @SequenceGenerator(name = "PKG_CUSTOMER_BENEFIT_id_gen", sequenceName = "PKG_CBT_ID_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PKG_GIFT_MAPPING_id_gen")
+    @SequenceGenerator(name = "PKG_GIFT_MAPPING_id_gen", sequenceName = "PKG_GIFT_MAPPING_ID_SEQ", allocationSize = 1)
     @Column(name = "ID", nullable = false)
     private Long id;
 
     @NotNull
     @Column(name = "PACKAGE_ID", nullable = false)
     private Long packageField;
-
-    @NotNull
-    @Column(name = "CUSTOMER_ID", nullable = false)
-    private Long customer;
 
     @Column(name = "PARTNER_ID")
     private Long partner;
@@ -39,17 +37,28 @@ public class PkgCustomerBenefit {
     @Column(name = "GIFT_QUANTITY")
     private Integer giftQuantity;
 
-    @Size(max = 50)
-    @Column(name = "CIF_NO", length = 50)
-    private String cifNo;
-
     @Size(max = 10)
     @NotNull
     @Nationalized
     @Column(name = "STATUS", nullable = false, length = 10)
     private String status;
 
-    @Column(name = "DISPLAY_ORDER")
-    private Integer displayOrder;
+    @NotNull
+    @Column(name = "CREATED_BY", nullable = false)
+    private Long createdBy;
+
+    @NotNull
+    @Column(name = "CREATED_AT", nullable = false)
+    private LocalDate createdAt;
+
+    @Column(name = "UPDATED_BY")
+    private Integer updatedBy;
+
+    @Column(name = "UPDATED_AT")
+    private LocalDate updatedAt;
+
+    @NotNull
+    @Column(name = "IS_DELETED", nullable = false)
+    private Boolean isDeleted = false;
 
 }

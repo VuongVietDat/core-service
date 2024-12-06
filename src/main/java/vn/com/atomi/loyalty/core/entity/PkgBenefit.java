@@ -1,14 +1,17 @@
 package vn.com.atomi.loyalty.core.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.com.atomi.loyalty.core.enums.Status;
+import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import java.sql.Date;
-import java.util.Objects;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,55 +21,69 @@ import java.util.Objects;
 @Table(name = "PKG_BENEFIT")
 public class PkgBenefit {
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PKG_BENEFIT_ID_SEQ")
-    @SequenceGenerator(
-            name = "PKG_BENEFIT_ID_SEQ",
-            sequenceName = "PKG_BENEFIT_ID_SEQ",
-            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PKG_BENEFIT_id_gen")
+    @SequenceGenerator(name = "PKG_BENEFIT_id_gen", sequenceName = "PKG_BENEFIT_ID_SEQ", allocationSize = 1)
+    @Column(name = "ID", nullable = false)
     private Long id;
 
-    @Column(name = "PACKAGE_ID")
-    private Long packageId;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.RESTRICT)
+    @JoinColumn(name = "PACKAGE_ID", nullable = false)
+    private Packages packageField;
 
-    @Column(name = "GIFT_PARTNER_ID")
-    private Long giftPartnerId;
+    @NotNull
+    @Column(name = "PRODUCT_LINE_ID", nullable = false)
+    private Long productLine;
 
-    @Column(name = "NAME")
-    private String name;
+    @NotNull
+    @Column(name = "PRODUCT_ID", nullable = false)
+    private Long product;
 
-    @Column(name = "STATUS")
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    @Column(name = "TXN_REFUND")
+    private Float txnRefund;
 
-    @Column(name = "TYPE")
-    private String type;
+    @Column(name = "TXN_MAX_AMOUNT")
+    private Long txnMaxAmount;
 
-    @Column(name = "DISPLAY_ORDER")
-    private Integer displayOrder;
+    @Column(name = "CUST_MAX_AMOUNT")
+    private Long custMaxAmount;
 
-    @Column(name = "URL_IMAGE")
+    @Column(name = "CUST_REFUND_TIME")
+    private String custRefundTime;
+
+    @Size(max = 200)
+    @Nationalized
+    @Column(name = "URL_IMAGE", length = 200)
     private String urlImage;
 
-    @Column(name = "DESCRIPTION")
+    @Size(max = 500)
+    @Nationalized
+    @Column(name = "DESCRIPTION", length = 500)
     private String description;
 
-    @Column(name = "START_DATE")
-    private Date startDate;
+    @Size(max = 10)
+    @NotNull
+    @Nationalized
+    @Column(name = "STATUS", nullable = false, length = 10)
+    private String status;
 
-    @Column(name = "END_DATE")
-    private Date endDate;
+    @NotNull
+    @Column(name = "CREATED_BY", nullable = false)
+    private Long createdBy;
 
-    @Column(name = "CREATED_BY")
-    private Integer createdBy;
-
-    @Column(name = "CREATED_AT")
-    private Date createdAt;
+    @NotNull
+    @Column(name = "CREATED_AT", nullable = false)
+    private LocalDate createdAt;
 
     @Column(name = "UPDATED_BY")
     private Integer updatedBy;
 
     @Column(name = "UPDATED_AT")
-    private Date updatedAt;
+    private LocalDate updatedAt;
+
+    @NotNull
+    @Column(name = "IS_DELETED", nullable = false)
+    private Boolean isDeleted = false;
 
 }
