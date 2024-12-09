@@ -54,7 +54,7 @@ public class GetListPackageOutput {
   private String description;
 
   @Schema(description = "Danh sách ưu đãi của gói")
-  private List<PkgBenefit> pkgBenefit;
+  private List<PkgBenefitOutput> pkgBenefit;
 
 
 }
