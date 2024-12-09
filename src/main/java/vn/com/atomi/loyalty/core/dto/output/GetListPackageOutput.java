@@ -6,12 +6,14 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
+import vn.com.atomi.loyalty.core.entity.PkgBenefit;
 import vn.com.atomi.loyalty.core.enums.ApprovalStatus;
 import vn.com.atomi.loyalty.core.enums.ApprovalType;
 import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author haidv
@@ -50,6 +52,9 @@ public class GetListPackageOutput {
 
   @Schema(description = "Mô tả gói hội viên")
   private String description;
+
+  @Schema(description = "Danh sách ưu đãi của gói")
+  private List<PkgBenefit> pkgBenefit;
 
 
 }

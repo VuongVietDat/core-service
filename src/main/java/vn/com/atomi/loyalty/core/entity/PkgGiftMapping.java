@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.time.LocalDate;
 
@@ -29,22 +30,20 @@ public class PkgGiftMapping {
     private Long packageId;
 
     @Column(name = "PARTNER_ID")
-    private Long partner;
+    private Long partnerId;
 
     @Column(name = "GIFT_PARTNER_ID")
-    private Long giftPartner;
+    private Long giftPartnerId;
 
     @Column(name = "GIFT_QUANTITY")
     private Integer giftQuantity;
-
-    @Column(name = "GIFT_TYPE")
-    private Integer giftType;
 
     @Size(max = 10)
     @NotNull
     @Nationalized
     @Column(name = "STATUS", nullable = false, length = 10)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @NotNull
     @Column(name = "CREATED_BY", nullable = false)
@@ -62,6 +61,6 @@ public class PkgGiftMapping {
 
     @NotNull
     @Column(name = "IS_DELETED", nullable = false, columnDefinition = "CHAR(1)")
-    private Boolean isDeleted = false;
+    private String isDeleted = "N";
 
 }

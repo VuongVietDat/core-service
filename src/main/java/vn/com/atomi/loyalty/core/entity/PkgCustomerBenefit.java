@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+import vn.com.atomi.loyalty.core.enums.Status;
+
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,19 +25,17 @@ public class PkgCustomerBenefit {
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @NotNull
     @Column(name = "PACKAGE_ID", nullable = false)
     private Long packageId;
 
-    @NotNull
     @Column(name = "CUSTOMER_ID", nullable = false)
-    private Long customer;
+    private Long customerId;
 
     @Column(name = "PARTNER_ID")
-    private Long partner;
+    private Long partnerId;
 
     @Column(name = "GIFT_PARTNER_ID")
-    private Long giftPartner;
+    private Long giftPartnerId;
 
     @Column(name = "GIFT_QUANTITY")
     private Integer giftQuantity;
@@ -44,7 +45,6 @@ public class PkgCustomerBenefit {
     private String cifNo;
 
     @Size(max = 10)
-    @NotNull
     @Nationalized
     @Column(name = "STATUS", nullable = false, length = 10)
     private String status;
@@ -52,4 +52,12 @@ public class PkgCustomerBenefit {
     @Column(name = "DISPLAY_ORDER")
     private Integer displayOrder;
 
+    @Column(name = "TXN_DATE")
+    private LocalDate txnDate;
+
+    @Column(name = "EFFECTIVE_DATE")
+    private LocalDate effectiveDate;
+
+    @Column(name = "EXPIRE_DATE")
+    private LocalDate expireDate;
 }

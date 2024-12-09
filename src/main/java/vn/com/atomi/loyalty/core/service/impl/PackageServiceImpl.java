@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.service.impl;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,10 @@ public class PackageServiceImpl extends BaseService implements PackageService {
     }
     @Override
     public List<GetListBenefitOutput> getListBenefit(Long packageId) {
-    var listPackagePage = giftMappingRepository.getListGiftBenefits(packageId, Status.ACTIVE.name());
-//    return super.modelMapper.convertBenefitOutput(listPackagePage);
+        var listPackagePage = giftMappingRepository.getListGiftBenefit(packageId, Status.ACTIVE.name());
+        if(listPackagePage != null) {
+            return mappingListGiftBenefit(listPackagePage);
+        }
         return null;
     }
     @Override
@@ -81,7 +84,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
           throw new BaseException(ErrorCode.CUSTOMER_REGISTED_PACKAGE);
         }
         // handle data save to pkg_customer_benefit
-//        this.handleCloneDataCustomerBenefit(purchasePackageInput, customer.get());
+        this.handleCloneDataCustomerBenefit(purchasePackageInput, customer.get());
 
         // insert log to trans_external
         TransExternal history = mappingPurchasePackage(purchasePackageInput, customer.get());
@@ -120,8 +123,7 @@ public class PackageServiceImpl extends BaseService implements PackageService {
         if(customerBenefit.isEmpty()) {
             return new ArrayList<>();
         }
-//        return this.convertCustomerBenefit(customerBenefit);
-        return null;
+        return this.convertCustomerBenefit(customerBenefit);
     }
 
     private TransExternal mappingPurchasePackage(PurchasePackageInput purchasePackageInput, Customer customer){
@@ -172,92 +174,77 @@ public class PackageServiceImpl extends BaseService implements PackageService {
                 customer.getPhone());
     }
 
-//    List<PkgCustomerBenefitOutput> convertCustomerBenefit(List<PkgCustomerBenefit> benefits) {
-//        return benefits.stream()
-//                .map(data -> {
-//                    PkgCustomerBenefitOutput output = new PkgCustomerBenefitOutput();
-//
-//                    output.setId(data.getId());
-//                    output.setPackageId(data.getPackageId());
-//                    output.setCustomerId(data.getCustomerId());
-//                    output.setGiftPartnerId(data.getGiftPartnerId());
-//                    output.setName(data.getName());
-//                    output.setStatus(data.getStatus());
-//                    output.setType(data.getType());
-//                    output.setQuantity(data.getQuantity());
-//                    if(data.getStartDate() != null) {
-//                        output.setStartDate(data.getStartDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-//                    }
-//                    if (data.getEndDate() != null) {
-//                        output.setEndDate(data.getEndDate().format(DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
-//                    }
-//                    output.setDisplayOrder(data.getDisplayOrder());
-//                    output.setUrlImage(data.getUrlImage());
-//                    output.setDescription(data.getDescription());
-//                    return output;
-//
-//                }).collect(Collectors.toList());
-//    }
-//    private void handleCloneDataCustomerBenefit (PurchasePackageInput purchasePackageInput, Customer customer) {
-//        var benefitList = benefitRepository.getListBenefit(purchasePackageInput.getPackageId(), Status.ACTIVE);
-//        customerBenefitRepository.saveAll(mappingDataCreateCustomerBenefit(benefitList, customer));
-//    }
-//    private List<PkgCustomerBenefit> mappingDataCreateCustomerBenefit(List<PkgBenefit> benefits, Customer customer){
-//        return benefits.stream()
-//                .map(data -> {
-//                    PkgCustomerBenefit output = new PkgCustomerBenefit();
-//                    output.setCustomerId(customer.getId());
-//                    output.setPackageId(data.getPackageId());
-//                    output.setGiftPartnerId(data.getGiftPartnerId());
-//                    output.setCifNo(customer.getCifBank());
-//                    output.setName(data.getName());
-//                    output.setStatus(Constants.Packages.STATUS_AVAILABLE);
-//                    output.setType(data.getType());
-//                    output.setQuantity(1);
-//                    if(data.getStartDate() != null) {
-//                        output.setStartDate(data.getStartDate().toLocalDate());
-//                    }
-//                    if(data.getEndDate() != null) {
-//                        output.setEndDate(data.getEndDate().toLocalDate());
-//                    }
-//                    output.setDisplayOrder(data.getDisplayOrder());
-//                    output.setUrlImage(data.getUrlImage());
-//                    output.setDescription(data.getDescription());
-//                    output.setCreatedAt(LocalDate.now());
-//                    output.setCreatedBy(1L);
-//                    return output;
-//
-//                }).collect(Collectors.toList());
-//
-//    }
-//private List<GetListBenefitOutput> mappingListGiftBenefit (List<Object[]> rawData){
-//    return rawData.stream()
-//            .map(data -> {
-//                GetListBenefitOutput output = new GetListBenefitOutput();
-//
-//                output.setChainId(data.length > 0 ? Long.valueOf((String) data[0]) : null);  // Assuming column 0 is chainId
-//                output.setId(data.length > 1 ? Long.valueOf((String) data[1]) : null);  // Assuming column 1 is missionId
-//                output.setOrderNo(data.length > 2 ? Integer.parseInt((String) data[2]) : null);  // Assuming column 2 is orderNo
-//                output.setGroupType(data.length > 3 ? (String) data[3] : null);  // Assuming column 3 is groupType
-//                output.setCode(data.length > 4 ? (String) data[4] : null);  // Assuming column 4 is code
-//                output.setName(data.length > 5 ? (String) data[5] : null);  // Assuming column 5 is name
-//                output.setBenefitType(data.length > 6 ? (String) data[6] : null);  // Assuming column 6 is benefitType
-//                if (data.length > 7 && data[7] != null) {
-//                    Timestamp startDate = (Timestamp) data[7];
-//                    output.setStartDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(startDate.getTime()));
-//                }
-//                if (data.length > 8 && data[8] != null) {
-//                    Timestamp endDate = (Timestamp) data[8];
-//                    output.setEndDate(new SimpleDateFormat(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE).format(endDate.getTime()));
-//                }
-//                output.setPrice(data.length == 9? new BigDecimal((String) data[9]) : null);  // Assuming column 9 is price
-//                output.setCurrency(data.length > 10 ? (String) data[10] : null);  // Assuming column 10 is currency
-//                output.setImage(data.length > 11 ? (String) data[11] : null);  // Assuming column 11 is image
-//                output.setNotes(data.length > 12 ? (String) data[12] : null);  // Assuming column 12 is notes
-//                output.setStatus(data.length > 13 ? (String) data[13] : null);  // Assuming column 13 is notes
-//                return output;
-//
-//            }).collect(Collectors.toList());
-//}
+    List<PkgCustomerBenefitOutput> convertCustomerBenefit(List<Object[]> benefits) {
+        return benefits.stream()
+                .map(data -> {
+                    PkgCustomerBenefitOutput output = new PkgCustomerBenefitOutput();
+
+                    output.setId(data.length > 0 ? Long.valueOf((String) data[0]) : null);
+                    output.setPackageId(data.length > 1 ? Long.valueOf((String) data[1]) : null);
+                    output.setCustomerId(data.length > 2 ? Long.valueOf((String) data[2]) : null);
+                    output.setGiftPartnerId(data.length > 3 ? Long.valueOf((String) data[3]) : null);
+                    output.setType(data.length > 4 ? String.valueOf((Character) data[4]) : null);
+                    output.setCode(data.length > 5 ? (String) data[5] : null);
+                    output.setName(data.length > 6 ? (String) data[6] : null);
+                    output.setStatus(data.length > 7 ? (String) data[7] : null);
+                    output.setQuantity(data.length > 8 ? (Integer) data[8] : null);
+                    output.setUrlImage(data.length > 9 ? (String) data[9] : null);
+                    output.setDescription(data.length > 10 ? (String) data[10] : null);
+                    output.setStartDate(data.length > 11 ? (String) data[11] : null);
+                    output.setEndDate(data.length > 12 ? (String) data[12] : null);
+                    return output;
+
+                }).collect(Collectors.toList());
+    }
+    private void handleCloneDataCustomerBenefit (PurchasePackageInput purchasePackageInput, Customer customer) {
+        var benefitList = giftMappingRepository.getListPkgBenefitMapping(purchasePackageInput.getPackageId(), Status.ACTIVE, Constants.isDeleted.NO);
+        customerBenefitRepository.saveAll(mappingDataCreateCustomerBenefit(purchasePackageInput, benefitList, customer));
+    }
+    private List<PkgCustomerBenefit> mappingDataCreateCustomerBenefit(PurchasePackageInput purchasePackageInput, List<PkgGiftMapping> benefit, Customer customer){
+        return benefit.stream()
+                .map(data -> {
+                    PkgCustomerBenefit output = new PkgCustomerBenefit();
+                    output.setCustomerId(customer.getId());
+                    output.setPackageId(data.getPackageId());
+                    output.setGiftPartnerId(data.getGiftPartnerId());
+                    output.setCifNo(customer.getCifBank());
+                    output.setStatus(Constants.Packages.STATUS_AVAILABLE);
+                    output.setGiftQuantity(1);
+                    output.setDisplayOrder(null);
+                    if(StringUtils.isNotBlank(purchasePackageInput.getPurchasedDate())) {
+                        output.setTxnDate(LocalDate.parse(purchasePackageInput.getPurchasedDate(),
+                                DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_HH_MM_SS_STROKE)));
+                    }
+                    if(StringUtils.isNotBlank(purchasePackageInput.getEffectiveDate())) {
+                        output.setEffectiveDate(LocalDate.parse(purchasePackageInput.getEffectiveDate(),
+                                DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    if(StringUtils.isNotBlank(purchasePackageInput.getExpiredDate())) {
+                        output.setExpireDate(LocalDate.parse(purchasePackageInput.getExpiredDate(),
+                                DateTimeFormatter.ofPattern(DateConstant.STR_PLAN_DD_MM_YYYY_STROKE)));
+                    }
+                    return output;
+
+                }).collect(Collectors.toList());
+
+    }
+    private List<GetListBenefitOutput> mappingListGiftBenefit (List<Object[]> rawData){
+        return rawData.stream()
+                .map(data -> {
+                    GetListBenefitOutput output = new GetListBenefitOutput();
+
+                    output.setId(data.length > 0 ? (Long) data[0] : null);
+                    output.setPackageId(data.length > 1 ? Long.valueOf((Integer) data[1]) : null);
+                    output.setType(data.length > 2 ? String.valueOf((Character) data[2]) : null);
+                    output.setCode(data.length > 3 ? (String) data[3] : null);
+                    output.setName(data.length > 4 ? (String) data[4] : null);
+                    output.setQuantity(data.length > 5 ? (Integer) data[5] : null);
+                    output.setUrlImage(data.length > 6 ? (String) data[6] : null);
+                    output.setDescription(data.length > 7 ? (String) data[7] : null);
+
+                    return output;
+
+                }).collect(Collectors.toList());
+    }
 
 }

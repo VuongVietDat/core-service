@@ -25,6 +25,8 @@ public class PkgCustomerBenefitOutput implements Serializable {
 
     private Long giftPartnerId;
 
+    private String code;
+
     private String name;
 
     private String status;

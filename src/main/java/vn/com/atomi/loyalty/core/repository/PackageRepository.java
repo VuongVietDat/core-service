@@ -20,11 +20,11 @@ public interface PackageRepository extends JpaRepository<Packages, Long> {
 
   @Query(value = "select ps " +
           " from Packages ps " +
-//          " join fetch ps.benefits " +
+          " left join fetch ps.pkgBenefit " +
           " where ps.status = :status")
   List<Packages> getListPackage(Status status);
   @Query(value = "select ps from Packages ps " +
-//          " join fetch ps.benefits " +
+          " left join fetch ps.pkgBenefit " +
           " where ps.status = :status " +
           " and ps.id in (" +
           "   select tel.refId " +

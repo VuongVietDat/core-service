@@ -58,7 +58,10 @@ public class Constants {
     public static final String TYPE_VOUCHER = "V";
     public static final String TYPE_GIFT = "G";
   }
-
+  public class isDeleted {
+    public static final String NO = "N";
+    public static final String YES = "Y";
+  }
 
   private Constants() {
     throw new IllegalStateException("Utility class");

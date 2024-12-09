@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -85,6 +86,7 @@ public class Packages {
     @Column(name = "DESCRIPTION")
     private String description;
 
-//    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
-//    private List<PkgBenefit> benefits = new ArrayList<>();;
+    @OneToMany(mappedBy = "packages", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<PkgBenefit> pkgBenefit = new ArrayList<>();
 }

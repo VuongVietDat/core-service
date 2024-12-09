@@ -2,8 +2,11 @@ package vn.com.atomi.loyalty.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import vn.com.atomi.loyalty.core.entity.Packages;
 import vn.com.atomi.loyalty.core.entity.PkgCustomerBenefit;
 import vn.com.atomi.loyalty.core.entity.PkgGiftMapping;
+import vn.com.atomi.loyalty.core.enums.RefType;
+import vn.com.atomi.loyalty.core.enums.Status;
 
 import java.util.List;
 
@@ -19,5 +22,13 @@ public interface PkgGiftMappingRepository extends JpaRepository<PkgGiftMapping, 
         WHERE gpg.STATUS = 'ACTIVE'
         AND ggp.STATUS  = 'ACTIVE'
     """, nativeQuery = true)
-    List<Object[]> getListGiftBenefits(Long packageId, String lstStatus);
+    List<Object[]> getListGiftBenefit(Long packageId, String lstStatus);
+
+    @Query(value = """
+        select pgm from PkgGiftMapping pgm
+        where pgm.packageId = :packageId
+        and pgm.status = :status
+        and pgm.isDeleted = :isDeleted
+    """)
+    List<PkgGiftMapping> getListPkgBenefitMapping(Long packageId, Status status, String isDeleted);
 }

@@ -1,5 +1,6 @@
 package vn.com.atomi.loyalty.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,7 +29,8 @@ public class PkgBenefit {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PACKAGE_ID", nullable = false)
-    private Packages packageField;
+    @JsonManagedReference
+    private Packages packages;
 
     @NotNull
     @Column(name = "PRODUCT_LINE_ID", nullable = false)

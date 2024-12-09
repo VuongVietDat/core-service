@@ -17,13 +17,19 @@ public class GetListBenefitOutput {
   private Long id;
 
   @Schema(description = "ID gói hội viên")
-  private String packageId;
+  private Long packageId;
+
+  @Schema(description = "Mã ưu đãi")
+  private String code;
 
   @Schema(description = "Tên ưu đãi")
   private String name;
 
   @Schema(description = "Loại ưu đãi")
   private String type;
+
+  @Schema(description = "Số lượng")
+  private Integer quantity;
 
   @Schema(description = "Thứ tự hiển thị")
   private Integer displayOrder;
